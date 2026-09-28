@@ -8,6 +8,7 @@
 - [Giới thiệu](#-giới-thiệu)
 - [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
 - [Cài đặt & Chạy dự án](#-cài-đặt--chạy-dự-án)
+- [Kết nối Database SQL Server](#-kết-nối-database-sql-server)
 - [Phân công Module](#-phân-công-module)
 - [Hướng dẫn làm việc với GitHub](#-hướng-dẫn-làm-việc-với-github)
   - [Bước 1: Cài đặt Git](#bước-1-cài-đặt-git)
@@ -21,6 +22,7 @@
 - [Quy trình làm việc tổng thể](#-quy-trình-làm-việc-tổng-thể)
 - [Tài khoản kiểm thử](#-tài-khoản-kiểm-thử)
 - [Dữ liệu mẫu](#-dữ-liệu-mẫu)
+- [Ghi chú quan trọng](#-ghi-chú-quan-trọng)
 
 ---
 
@@ -71,9 +73,10 @@ cd QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN
 dotnet restore
 
 # 4. Cập nhật Connection String trong appsettings.json
-# Mở file appsettings.json và sửa ConnectionStrings phù hợp với SQL Server của bạn
+# Mỗi người chỉ cần sửa đúng đoạn "Server=..." - xem mục Kết nối Database bên dưới
 
 # 5. Tạo Database từ Migration
+dotnet tool restore
 dotnet ef database update
 
 # 6. Chạy ứng dụng
@@ -81,6 +84,109 @@ dotnet run
 ```
 
 > 📝 **Lưu ý:** Nếu dùng Visual Studio, mở file `.sln` → nhấn `F5` hoặc `Ctrl+F5` để chạy.
+
+---
+
+## 🔌 Kết Nối Database (SQL Server)
+
+### 1. Nơi cấu hình
+
+Connection string nằm trong **`QLyDatPhongKhachSan/appsettings.json`** và được đọc tại `Program.cs`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=QLyDatPhongKhachSanDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  }
+}
+```
+
+```csharp
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+```
+
+### 2. Nguyên tắc cho cả nhóm
+
+> ✅ **Tên database luôn giữ nguyên:** `Database=QLyDatPhongKhachSanDB`
+> 🔧 **Mỗi người chỉ sửa đúng đoạn `Server=`** theo SQL Server đang có trên máy mình.
+
+Nhờ vậy ai cũng dùng chung một tên database, chỉ khác địa chỉ instance:
+
+| SQL Server trên máy bạn | Giá trị `Server=` |
+|--------------------------|-------------------|
+| LocalDB (mặc định của dự án) | `Server=(localdb)\MSSQLLocalDB` |
+| SQL Server Express | `Server=.\SQLEXPRESS` |
+| SQL Server bản đầy đủ (mặc định) | `Server=.` |
+| SQL Server của bạn trong mạng LAN | `Server=192.168.x.x\SQLEXPRESS` |
+
+**Ví dụ cụ thể** — bạn dùng SQL Express thì chỉ cần sửa thành:
+
+```json
+"DefaultConnection": "Server=.\\SQLEXPRESS;Database=QLyDatPhongKhachSanDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+```
+
+> ⚠️ Trong JSON phải ghi `\\` thay cho `\`, ví dụ `\\SQLEXPRESS` thay cho `\SQLEXPRESS`.
+
+### 3. Kiểm tra SQL Server nào đang có trên máy
+
+```powershell
+# Liệt kê các service SQL Server
+Get-Service | Where-Object { $_.Name -match "MSSQL|SQL" }
+
+# Kiểm tra LocalDB
+SqlLocalDB info
+```
+
+Nếu không thấy `MSSQL$SQLEXPRESS` và `SqlLocalDB info` không có, cần cài một trong hai:
+- [SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-express-download)
+- LocalDB (có sẵn cùng Visual Studio)
+
+### 4. Tạo Database
+
+Sau khi sửa xong `Server=`, chạy ở thư mục gốc dự án:
+
+```bash
+dotnet tool restore          # cài dotnet-ef đúng phiên bản 10.0.12
+dotnet ef database update   # tạo database + 7 bảng từ Migration
+```
+
+Database `QLyDatPhongKhachSanDB` sẽ có các bảng:
+
+```
+TaiKhoan, LoaiPhong, Phong, KhachHang, DatPhong, ChiTietDatPhong, DichVu
+```
+
+Kiểm tra database đã tạo:
+
+```powershell
+sqlcmd -S "(localdb)\MSSQLLocalDB" -d QLyDatPhongKhachSanDB -Q "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'" -W
+```
+
+### 5. Thêm dữ liệu mẫu
+
+Migration chỉ tạo cấu trúc bảng, chưa có dữ liệu. Thêm dữ liệu bằng 1 trong 2 cách:
+
+**Cách 1 — dùng SQL Server Management Studio:**
+`SQL Server Object Explorer` → phải chuột `QLyDatPhongKhachSanDB` → `Scripts for Database` → `New Database Script`,
+dán nội dung file `InsertData.sql` vào cửa sổ truy vấn rồi chạy.
+
+**Cách 2 — chạy bằng `sqlcmd` ở thư mục gốc dự án:**
+```powershell
+sqlcmd -S "(localdb)\MSSQLLocalDB" -d QLyDatPhongKhachSanDB -i InsertData.sql
+```
+
+> 📌 Danh sách tài khoản kiểm thử và số lượng dữ liệu mẫu xem ở các mục bên dưới.
+
+### 6. Lỗi kết nối thường gặp
+
+| Lỗi | Nguyên nhân | Cách sửa |
+|-----|-------------|----------|
+| `Cannot open database` | Database chưa được tạo | Chạy `dotnet ef database update` |
+| `Login failed for user` | Sai tên instance | Kiểm tra lại `Get-Service \| Where-Object { $_.Name -match "MSSQL" }` |
+| `A network-related or instance-specific error` | LocalDB chưa chạy | Chạy `SqlLocalDB start MSSQLLocalDB` |
+| `certificate chain was issued by an authority` | Thiếu TrustServerCertificate | Giữ nguyên `TrustServerCertificate=True` trong chuỗi |
+| `provider: SqlClient ... error 40` | SQL Browser service đang tắt | `Start-Service SQLBrowser` |
 
 ---
 
@@ -588,6 +694,67 @@ Mỗi file code phải có header:
 ```
 
 > Áp dụng cho: **Model**, **Controller**, **ViewModel**, **View**, và các lớp xử lý khác.
+
+---
+
+## 📌 Ghi Chú Quan Trọng
+
+### Về Database
+
+1. **Ai cũng phải tự tạo database trên máy mình.** Database không được commit lên GitHub.
+   ```bash
+   dotnet tool restore
+   dotnet ef database update
+   ```
+
+2. **Không đổi tên database.** Tên phải luôn là `QLyDatPhongKhachSanDB` để cả nhóm thống nhất.
+   Chỉ được đổi đoạn `Server=` trong `appsettings.json`.
+
+3. **`appsettings.json` được commit lên GitHub.** Vì vậy chỉ chứa thông tin kết nối cục bộ,
+   tuyệt đối **không** đặt mật khẩu hay connection string có mật khẩu thật vào file này.
+   Nếu cần bảo mật hơn, dùng User Secrets:
+   ```bash
+   dotnet user-secrets init
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=...;Database=QLyDatPhongKhachSanDB;..."
+   ```
+
+4. **Dữ liệu trên mỗi máy là độc lập.** Sửa dữ liệu trên máy bạn không ảnh hưởng tới máy người khác.
+   Muốn đồng bộ thì dùng file script `.sql` và chạy trên từng máy.
+
+5. **Migration không kèm dữ liệu mẫu.** Sau khi `dotnet ef database update`, database còn trống.
+   Chạy thêm `InsertData.sql` mới có tài khoản đăng nhập để test (xem mục *Kết nối Database*).
+
+### Về công cụ EF Core
+
+6. **Luôn dùng `dotnet-ef` từ local tool manifest** (`dotnet-tools.json`), không dùng bản global.
+   Dự án cần đúng phiên bản `10.0.12` — bản global có thể cũ hơn và sẽ báo lỗi
+   *"Tools older than runtime"*.
+   ```bash
+   dotnet tool restore
+   ```
+
+7. **Chỉ 1 người tạo Migration tại 1 thời điểm** để tránh xung đột khi merge.
+
+### Về code
+
+8. **Không commit các file sinh tự động** — `.gitignore` đã loại sẵn `bin/`, `obj/`, `appsettings.*.local.json`.
+   Kiểm tra trước khi commit:
+   ```bash
+   git status
+   ```
+
+9. **Không sửa Entity của người khác** khi không cần thiết. Cần thay đổi thì báo nhóm trưởng trước.
+
+10. **Không dồn toàn bộ code vào 1 commit cuối cùng.** Mỗi thành viên phải có nhiều commit theo tiến độ.
+
+### Thông tin phiên bản
+
+| Thành phần | Phiên bản |
+|------------|-----------|
+| .NET SDK | 10.0.401 |
+| Entity Framework Core | 10.0.12 |
+| ASP.NET Core | 10.0 |
+| dotnet-ef tool | 10.0.12 |
 
 ---
 
