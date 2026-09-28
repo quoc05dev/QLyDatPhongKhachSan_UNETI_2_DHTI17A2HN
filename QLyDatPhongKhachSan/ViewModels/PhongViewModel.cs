@@ -1,0 +1,33 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
+using QLyDatPhongKhachSan.Models;
+
+namespace QLyDatPhongKhachSan.ViewModels
+{
+    public class PhongListViewModel
+    {
+        public List<Phong> Phongs { get; set; } = new List<Phong>();
+
+        // Search & Filter parameters
+        public string? Keyword { get; set; }
+        public int? MaLoaiPhong { get; set; }
+        public int? Tang { get; set; }
+        public string? TrangThai { get; set; }
+        public decimal? GiaMin { get; set; }
+        public decimal? GiaMax { get; set; }
+        public DateTime? NgayNhan { get; set; }
+        public DateTime? NgayTra { get; set; }
+
+        // Sort parameter
+        public string? SortOrder { get; set; }
+
+        // Pagination
+        public int CurrentPage { get; set; } = 1;
+        public int PageSize { get; set; } = 6;
+        public int TotalItems { get; set; }
+        public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
+
+        // Select lists
+        public SelectList? LoaiPhongList { get; set; }
+        public SelectList? TrangThaiList { get; set; }
+    }
+}

@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kế Hoạch Đề Tài 15 - Quản Lý Đặt Phòng Khách Sạn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-card-hover: #1a2744;
+            --accent-1: #e94560;
+            --accent-2: #0f3460;
+            --accent-3: #533483;
+            --accent-4: #00d2ff;
+            --accent-5: #7b2ff7;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b82;
+            --border: #2a2a45;
+            --gradient-1: linear-gradient(135deg, #e94560, #0f3460);
+            --gradient-2: linear-gradient(135deg, #7b2ff7, #00d2ff);
+            --gradient-3: linear-gradient(135deg, #f093fb, #f5576c);
+            --gradient-4: linear-gradient(135deg, #4facfe, #00f2fe);
+            --gradient-5: linear-gradient(135deg, #43e97b, #38f9d7);
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-glow: 0 0 40px rgba(233,69,96,0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(123,47,247,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(233,69,96,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(0,210,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Header */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 200px; height: 2px;
+            background: var(--gradient-2);
+            border-radius: 2px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            background: rgba(233,69,96,0.12);
+            border: 1px solid rgba(233,69,96,0.3);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-1);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .hero h2 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+
+        .hero-meta span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .hero-meta span strong {
+            color: var(--accent-4);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 56px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: rgba(123,47,247,0.3);
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .card-m1::before { background: var(--gradient-1); }
+        .card-m2::before { background: var(--gradient-2); }
+        .card-m3::before { background: var(--gradient-3); }
+        .card-m4::before { background: var(--gradient-4); }
+        .card-m5::before { background: var(--gradient-5); }
+
+        .card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .card .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        /* Role Grid */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .role-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .role-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 14px;
+        }
+
+        .role-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .role-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin: 16px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.87rem;
+        }
+
+        thead {
+            background: rgba(123,47,247,0.12);
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-4);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Priority badges */
+        .priority-high {
+            display: inline-block;
+            padding: 2px 10px;
+            background: rgba(233,69,96,0.15);
+            color: #ff6b81;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .priority-med {
+            display: inline-block;
+            padding: 2px 10px;
+            background: rgba(255,190,11,0.15);
+            color: #ffc93c;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Flow Diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .flow-step {
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .flow-arrow {
+            color: var(--accent-4);
+            font-size: 1.1rem;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 18px 22px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.83rem;
+            color: #c9d1d9;
+            overflow-x: auto;
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+
+        .code-block .comment { color: #8b949e; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .keyword { color: #ff7b72; }
+
+        /* File tree */
+        .file-tree {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 22px 26px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.82rem;
+            color: #c9d1d9;
+            line-height: 1.9;
+        }
+
+        .file-tree .folder { color: #79c0ff; }
+        .file-tree .file { color: #c9d1d9; }
+        .file-tree .owner { color: #8b949e; font-style: italic; }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 36px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 14px; top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -29px; top: 6px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            border: 3px solid;
+        }
+
+        .timeline-item h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .timeline-item .time-range {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .timeline-tasks {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .timeline-task {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-task::before {
+            content: '→';
+            color: var(--accent-4);
+            flex-shrink: 0;
+        }
+
+        /* Entity diagram */
+        .er-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .entity-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .entity-card:hover {
+            border-color: rgba(123,47,247,0.4);
+            transform: translateY(-2px);
+        }
+
+        .entity-header {
+            padding: 12px 18px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .entity-fields {
+            padding: 0 18px 16px;
+            font-size: 0.8rem;
+            color: #8b949e;
+            line-height: 1.9;
+        }
+
+        .entity-fields .pk { color: #ffa657; }
+        .entity-fields .fk { color: #d2a8ff; }
+        .entity-fields .field { color: #c9d1d9; }
+
+        /* Alert boxes */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 16px 0;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-warning {
+            background: rgba(255,190,11,0.08);
+            border: 1px solid rgba(255,190,11,0.2);
+            color: #ffc93c;
+        }
+
+        .alert-danger {
+            background: rgba(233,69,96,0.08);
+            border: 1px solid rgba(233,69,96,0.2);
+            color: #ff6b81;
+        }
+
+        .alert-info {
+            background: rgba(0,210,255,0.08);
+            border: 1px solid rgba(0,210,255,0.2);
+            color: var(--accent-4);
+        }
+
+        /* Data sample grid */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .data-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .data-item .number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-item .label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Commit example */
+        .commit-example {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 6px 0;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .commit-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .commit-text .cm-id { color: #ffa657; }
+        .commit-text .cm-mod { color: #d2a8ff; }
+        .commit-text .cm-msg { color: #c9d1d9; }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .tag-tech { background: rgba(0,210,255,0.12); color: var(--accent-4); }
+        .tag-sv1 { background: rgba(233,69,96,0.12); color: #ff6b81; }
+        .tag-sv2 { background: rgba(123,47,247,0.12); color: #b388ff; }
+        .tag-sv3 { background: rgba(240,147,251,0.12); color: #f093fb; }
+        .tag-sv4 { background: rgba(79,172,254,0.12); color: #4facfe; }
+        .tag-sv5 { background: rgba(67,233,123,0.12); color: #43e97b; }
+
+        /* Relation list */
+        .relation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .relation-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+
+        .relation-item code {
+            background: rgba(123,47,247,0.15);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #b388ff;
+        }
+
+        .relation-arrow {
+            color: var(--accent-4);
+            font-weight: 700;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        /* TOC */
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 48px;
+        }
+
+        .toc h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--accent-4);
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 6px;
+        }
+
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: block;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: rgba(123,47,247,0.1);
+            color: var(--text-primary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Print */
+        @media print {
+            body { background: #fff; color: #000; }
+            body::before { display: none; }
+            .card, .role-card, .entity-card, .toc { border-color: #ddd; background: #f9f9f9; }
+            .hero h1 { -webkit-text-fill-color: #333; }
+            th { color: #333; }
+            td { color: #555; }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .hero-meta { gap: 16px; }
+            .container { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HERO -->
+    <header class="hero">
+        <div class="hero-badge">Đề Tài 15</div>
+        <h1>🏨 Quản Lý Đặt Phòng Khách Sạn</h1>
+        <h2>Bài Tập Lớn Môn Thực Hành Lập Trình .NET</h2>
+        <div class="hero-meta">
+            <span>🏫 <strong>UNETI</strong></span>
+            <span>👥 <strong>Nhóm 2</strong> &mdash; 05 SV</span>
+            <span>📚 <strong>DHTI17A2HN</strong></span>
+            <span>⚡ <strong>ASP.NET Core 10 MVC</strong></span>
+        </div>
+    </header>
+
+    <!-- TOC -->
+    <div class="toc">
+        <h3>📑 Mục Lục</h3>
+        <div class="toc-grid">
+            <a href="#overview">1. Tổng Quan Đề Tài</a>
+            <a href="#tech">2. Công Nghệ Sử Dụng</a>
+            <a href="#database">3. Thiết Kế Cơ Sở Dữ Liệu</a>
+            <a href="#module1">4.1 Module 1 — Tài Khoản & Phân Quyền</a>
+            <a href="#module2">4.2 Module 2 — Quản Lý Phòng</a>
+            <a href="#module3">4.3 Module 3 — Khách Hàng & Đặt Phòng</a>
+            <a href="#module4">4.4 Module 4 — Tiếp Nhận & Trạng Thái</a>
+            <a href="#module5">4.5 Module 5 — Tính Tiền & Thống Kê</a>
+            <a href="#structure">5. Cấu Trúc Thư Mục</a>
+            <a href="#timeline">6. Timeline Thực Hiện</a>
+            <a href="#data">7. Dữ Liệu Mẫu</a>
+            <a href="#commit">8. Quy Định Commit</a>
+            <a href="#advanced">9. Chức Năng Nâng Cao</a>
+        </div>
+    </div>
+
+    <!-- 1. TỔNG QUAN -->
+    <section class="section" id="overview">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-1);">1</div>
+            <h2>Tổng Quan Đề Tài</h2>
+        </div>
+
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">
+            Xây dựng ứng dụng Web quản lý đặt phòng khách sạn bằng <strong style="color:var(--accent-4)">ASP.NET Core 10 MVC</strong>, hỗ trợ quy trình nghiệp vụ từ quản lý dữ liệu nền, tiếp nhận giao dịch, xử lý trạng thái đến Dashboard và thống kê.
+        </p>
+
+        <div class="role-grid">
+            <div class="role-card">
+                <div class="role-icon" style="background: rgba(233,69,96,0.15); color: #ff6b81;">🔴</div>
+                <h4>Admin</h4>
+                <p>Quản lý tài khoản, loại phòng, phòng và dữ liệu dùng chung.</p>
+            </div>
+            <div class="role-card">
+                <div class="role-icon" style="background: rgba(255,190,11,0.15); color: #ffc93c;">🟡</div>
+                <h4>Lễ Tân (Nhân Viên)</h4>
+                <p>Quản lý phòng, khách hàng, đặt phòng, nhận/trả phòng, Dashboard, thống kê.</p>
+            </div>
+            <div class="role-card">
+                <div class="role-icon" style="background: rgba(67,233,123,0.15); color: #43e97b;">🟢</div>
+                <h4>Khách Hàng</h4>
+                <p>Đăng nhập, quản lý thông tin cá nhân, tìm & đặt phòng, theo dõi đặt phòng.</p>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 28px; margin-bottom: 12px;">Luồng Nghiệp Vụ — Người Dùng</h4>
+        <div class="flow">
+            <span class="flow-step">Đăng nhập</span><span class="flow-arrow">→</span>
+            <span class="flow-step">Tìm phòng</span><span class="flow-arrow">→</span>
+            <span class="flow-step">Kiểm tra ngày</span><span class="flow-arrow">→</span>
+            <span class="flow-step">Đặt phòng</span><span class="flow-arrow">→</span>
+            <span class="flow-step">Xác nhận</span><span class="flow-arrow">→</span>
+            <span class="flow-step">Nhận phòng</span><span class="flow-arrow">→</span>
+            <span class="flow-step">Trả phòng</span><span class="flow-arrow">→</span>
+            <span class="flow-step" style="border-color: var(--accent-4);">Tính tiền</span>
+        </div>
+
+        <h4 style="margin-top: 20px; margin-bottom: 12px;">Luồng Trạng Thái Giao Dịch</h4>
+        <div class="flow">
+            <span class="flow-step" style="border-color: #ffc93c;">Chờ xử lý</span><span class="flow-arrow">→</span>
+            <span class="flow-step" style="border-color: #4facfe;">Đang xử lý</span><span class="flow-arrow">→</span>
+            <span class="flow-step" style="border-color: #43e97b;">Hoàn thành</span>
+        </div>
+        <div class="flow" style="margin-top: 4px; padding-left: 20px;">
+            <span style="color: var(--text-muted); font-size: 0.8rem;">↳ Có thể</span>
+            <span class="flow-step" style="border-color: #ff6b81;">Hủy / Từ chối</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">(khi thỏa mãn điều kiện)</span>
+        </div>
+    </section>
+
+    <!-- 2. CÔNG NGHỆ -->
+    <section class="section" id="tech">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-2);">2</div>
+            <h2>Công Nghệ Sử Dụng</h2>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Thành phần</th><th>Yêu cầu</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>SDK</strong></td><td>.NET 10</td></tr>
+                    <tr><td><strong>Framework</strong></td><td>ASP.NET Core 10 MVC</td></tr>
+                    <tr><td><strong>Ngôn ngữ</strong></td><td>C#</td></tr>
+                    <tr><td><strong>ORM</strong></td><td>Entity Framework Core 10 (Code First)</td></tr>
+                    <tr><td><strong>Database</strong></td><td>SQL Server</td></tr>
+                    <tr><td><strong>Query</strong></td><td>LINQ</td></tr>
+                    <tr><td><strong>View Engine</strong></td><td>Razor View</td></tr>
+                    <tr><td><strong>Frontend</strong></td><td>HTML / CSS / JavaScript (mức cần thiết)</td></tr>
+                    <tr><td><strong>IDE</strong></td><td>Visual Studio 2022 / VS Code</td></tr>
+                    <tr><td><strong>Version Control</strong></td><td>Git / GitHub</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-danger">
+            <span>⛔</span>
+            <div>
+                <strong>KHÔNG</strong> dùng ASP.NET MVC trên .NET Framework •
+                <strong>KHÔNG</strong> dùng ASP.NET Core &lt; 10 •
+                <strong>KHÔNG</strong> dùng SQL trực tiếp thay CRUD bắt buộc •
+                Package EF Core phải version 10
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. CƠ SỞ DỮ LIỆU -->
+    <section class="section" id="database">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-3);">3</div>
+            <h2>Thiết Kế Cơ Sở Dữ Liệu</h2>
+        </div>
+
+        <div class="er-grid">
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(233,69,96,0.12); color: #ff6b81;">🔑 TaiKhoan</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaTaiKhoan<br>
+                    <span class="field">TenDangNhap</span><br>
+                    <span class="field">MatKhau</span><br>
+                    <span class="field">HoTen</span><br>
+                    <span class="field">Email</span><br>
+                    <span class="field">VaiTro</span><br>
+                    <span class="field">TrangThai</span>
+                </div>
+            </div>
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(123,47,247,0.12); color: #b388ff;">🏷️ LoaiPhong</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaLoaiPhong<br>
+                    <span class="field">TenLoai</span><br>
+                    <span class="field">SoNguoiToiDa</span><br>
+                    <span class="field">DonGiaNgay</span><br>
+                    <span class="field">MoTa</span><br>
+                    <span class="field">TrangThai</span>
+                </div>
+            </div>
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(0,210,255,0.12); color: #00d2ff;">🚪 Phong</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaPhong<br>
+                    <span class="field">SoPhong</span><br>
+                    <span class="fk">FK</span> MaLoaiPhong<br>
+                    <span class="field">Tang • HuongPhong</span><br>
+                    <span class="field">TienNghi • DonGia</span><br>
+                    <span class="field">TrangThai • GhiChu</span><br>
+                    <span class="field">NgayBaoTri</span>
+                </div>
+            </div>
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(240,147,251,0.12); color: #f093fb;">👤 KhachHang</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaKhachHang<br>
+                    <span class="fk">FK</span> MaTaiKhoan<br>
+                    <span class="field">HoTen • NgaySinh</span><br>
+                    <span class="field">GioiTinh • CCCD</span><br>
+                    <span class="field">SoDienThoai • Email</span><br>
+                    <span class="field">DiaChi • QuocTich</span><br>
+                    <span class="field">TrangThai</span>
+                </div>
+            </div>
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(79,172,254,0.12); color: #4facfe;">📋 DatPhong</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaDatPhong<br>
+                    <span class="fk">FK</span> MaKhachHang<br>
+                    <span class="field">NgayDat • NgayNhan</span><br>
+                    <span class="field">NgayTraDuKien</span><br>
+                    <span class="field">SoNguoi • TienCoc</span><br>
+                    <span class="field">TrangThai • GhiChu</span>
+                </div>
+            </div>
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(67,233,123,0.12); color: #43e97b;">📊 ChiTietDatPhong</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaChiTiet<br>
+                    <span class="fk">FK</span> MaDatPhong<br>
+                    <span class="fk">FK</span> MaPhong<br>
+                    <span class="field">NgayNhan • NgayTra</span><br>
+                    <span class="field">DonGia • SoNgay</span><br>
+                    <span class="field">ThanhTien • TrangThai</span>
+                </div>
+            </div>
+            <div class="entity-card">
+                <div class="entity-header" style="background: rgba(255,190,11,0.12); color: #ffc93c;">🛎️ DichVu</div>
+                <div class="entity-fields">
+                    <span class="pk">PK</span> MaDichVu<br>
+                    <span class="field">TenDichVu</span><br>
+                    <span class="field">Gia</span><br>
+                    <span class="field">MoTa</span><br>
+                    <span class="field">TrangThai</span>
+                </div>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 24px; margin-bottom: 12px;">Quan Hệ Chính</h4>
+        <div class="relation-list">
+            <div class="relation-item"><code>TaiKhoan</code> <span class="relation-arrow">1 — 1</span> <code>KhachHang</code> <span style="color: var(--text-muted)">(qua MaTaiKhoan)</span></div>
+            <div class="relation-item"><code>LoaiPhong</code> <span class="relation-arrow">1 — N</span> <code>Phong</code> <span style="color: var(--text-muted)">(qua MaLoaiPhong)</span></div>
+            <div class="relation-item"><code>KhachHang</code> <span class="relation-arrow">1 — N</span> <code>DatPhong</code> <span style="color: var(--text-muted)">(qua MaKhachHang)</span></div>
+            <div class="relation-item"><code>DatPhong</code> <span class="relation-arrow">1 — N</span> <code>ChiTietDatPhong</code> <span style="color: var(--text-muted)">(qua MaDatPhong)</span></div>
+            <div class="relation-item"><code>Phong</code> <span class="relation-arrow">1 — N</span> <code>ChiTietDatPhong</code> <span style="color: var(--text-muted)">(qua MaPhong)</span></div>
+        </div>
+    </section>
+
+    <!-- MODULE 1 -->
+    <section class="section" id="module1">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-1);">4.1</div>
+            <h2>Module 1 — Tài Khoản, Đăng Nhập, Phân Quyền & Loại Phòng</h2>
+        </div>
+
+        <div class="card card-m1">
+            <h3>👤 Sinh viên 1</h3>
+            <p class="subtitle">Entity: <code>TaiKhoan</code>, <code>LoaiPhong</code></p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>STT</th><th>Chức năng</th><th>Mô tả</th><th>Ưu tiên</th></tr></thead>
+                    <tbody>
+                        <tr><td>1.1</td><td><strong>Entity TaiKhoan</strong></td><td>MaTaiKhoan, TenDangNhap, MatKhau, HoTen, Email, VaiTro, TrangThai + Data Annotation</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.2</td><td><strong>Entity LoaiPhong</strong></td><td>MaLoaiPhong, TenLoai, SoNguoiToiDa, DonGiaNgay, MoTa, TrangThai + Data Annotation</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.3</td><td><strong>Đăng nhập</strong></td><td>Form đăng nhập, kiểm tra EF Core + LINQ, lưu Session (MaTaiKhoan, HoTen, VaiTro)</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.4</td><td><strong>Đăng xuất</strong></td><td>Xóa Session, redirect trang chủ / đăng nhập</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.5</td><td><strong>Phân quyền Controller</strong></td><td>Kiểm tra quyền tại mỗi Controller action (không chỉ ẩn menu)</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.6</td><td><strong>CRUD TaiKhoan</strong></td><td>Admin: danh sách, thêm, sửa, khóa/mở khóa tài khoản</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.7</td><td><strong>CRUD LoaiPhong</strong></td><td>Admin: danh sách, chi tiết, thêm, sửa, xóa, cập nhật trạng thái</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.8</td><td><strong>Validation TaiKhoan</strong></td><td>TenDangNhap không trùng, MatKhau bắt buộc, Email đúng định dạng</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>1.9</td><td><strong>Validation LoaiPhong</strong></td><td>TenLoai không trùng, kiểm tra tham chiếu trước khi xóa</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>1.10</td><td><strong>Thông báo lỗi</strong></td><td>Hiển thị validation message phù hợp trên View</td><td><span class="priority-med">TB</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 16px; margin-bottom: 8px;">📁 Files cần tạo:</h4>
+            <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8;">
+                <code>Models/TaiKhoan.cs</code> • <code>Models/LoaiPhong.cs</code> • <code>Controllers/TaiKhoanController.cs</code> • <code>Controllers/LoaiPhongController.cs</code> • <code>Views/TaiKhoan/</code> (Index, Create, Edit, Details) • <code>Views/LoaiPhong/</code> (Index, Create, Edit, Details, Delete) • <code>Views/DangNhap/</code> (Login) • <code>Filters/AuthorizationFilter.cs</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 2 -->
+    <section class="section" id="module2">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-2);">4.2</div>
+            <h2>Module 2 — Quản Lý Phòng, Tìm Kiếm, Lọc, Sắp Xếp, Phân Trang</h2>
+        </div>
+
+        <div class="card card-m2">
+            <h3>🚪 Sinh viên 2</h3>
+            <p class="subtitle">Entity: <code>Phong</code></p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>STT</th><th>Chức năng</th><th>Mô tả</th><th>Ưu tiên</th></tr></thead>
+                    <tbody>
+                        <tr><td>2.1</td><td><strong>Entity Phong</strong></td><td>MaPhong, SoPhong, MaLoaiPhong (FK), Tang, HuongPhong, TienNghi, DonGia, TrangThai, GhiChu, NgayBaoTri</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.2</td><td><strong>CRUD Phong</strong></td><td>Admin/NV: danh sách, chi tiết, thêm, sửa, xóa, cập nhật trạng thái</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.3</td><td><strong>Tìm kiếm</strong></td><td>Tìm theo: Số phòng, Tên loại phòng, Tên khách hàng</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.4</td><td><strong>Lọc</strong></td><td>Loại phòng, Tầng, Trạng thái, Khoảng giá, Phòng trống/theo khoảng ngày. Kết hợp được</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.5</td><td><strong>Sắp xếp</strong></td><td>Số phòng ↑↓, Đơn giá ↑↓, Tầng ↑↓, Tên loại phòng A→Z</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.6</td><td><strong>Phân trang</strong></td><td>Skip()/Take() trên LINQ, trang trước/sau, số trang, trang hiện tại</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.7</td><td><strong>Kết hợp S+F+S+P</strong></td><td>Search + Filter + Sort + Pagination giữ nguyên điều kiện khi chuyển trang</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>2.8</td><td><strong>Validation Phong</strong></td><td>Data Annotation, số lượng/giá trị ≥ 0, ngày hợp lệ, không xóa phòng đã có lịch sử</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>2.9</td><td><strong>View khách hàng</strong></td><td>Hiển thị phòng khả dụng/không khả dụng, khóa ngoại dùng select</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>2.10</td><td><strong>ViewModel</strong></td><td>Tạo ViewModel kết hợp dữ liệu phòng + điều kiện tìm kiếm/lọc/sắp xếp</td><td><span class="priority-med">TB</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 16px; margin-bottom: 8px;">📁 Files cần tạo:</h4>
+            <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8;">
+                <code>Models/Phong.cs</code> • <code>ViewModels/PhongViewModel.cs</code> • <code>Controllers/PhongController.cs</code> • <code>Views/Phong/</code> (Index, Create, Edit, Details, Delete) • <code>Views/Shared/_PaginationPartial.cshtml</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 3 -->
+    <section class="section" id="module3">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-3);">4.3</div>
+            <h2>Module 3 — Quản Lý Khách Hàng, Hồ Sơ, Đặt Phòng, Theo Dõi</h2>
+        </div>
+
+        <div class="card card-m3">
+            <h3>👤 Sinh viên 3</h3>
+            <p class="subtitle">Entity: <code>KhachHang</code>, <code>DatPhong</code></p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>STT</th><th>Chức năng</th><th>Mô tả</th><th>Ưu tiên</th></tr></thead>
+                    <tbody>
+                        <tr><td>3.1</td><td><strong>Entity KhachHang</strong></td><td>MaKhachHang, MaTaiKhoan (FK), HoTen, NgaySinh, GioiTinh, CCCD, SoDienThoai, Email, DiaChi, QuocTich, TrangThai</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.2</td><td><strong>Entity DatPhong</strong></td><td>MaDatPhong, MaKhachHang (FK), NgayDat, NgayNhan, NgayTraDuKien, SoNguoi, TienCoc, TrangThai</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.3</td><td><strong>Hồ sơ cá nhân</strong></td><td>Khách hàng chỉ xem/sửa hồ sơ của chính mình</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.4</td><td><strong>Tạo đặt phòng</strong></td><td>Kiểm tra: user tồn tại + hoạt động, phòng đủ điều kiện, thời gian hợp lệ, không trùng</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.5</td><td><strong>Hủy đặt phòng</strong></td><td>Chỉ hủy ở trạng thái cho phép, đã hoàn tất/có kết quả → không hủy</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.6</td><td><strong>Theo dõi đặt phòng</strong></td><td>Danh sách giao dịch đã tạo, trạng thái hiện tại, kết quả khi hoàn tất</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.7</td><td><strong>Bảo mật dữ liệu</strong></td><td>Thay đổi mã trên URL không xem được dữ liệu người khác</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>3.8</td><td><strong>Validation KhachHang</strong></td><td>HoTen bắt buộc, NgaySinh hợp lệ, Email, SoDienThoai</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>3.9</td><td><strong>Validation DatPhong</strong></td><td>NgayNhan < NgayTraDuKien, SoNguoi > 0, TienCoc ≥ 0, không trùng</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>3.10</td><td><strong>CRUD KhachHang</strong></td><td>Admin/NV quản lý danh sách khách hàng</td><td><span class="priority-med">TB</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 16px; margin-bottom: 8px;">📁 Files cần tạo:</h4>
+            <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8;">
+                <code>Models/KhachHang.cs</code> • <code>Models/DatPhong.cs</code> • <code>ViewModels/DatPhongViewModel.cs</code> • <code>Controllers/KhachHangController.cs</code> • <code>Controllers/DatPhongController.cs</code> • <code>Views/KhachHang/</code> • <code>Views/DatPhong/</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 4 -->
+    <section class="section" id="module4">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-4);">4.4</div>
+            <h2>Module 4 — Tiếp Nhận, Nhận Phòng, Trả Phòng, Quản Lý Trạng Thái</h2>
+        </div>
+
+        <div class="card card-m4">
+            <h3>📋 Sinh viên 4</h3>
+            <p class="subtitle">Xử lý trên: <code>DatPhong</code>, <code>Phong</code></p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>STT</th><th>Chức năng</th><th>Mô tả</th><th>Ưu tiên</th></tr></thead>
+                    <tbody>
+                        <tr><td>4.1</td><td><strong>Danh sách cần xử lý</strong></td><td>Tìm theo khách hàng/phòng; lọc theo loại phòng, trạng thái, khoảng ngày; sắp xếp theo ngày/tên</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.2</td><td><strong>Tiếp nhận đặt phòng</strong></td><td>NV xem thông tin và xử lý (Chờ xử lý → Đang xử lý)</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.3</td><td><strong>Nhận phòng</strong></td><td>Đang xử lý → Đã nhận phòng, kiểm tra điều kiện nghiệp vụ</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.4</td><td><strong>Trả phòng</strong></td><td>Đã nhận phòng → Hoàn thành, cập nhật phòng về trống</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.5</td><td><strong>Kiểm tra trùng thời gian</strong></td><td>LINQ kiểm tra không trùng khoảng thời gian đặt phòng</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.6</td><td><strong>Kiểm tra sức chứa</strong></td><td>SoNguoi ≤ SoNguoiToiDa của LoaiPhong</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.7</td><td><strong>Kiểm tra trạng thái phòng</strong></td><td>Chỉ đặt phòng đang kinh doanh (TrangThai hợp lệ)</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.8</td><td><strong>Quản lý luồng trạng thái</strong></td><td>Chờ → Đang xử lý → Hoàn thành; Hủy/Từ chối theo điều kiện</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>4.9</td><td><strong>Kiểm tra ngày</strong></td><td>NgayTra > NgayNhan, NgayNhan ≥ hôm nay</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>4.10</td><td><strong>Kiểm soát số lượng</strong></td><td>LINQ đếm/kiểm tra, cảnh báo khi đạt giới hạn</td><td><span class="priority-med">TB</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 16px; margin-bottom: 8px;">📁 Files cần tạo:</h4>
+            <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8;">
+                <code>Controllers/TiepNhanController.cs</code> • <code>ViewModels/TiepNhanViewModel.cs</code> • <code>Views/TiepNhan/</code> (Index, Details, XuLy, NhanPhong, TraPhong)
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 5 -->
+    <section class="section" id="module5">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-5);">4.5</div>
+            <h2>Module 5 — Tính Tiền, Dashboard, Thống Kê, Báo Cáo</h2>
+        </div>
+
+        <div class="card card-m5">
+            <h3>📊 Sinh viên 5</h3>
+            <p class="subtitle">Entity: <code>ChiTietDatPhong</code>, <code>DichVu</code></p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>STT</th><th>Chức năng</th><th>Mô tả</th><th>Ưu tiên</th></tr></thead>
+                    <tbody>
+                        <tr><td>5.1</td><td><strong>Entity ChiTietDatPhong</strong></td><td>MaChiTiet, MaDatPhong (FK), MaPhong (FK), NgayNhan, NgayTra, DonGia, SoNgay, ThanhTien, TrangThai</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.2</td><td><strong>Entity DichVu</strong></td><td>MaDichVu, TenDichVu, Gia, MoTa, TrangThai</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.3</td><td><strong>Tính tiền phòng</strong></td><td>SoNgay × DonGia = ThanhTien, kiểm tra khoảng hợp lệ</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.4</td><td><strong>Cập nhật kết quả</strong></td><td>Chỉ giao dịch đủ điều kiện mới được cập nhật, thời điểm do hệ thống xác định</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.5</td><td><strong>Dashboard</strong></td><td>Tổng loại phòng, phòng, phòng khả dụng, khách hàng, giao dịch (chờ/đang/hoàn thành), doanh thu</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.6</td><td><strong>Số phòng theo loại</strong></td><td>LINQ GroupBy()</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.7</td><td><strong>Tỷ lệ sử dụng phòng</strong></td><td>LINQ Count()/tổng</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.8</td><td><strong>Số lượt đặt theo tháng</strong></td><td>LINQ GroupBy() theo tháng</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.9</td><td><strong>Phòng đặt nhiều nhất</strong></td><td>LINQ OrderByDescending()</td><td><span class="priority-med">TB</span></td></tr>
+                        <tr><td>5.10</td><td><strong>Doanh thu theo tháng/loại</strong></td><td>LINQ Sum(), GroupBy()</td><td><span class="priority-high">Cao</span></td></tr>
+                        <tr><td>5.11</td><td><strong>Số lượt hủy</strong></td><td>LINQ Count() với điều kiện</td><td><span class="priority-med">TB</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 16px; margin-bottom: 8px;">📁 Files cần tạo:</h4>
+            <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8;">
+                <code>Models/ChiTietDatPhong.cs</code> • <code>Models/DichVu.cs</code> • <code>ViewModels/DashboardViewModel.cs</code> • <code>ViewModels/ThongKeViewModel.cs</code> • <code>Controllers/ChiTietDatPhongController.cs</code> • <code>Controllers/DichVuController.cs</code> • <code>Controllers/ThongKeController.cs</code> • <code>Views/ThongKe/</code> • <code>Views/ChiTietDatPhong/</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. CẤU TRÚC THƯ MỤC -->
+    <section class="section" id="structure">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-1);">5</div>
+            <h2>Cấu Trúc Thư Mục Dự Án</h2>
+        </div>
+
+        <div class="file-tree">
+<span class="folder">QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN/</span>
+├── README.md
+├── .gitignore
+├── QLyDatPhongKhachSan.sln
+└── <span class="folder">QLyDatPhongKhachSan/</span>
+    ├── <span class="folder">Models/</span>
+    │   ├── <span class="file">TaiKhoan.cs</span>          <span class="owner">(SV1)</span>
+    │   ├── <span class="file">LoaiPhong.cs</span>         <span class="owner">(SV1)</span>
+    │   ├── <span class="file">Phong.cs</span>             <span class="owner">(SV2)</span>
+    │   ├── <span class="file">KhachHang.cs</span>         <span class="owner">(SV3)</span>
+    │   ├── <span class="file">DatPhong.cs</span>          <span class="owner">(SV3)</span>
+    │   ├── <span class="file">ChiTietDatPhong.cs</span>   <span class="owner">(SV5)</span>
+    │   └── <span class="file">DichVu.cs</span>            <span class="owner">(SV5)</span>
+    ├── <span class="folder">ViewModels/</span>
+    │   ├── <span class="file">PhongViewModel.cs</span>    <span class="owner">(SV2)</span>
+    │   ├── <span class="file">DatPhongViewModel.cs</span> <span class="owner">(SV3)</span>
+    │   ├── <span class="file">TiepNhanViewModel.cs</span> <span class="owner">(SV4)</span>
+    │   ├── <span class="file">DashboardViewModel.cs</span><span class="owner">(SV5)</span>
+    │   └── <span class="file">ThongKeViewModel.cs</span>  <span class="owner">(SV5)</span>
+    ├── <span class="folder">Data/</span>
+    │   └── <span class="file">AppDbContext.cs</span>      <span class="owner">(Cả nhóm)</span>
+    ├── <span class="folder">Controllers/</span>            <span class="owner">→ Theo module phân công</span>
+    ├── <span class="folder">Views/</span>                  <span class="owner">→ Theo module phân công</span>
+    ├── <span class="folder">Migrations/</span>
+    ├── <span class="folder">wwwroot/</span>  (css, js, images)
+    ├── <span class="file">Program.cs</span>
+    └── <span class="file">appsettings.json</span>
+        </div>
+    </section>
+
+    <!-- 6. TIMELINE -->
+    <section class="section" id="timeline">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-2);">6</div>
+            <h2>Timeline Thực Hiện (21 ngày)</h2>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot" style="border-color: #ff6b81;"></div>
+                <h4 style="color: #ff6b81;">Phase 1: Khởi Tạo & Thiết Kế</h4>
+                <div class="time-range">📅 Ngày 1 — 3</div>
+                <div class="timeline-tasks">
+                    <div class="timeline-task">Thiết kế CSDL, thống nhất Entity & quan hệ <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Tạo Project ASP.NET Core 10 MVC + Repository GitHub <span class="tag tag-sv1">SV1</span></div>
+                    <div class="timeline-task">Tạo AppDbContext, khai báo DbSet, tất cả Entity Models <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Tạo Migration đầu tiên + Update Database <span class="tag tag-sv1">SV1</span></div>
+                    <div class="timeline-task">Setup Layout chung, _ViewImports, _ViewStart <span class="tag tag-sv2">SV2</span></div>
+                    <div class="timeline-task">Tạo .gitignore, README.md <span class="tag tag-sv1">SV1</span></div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot" style="border-color: #4facfe;"></div>
+                <h4 style="color: #4facfe;">Phase 2: Phát Triển Module</h4>
+                <div class="time-range">📅 Ngày 4 — 14 (2 tuần)</div>
+                <div class="timeline-tasks">
+                    <div class="timeline-task"><strong>Tuần 1:</strong> Entity + CRUD cơ bản + Đăng nhập/Phân quyền <span class="tag tag-sv1">Tất cả SV</span></div>
+                    <div class="timeline-task"><strong>Tuần 2:</strong> Nghiệp vụ nâng cao + Search/Filter/Sort/Pagination + Dashboard <span class="tag tag-sv1">Tất cả SV</span></div>
+                    <div class="timeline-task">SV1: Entity → Đăng nhập → Phân quyền → CRUD TaiKhoan + LoaiPhong <span class="tag tag-sv1">SV1</span></div>
+                    <div class="timeline-task">SV2: Entity Phong → CRUD → Search + Filter + Sort + Pagination <span class="tag tag-sv2">SV2</span></div>
+                    <div class="timeline-task">SV3: Entity KhachHang/DatPhong → Hồ sơ → Đặt phòng + Hủy + Theo dõi <span class="tag tag-sv3">SV3</span></div>
+                    <div class="timeline-task">SV4: Tiếp nhận → Nhận phòng → Trả phòng → Quản lý trạng thái <span class="tag tag-sv4">SV4</span></div>
+                    <div class="timeline-task">SV5: ChiTietDatPhong/DichVu → Tính tiền → Dashboard + Thống kê <span class="tag tag-sv5">SV5</span></div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot" style="border-color: #ffc93c;"></div>
+                <h4 style="color: #ffc93c;">Phase 3: Tích Hợp & Kiểm Thử</h4>
+                <div class="time-range">📅 Ngày 15 — 18</div>
+                <div class="timeline-tasks">
+                    <div class="timeline-task">Pull tất cả module, merge & resolve conflicts <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Test đăng nhập/phân quyền đúng/sai <span class="tag tag-sv1">SV1</span></div>
+                    <div class="timeline-task">Test CRUD + Validation tất cả module <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Test luồng nghiệp vụ đặt phòng end-to-end <span class="tag tag-sv3">SV3 + SV4</span></div>
+                    <div class="timeline-task">Test Dashboard & đối chiếu LINQ với DB <span class="tag tag-sv5">SV5</span></div>
+                    <div class="timeline-task">Test bảo mật URL (thay đổi mã trên URL) <span class="tag tag-sv3">SV3</span></div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot" style="border-color: #43e97b;"></div>
+                <h4 style="color: #43e97b;">Phase 4: Hoàn Thiện & Nộp</h4>
+                <div class="time-range">📅 Ngày 19 — 21</div>
+                <div class="timeline-tasks">
+                    <div class="timeline-task">Thêm dữ liệu mẫu đầy đủ + Tạo tài khoản kiểm thử <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Viết báo cáo bài tập lớn <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Quay video minh chứng <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Review code, thêm comment người thực hiện <span class="tag tag-sv1">Cả nhóm</span></div>
+                    <div class="timeline-task">Final commit & push <span class="tag tag-sv1">Cả nhóm</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. DỮ LIỆU MẪU -->
+    <section class="section" id="data">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-3);">7</div>
+            <h2>Dữ Liệu Mẫu Cần Chuẩn Bị</h2>
+        </div>
+
+        <div class="data-grid">
+            <div class="data-item">
+                <div class="number">05</div>
+                <div class="label">Loại Phòng</div>
+            </div>
+            <div class="data-item">
+                <div class="number">15+</div>
+                <div class="label">Phòng (nhiều trạng thái)</div>
+            </div>
+            <div class="data-item">
+                <div class="number">30+</div>
+                <div class="label">Khách Hàng</div>
+            </div>
+            <div class="data-item">
+                <div class="number">1-2</div>
+                <div class="label">Tài Khoản Admin</div>
+            </div>
+            <div class="data-item">
+                <div class="number">2-3</div>
+                <div class="label">Tài Khoản Nhân Viên</div>
+            </div>
+            <div class="data-item">
+                <div class="number">40-50</div>
+                <div class="label">Giao Dịch Đặt Phòng</div>
+            </div>
+            <div class="data-item">
+                <div class="number">15-20</div>
+                <div class="label">Chi Tiết Đặt Phòng</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. QUY ĐỊNH COMMIT -->
+    <section class="section" id="commit">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-4);">8</div>
+            <h2>Quy Định Commit & Comment Mã Nguồn</h2>
+        </div>
+
+        <h4 style="margin-bottom: 12px;">Format Commit Message</h4>
+        <div class="code-block">
+            <span class="comment">// Format:</span><br>
+            [Mã SV] [Module] Nội dung công việc
+        </div>
+
+        <h4 style="margin-top: 20px; margin-bottom: 12px;">Ví dụ theo từng Module</h4>
+
+        <div class="commit-example">
+            <div class="commit-dot" style="background: var(--accent-1);"></div>
+            <div class="commit-text"><span class="cm-id">[22103100001]</span> <span class="cm-mod">[TaiKhoan]</span> <span class="cm-msg">Tao Entity TaiKhoan va Data Annotation</span></div>
+        </div>
+        <div class="commit-example">
+            <div class="commit-dot" style="background: var(--accent-5);"></div>
+            <div class="commit-text"><span class="cm-id">[22103100002]</span> <span class="cm-mod">[Phong]</span> <span class="cm-msg">Them chuc nang phan trang voi Skip Take</span></div>
+        </div>
+        <div class="commit-example">
+            <div class="commit-dot" style="background: #f093fb;"></div>
+            <div class="commit-text"><span class="cm-id">[22103100003]</span> <span class="cm-mod">[DatPhong]</span> <span class="cm-msg">Kiem tra trung lich dat phong bang LINQ</span></div>
+        </div>
+        <div class="commit-example">
+            <div class="commit-dot" style="background: var(--accent-4);"></div>
+            <div class="commit-text"><span class="cm-id">[22103100004]</span> <span class="cm-mod">[TiepNhan]</span> <span class="cm-msg">Xu ly trang thai nhan phong va tra phong</span></div>
+        </div>
+        <div class="commit-example">
+            <div class="commit-dot" style="background: #43e97b;"></div>
+            <div class="commit-text"><span class="cm-id">[22103100005]</span> <span class="cm-mod">[ThongKe]</span> <span class="cm-msg">Them Dashboard tong quan voi LINQ</span></div>
+        </div>
+
+        <div class="alert alert-warning" style="margin-top: 20px;">
+            <span>⚠️</span>
+            <div>Commit message phải viết <strong>KHÔNG DẤU</strong> để tránh lỗi encoding. Mỗi thành viên phải có <strong>nhiều commit</strong> phù hợp tiến độ, <strong>KHÔNG</strong> dồn toàn bộ vào 1 commit cuối!</div>
+        </div>
+
+        <h4 style="margin-top: 24px; margin-bottom: 12px;">Comment Header Mã Nguồn</h4>
+        <div class="code-block">
+<span class="comment">// Họ và tên: Nguyễn Văn A</span>
+<span class="comment">// Mã sinh viên: 22103100001</span>
+<span class="comment">// Nội dung thực hiện: Quản lý tài khoản, đăng nhập,</span>
+<span class="comment">// phân quyền và quản lý loại phòng.</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px;">
+            Áp dụng cho: Model/Entity, Controller, ViewModel, View và các lớp xử lý khác.
+        </p>
+    </section>
+
+    <!-- 9. CHỨC NĂNG NÂNG CAO -->
+    <section class="section" id="advanced">
+        <div class="section-header">
+            <div class="section-number" style="background: var(--gradient-5);">9</div>
+            <h2>Chức Năng Nâng Cao (Không Bắt Buộc)</h2>
+        </div>
+
+        <div class="alert alert-danger">
+            <span>🚫</span>
+            <div>Chức năng nâng cao <strong>KHÔNG</strong> được thay thế chức năng bắt buộc còn thiếu. Không cộng ưu tiên cho giao diện đẹp nếu nghiệp vụ bắt buộc chưa hoàn thành.</div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Chức năng</th><th>Mô tả</th></tr></thead>
+                <tbody>
+                    <tr><td>📷 Upload file/hình ảnh</td><td>Ảnh phòng, avatar khách hàng</td></tr>
+                    <tr><td>📧 Gửi email thông báo</td><td>Xác nhận đặt phòng qua email</td></tr>
+                    <tr><td>📊 Biểu đồ Chart.js</td><td>Trực quan hóa thống kê</td></tr>
+                    <tr><td>⚡ AJAX</td><td>Tải dữ liệu không reload trang</td></tr>
+                    <tr><td>📄 Xuất Excel/PDF</td><td>Xuất báo cáo</td></tr>
+                    <tr><td>🔍 Tìm kiếm AJAX</td><td>Tìm kiếm không tải lại trang</td></tr>
+                    <tr><td>🔒 Mã hóa mật khẩu</td><td>Hash password</td></tr>
+                    <tr><td>🛡️ ASP.NET Core Identity</td><td>Hệ thống xác thực nâng cao</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer>
+        <p>📋 Kế Hoạch Đề Tài 15 — Quản Lý Đặt Phòng Khách Sạn</p>
+        <p>UNETI • Nhóm 2 • DHTI17A2HN • ASP.NET Core 10 MVC</p>
+        <p style="margin-top: 8px; color: var(--text-muted);">© 2026</p>
+    </footer>
+
+</div>
+
+</body>
+</html>
