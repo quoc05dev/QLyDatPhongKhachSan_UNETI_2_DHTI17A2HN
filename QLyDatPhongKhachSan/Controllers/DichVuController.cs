@@ -1,3 +1,7 @@
+// Họ và tên: Đặng Minh Quốc
+// Mã sinh viên: 23103100069
+// Nội dung thực hiện: Quản lý dịch vụ của khách sạn.
+
 using Microsoft.AspNetCore.Mvc;
 using QLyDatPhongKhachSan.Data;
 
@@ -18,7 +22,11 @@ namespace QLyDatPhongKhachSan.Controllers
         // GET: DichVu
         public IActionResult Index()
         {
-            return View();
+            var danhSach = _context.DichVus
+                .OrderByDescending(dv => dv.MaDichVu)
+                .ToList();
+
+            return View(danhSach);
         }
 
         // GET: DichVu/Details/5
