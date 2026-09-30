@@ -1,0 +1,85 @@
+@*
+    Ho va ten: Dau Duc Luu
+    Ma sinh vien: 23103100114
+    Noi dung: CRUD co ban quan ly Phong - Man hinh chi tiet
+*@
+@model QLyDatPhongKhachSan.Models.Phong
+
+@{
+    ViewData["Title"] = "Chi tiết phòng";
+}
+
+<h1>Chi tiết phòng</h1>
+
+<div>
+    <h4>Phòng @Model.SoPhong</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.SoPhong)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.SoPhong)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.MaLoaiPhong)
+        </dt>
+        <dd class="col-sm-9">
+            @(Model.LoaiPhong != null ? Model.LoaiPhong.TenLoai : "Không xác định")
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Tang)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Tang)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.HuongPhong)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.HuongPhong)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TienNghi)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TienNghi)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.DonGia)
+        </dt>
+        <dd class="col-sm-9">
+            @Model.DonGia.ToString("N0") VNĐ
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TrangThai)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TrangThai)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.GhiChu)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.GhiChu)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.NgayBaoTri)
+        </dt>
+        <dd class="col-sm-9">
+            @(Model.NgayBaoTri.HasValue ? Model.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "Không có")
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.MaPhong" class="btn btn-warning">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+</div>
