@@ -49,6 +49,12 @@ namespace QLyDatPhongKhachSan.Models
         [DataType(DataType.Date)]
         public DateTime? NgayBaoTri { get; set; }
 
+        // Bổ sung theo yêu cầu De_15.docx mục 6.1 (Entity Phong gồm tối thiểu 11 trường).
+        // Thay đổi phối hợp giữa SV2 (23103100114 - quản lý Phong) và SV5 (23103100069).
+        [StringLength(500)]
+        [Display(Name = "Ghi chú bảo trì")]
+        public string? GhiChuBaoTri { get; set; }
+
         // Navigation
         [ForeignKey("MaLoaiPhong")]
         public virtual LoaiPhong? LoaiPhong { get; set; }

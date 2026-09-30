@@ -52,6 +52,12 @@ namespace QLyDatPhongKhachSan.Models
         [Display(Name = "Trạng thái")]
         public bool TrangThai { get; set; } = true;
 
+        // Bổ sung theo yêu cầu De_15.docx mục 7.1 (Entity KhachHang gồm tối thiểu 12 trường).
+        // Thay đổi phối hợp giữa SV3 (23103100086 - quản lý KhachHang) và SV5 (23103100069).
+        [StringLength(500)]
+        [Display(Name = "Ghi chú")]
+        public string? GhiChu { get; set; }
+
         // Navigation
         [ForeignKey("MaTaiKhoan")]
         public virtual TaiKhoan? TaiKhoan { get; set; }
