@@ -99,5 +99,8 @@ namespace QLyDatPhongKhachSan.ViewModels
         public string TenLoai { get; set; } = string.Empty;
         public int SoLuongPhong { get; set; }
         public double TyLe { get; set; }
+
+        // Chỉ dùng ở báo cáo doanh thu theo loại phòng (mục 9.4).
+        public decimal DoanhThu { get; set; }
     }
 }

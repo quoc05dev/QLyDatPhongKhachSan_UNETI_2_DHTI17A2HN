@@ -1,0 +1,472 @@
+@{
+    ViewData["Title"] = "Báo cáo thống kê - Module 5";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1 fw-bold">
+                <i class="bi bi-bar-chart-line text-primary me-2"></i>
+                Thống kê doanh thu
+            </h1>
+            <p class="text-muted mb-0">Báo cáo chi tiết theo tháng, loại phòng - Mục 9.4</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-lg-0">
+            <a asp-controller="ThongKe" asp-action="Dashboard" class="btn btn-outline-primary">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+            </a>
+            <a asp-controller="ThongKe" asp-action="DoanhThu"
+               asp-route-nam="@ViewBag.NamChon" asp-route-thang="@ViewBag.ThangChon"
+               class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
+            </a>
+        </div>
+    </div>
+
+    @* ============ BỘ LỌC NĂM / THÁNG ============ *@
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-controller="ThongKe" asp-action="DoanhThu" method="get" class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-4">
+                    <label for="nam" class="form-label fw-semibold">Năm</label>
+                    <select id="nam" name="nam" class="form-select">
+                        @{
+                            var danhSachNam = (List<int>)ViewBag.DanhSachNam;
+                            var namChon = (int)ViewBag.NamChon;
+                            var thangChon = (int)ViewBag.ThangChon;
+                        }
+                        @if (danhSachNam != null && danhSachNam.Any())
+                        {
+                            foreach (var y in danhSachNam)
+                            {
+                                <option value="@y" selected="@(y == namChon)">@y</option>
+                            }
+                        }
+                        else
+                        {
+                            <option value="@namChon" selected="true">@namChon</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-sm-6 col-md-4">
+                    <label for="thang" class="form-label fw-semibold">Tháng</label>
+                    <select id="thang" name="thang" class="form-select">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            var tenThang = m == 10 ? "Tháng 10" : $"Tháng {m}";
+                            <option value="@m" selected="@(m == thangChon)">@tenThang</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-sm-6 col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-funnel me-1"></i>Xem báo cáo
+                    </button>
+                    <a asp-controller="ThongKe" asp-action="Dashboard" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* ============ TỔNG QUAN KỲ ĐANG XEM ============ *@
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 border-start border-primary border-3">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small">Doanh thu kỳ</p>
+                    <h4 class="mb-0 fw-bold text-primary">@ViewBag.DoanhThuKyChon.ToString("N0") <small>VNĐ</small></h4>
+                    <small class="text-muted">Tháng @ViewBag.ThangChon/@ViewBag.NamChon</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 border-start border-success border-3">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small">Số lượt đặt (đã loại hủy)</p>
+                    <h4 class="mb-0 fw-bold text-success">@ViewBag.SoLuotDatKyChon</h4>
+                    <small class="text-muted">Giao dịch có hiệu lực</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 border-start border-danger border-3">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small">Số lượt hủy</p>
+                    <h4 class="mb-0 fw-bold text-danger">@ViewBag.SoLuotHuyKyChon</h4>
+                    <small class="text-muted">Trong kỳ đang xem</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            @{
+                var doanhThuKy = (decimal)ViewBag.DoanhThuKyChon;
+                var soLuotKy = (int)ViewBag.SoLuotDatKyChon;
+                var tbMoiLuot = soLuotKy == 0 ? 0 : Math.Round(doanhThuKy / soLuotKy, 0);
+            }
+            <div class="card border-0 shadow-sm h-100 border-start border-info border-3">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small">Doanh thu bình quân / lượt</p>
+                    <h4 class="mb-0 fw-bold text-info">@tbMoiLuot.ToString("N0") <small>VNĐ</small></h4>
+                    <small class="text-muted">Tổng doanh thu chia số lượt</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ============ DOANH THU THEO LOẠI PHÒNG ============ *@
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-cash-stack text-success me-1"></i>
+                        Doanh thu theo loại phòng (tháng @ViewBag.ThangChon/@ViewBag.NamChon)
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    @{
+                        var doanhThuTheoLoai = (List<QLyDatPhongKhachSan.ViewModels.LoaiPhongThongKeItem>)ViewBag.DoanhThuTheoLoai;
+                        var maxDoanhThu = doanhThuTheoLoai.Any() ? doanhThuTheoLoai.Max(x => x.DoanhThu) : 0;
+                    }
+                    @if (doanhThuTheoLoai.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Loại phòng</th>
+                                        <th class="text-end pe-4">Doanh thu</th>
+                                        <th class="pe-4" style="width: 35%;">Tỷ trọng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in doanhThuTheoLoai)
+                                    {
+                                        var tyTrong = maxDoanhThu == 0 ? 0 : Math.Round((double)(item.DoanhThu / maxDoanhThu * 100), 1);
+                                        <tr>
+                                            <td class="ps-4">@item.TenLoai</td>
+                                            <td class="text-end pe-4 fw-semibold">@item.DoanhThu.ToString("N0") đ</td>
+                                            <td class="pe-4">
+                                                <div class="progress" style="height: 6px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: @tyTrong%"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block"></i>
+                            Không có doanh thu trong kỳ này
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* ============ SỐ PHÒNG THEO LOẠI ============ *@
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-grid-3x3-gap text-info me-1"></i>
+                        Số phòng theo loại
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    @{
+                        var soPhongTheoLoai = (List<QLyDatPhongKhachSan.ViewModels.LoaiPhongThongKeItem>)ViewBag.SoPhongTheoLoai;
+                        var tongPhong = soPhongTheoLoai.Any() ? soPhongTheoLoai.Sum(x => x.SoLuongPhong) : 0;
+                    }
+                    @if (soPhongTheoLoai.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Loại phòng</th>
+                                        <th class="text-center">Số phòng</th>
+                                        <th class="text-end pe-4">Tỷ lệ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in soPhongTheoLoai)
+                                    {
+                                        var tyLe = tongPhong == 0 ? 0 : Math.Round((double)item.SoLuongPhong / tongPhong * 100, 1);
+                                        <tr>
+                                            <td class="ps-4">@item.TenLoai</td>
+                                            <td class="text-center fw-semibold">@item.SoLuongPhong</td>
+                                            <td class="text-end pe-4 text-muted">@tyLe.ToString("F1")%</td>
+                                        </tr>
+                                    }
+                                    <tr class="table-light">
+                                        <td class="ps-4 fw-bold">Tổng cộng</td>
+                                        <td class="text-center fw-bold">@tongPhong</td>
+                                        <td class="text-end pe-4 fw-bold">100%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block"></i>
+                            Chưa có dữ liệu loại phòng
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ============ DOANH THU THEO THÁNG TRONG NĂM ============ *@
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-graph-up text-primary me-1"></i>
+                        Doanh thu theo tháng (năm @ViewBag.NamChon)
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    @{
+                        var doanhThuThang = (List<QLyDatPhongKhachSan.ViewModels.DoanhThuThangItem>)ViewBag.DoanhThuTheoThang;
+                    }
+                    @if (doanhThuThang.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Tháng</th>
+                                        <th class="text-center">Số lượt đặt</th>
+                                        <th class="text-end pe-4">Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in doanhThuThang)
+                                    {
+                                        var tenThang = item.Thang == 10 ? "Tháng 10" : $"Tháng {item.Thang}";
+                                        <tr>
+                                            <td class="ps-4">@tenThang</td>
+                                            <td class="text-center">@item.SoLuotDat</td>
+                                            <td class="text-end pe-4 text-success fw-semibold">@item.DoanhThu.ToString("N0") đ</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block"></i>
+                            Chưa có doanh thu trong năm này
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* ============ LƯỢT ĐẶT THEO THÁNG ============ *@
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-calendar-month text-warning me-1"></i>
+                        Số lượt đặt theo tháng (năm @ViewBag.NamChon)
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    @{
+                        var luotDatThang = (List<QLyDatPhongKhachSan.ViewModels.DoanhThuThangItem>)ViewBag.LuotDatTheoThang;
+                        var maxLuot = luotDatThang.Any() ? luotDatThang.Max(x => x.SoLuotDat) : 0;
+                    }
+                    @if (luotDatThang.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Tháng</th>
+                                        <th class="text-center">Số lượt đặt</th>
+                                        <th class="pe-4" style="width: 40%;">Biểu đồ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in luotDatThang)
+                                    {
+                                        var width = maxLuot == 0 ? 0 : Math.Round((double)item.SoLuotDat / maxLuot * 100, 1);
+                                        var tenThang = item.Thang == 10 ? "Tháng 10" : $"Tháng {item.Thang}";
+                                        <tr>
+                                            <td class="ps-4">@tenThang</td>
+                                            <td class="text-center fw-semibold">@item.SoLuotDat</td>
+                                            <td class="pe-4">
+                                                <div class="progress" style="height: 6px;">
+                                                    <div class="progress-bar bg-warning" role="progressbar" style="width: @width%"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block"></i>
+                            Chưa có lượt đặt phòng trong năm này
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ============ TOP PHÒNG ĐƯỢC ĐẶT NHIỀU NHẤT TRONG KỲ ============ *@
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0">
+            <h6 class="mb-0 fw-semibold">
+                <i class="bi bi-trophy-fill text-warning me-1"></i>
+                Phòng được đặt nhiều nhất (tháng @ViewBag.ThangChon/@ViewBag.NamChon)
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            @{
+                var topPhong = (List<QLyDatPhongKhachSan.ViewModels.PhongThongKeItem>)ViewBag.PhongDatNhieuNhat;
+            }
+            @if (topPhong.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4" style="width: 60px;">#</th>
+                                <th>Số phòng</th>
+                                <th>Loại phòng</th>
+                                <th class="text-center">Số lượt đặt</th>
+                                <th class="text-end pe-4">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var rank = 1;
+                            }
+                            @foreach (var item in topPhong)
+                            {
+                                var medal = rank switch
+                                {
+                                    1 => "🥇",
+                                    2 => "🥈",
+                                    3 => "🥉",
+                                    _ => rank.ToString()
+                                };
+                                <tr>
+                                    <td class="ps-4 fw-bold">@medal</td>
+                                    <td class="fw-semibold">@item.SoPhong</td>
+                                    <td class="text-muted">@item.TenLoai</td>
+                                    <td class="text-center fw-semibold">@item.SoLuotDat</td>
+                                    <td class="text-end pe-4">@item.DoanhThu.ToString("N0") đ</td>
+                                </tr>
+                                rank++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1 d-block"></i>
+                    Không có lượt đặt nào trong kỳ này
+                </div>
+            }
+        </div>
+    </div>
+
+    @* ============ CHI TIẾT TỪNG ĐƠN TRONG KỲ ============ *@
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+            <h6 class="mb-0 fw-semibold">
+                <i class="bi bi-list-ul text-secondary me-1"></i>
+                Chi tiết các đơn đặt phòng trong kỳ
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            @{
+                var chiTietKy = (List<QLyDatPhongKhachSan.Models.DatPhong>)ViewBag.ChiTietKy;
+            }
+            @if (chiTietKy.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Mã</th>
+                                <th>Khách hàng</th>
+                                <th>Số điện thoại</th>
+                                <th>Nhận phòng</th>
+                                <th>Trả phòng</th>
+                                <th class="text-center">Số người</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-end pe-4">Tổng tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dp in chiTietKy)
+                            {
+                                var badge = dp.TrangThai switch
+                                {
+                                    "ChoXuLy" => "bg-warning text-dark",
+                                    "DangXuLy" => "bg-info",
+                                    "DaXacNhan" => "bg-primary",
+                                    "DangSuDung" => "bg-success",
+                                    "HoanThanh" => "bg-dark",
+                                    "DaHuy" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                                <tr>
+                                    <td class="ps-4 fw-semibold">@dp.MaDatPhong</td>
+                                    <td>@(dp.KhachHang?.HoTen ?? "—")</td>
+                                    <td class="text-muted">@(dp.KhachHang?.SoDienThoai ?? "—")</td>
+                                    <td>@dp.NgayNhan.ToString("dd/MM/yyyy")</td>
+                                    <td>@dp.NgayTraDuKien.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-center">@dp.SoNguoi</td>
+                                    <td class="text-center">
+                                        <span class="badge @badge">@dp.TrangThai</span>
+                                    </td>
+                                    <td class="text-end pe-4 fw-semibold">@dp.TongTien.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1 d-block"></i>
+                    Không có đơn đặt phòng nào trong kỳ này
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="text-muted small mt-3">
+        <i class="bi bi-info-circle me-1"></i>
+        Báo cáo dùng LINQ <code>GroupBy()</code>, <code>Sum()</code>, <code>Count()</code>,
+        <code>OrderByDescending()</code>, <code>Any()</code> theo yêu cầu mục 9.4 của De_15.docx.
+        Doanh thu chỉ tính các chi tiết chưa bị hủy.
+    </div>
+</div>
