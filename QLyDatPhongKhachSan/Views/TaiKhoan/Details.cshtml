@@ -1,0 +1,114 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Giao diện Xem chi tiết TaiKhoan dành cho Admin.
+*@
+@model QLyDatPhongKhachSan.Models.TaiKhoan
+
+@{
+    ViewData["Title"] = "Chi tiết tài khoản";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-info text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-info-circle-fill me-2"></i>CHI TIẾT TÀI KHOẢN #@Model.MaTaiKhoan</h4>
+                <a asp-action="Index" class="btn btn-sm btn-outline-light rounded-3">
+                    <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+                </a>
+            </div>
+            <div class="card-body p-4">
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Tên đăng nhập</small>
+                            <h5 class="fw-bold text-primary mb-0">@Model.TenDangNhap</h5>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Họ và tên</small>
+                            <h5 class="fw-bold mb-0">@Model.HoTen</h5>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Email</small>
+                            <span class="fs-6 fw-semibold">@Model.Email</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Số điện thoại</small>
+                            <span class="fs-6 fw-semibold">@(string.IsNullOrEmpty(Model.SoDienThoai) ? "Chưa cập nhật" : Model.SoDienThoai)</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Vai trò hệ thống</small>
+                            @if (Model.VaiTro == "Admin")
+                            {
+                                <span class="badge bg-danger rounded-pill px-3 py-2 fs-6"><i class="bi bi-shield-lock me-1"></i>Admin (Quản trị)</span>
+                            }
+                            else if (Model.VaiTro == "NhanVien")
+                            {
+                                <span class="badge bg-info text-dark rounded-pill px-3 py-2 fs-6"><i class="bi bi-person-badge me-1"></i>Nhân viên quản lý</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary rounded-pill px-3 py-2 fs-6"><i class="bi bi-person me-1"></i>Khách hàng</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Trạng thái hoạt động</small>
+                            @if (Model.TrangThai)
+                            {
+                                <span class="badge bg-success rounded-pill px-3 py-2 fs-6"><i class="bi bi-check-circle me-1"></i>Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger rounded-pill px-3 py-2 fs-6"><i class="bi bi-lock me-1"></i>Đã bị khóa</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <small class="text-muted d-block fw-semibold mb-1">Ngày khởi tạo tài khoản</small>
+                            <span class="fs-6 text-dark">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                        </div>
+                    </div>
+
+                    @if (Model.KhachHang != null)
+                    {
+                        <div class="col-md-12">
+                            <div class="alert alert-primary mb-0 rounded-3">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-person-vcard me-2"></i>Hồ sơ Khách hàng liên kết:</h6>
+                                <div class="row">
+                                    <div class="col-md-6">Mã KH: <strong>#@Model.KhachHang.MaKhachHang</strong></div>
+                                    <div class="col-md-6">CCCD/CMND: <strong>@(Model.KhachHang.CCCD ?? "Chưa cập nhật")</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-4 mt-3 border-top">
+                    <a asp-action="Edit" asp-route-id="@Model.MaTaiKhoan" class="btn btn-warning rounded-3 fw-bold">
+                        <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary rounded-3">Quay lại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

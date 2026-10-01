@@ -1,0 +1,32 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Trang thông báo không đủ quyền truy cập (Access Denied).
+*@
+@{
+    ViewData["Title"] = "Từ chối truy cập";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card shadow border-0 rounded-4 p-5">
+            <div class="card-body">
+                <div class="text-danger mb-4">
+                    <i class="bi bi-shield-lock-fill display-1"></i>
+                </div>
+                <h2 class="fw-bold text-danger mb-3">403 - TỪ CHỐI TRUY CẬP</h2>
+                <p class="lead text-secondary mb-4">
+                    Bạn không có quyền truy cập vào chức năng hoặc trang quản trị này. Vui lòng liên hệ Quản trị viên nếu đây là sự nhầm lẫn.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg rounded-3">
+                        <i class="bi bi-house-door me-2"></i>Về Trang Chủ
+                    </a>
+                    <a asp-controller="DangNhap" asp-action="Login" class="btn btn-primary btn-lg rounded-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập tài khoản khác
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
