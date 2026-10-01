@@ -1,7 +1,3 @@
-// Họ và tên: Sinh viên 1
-// Mã sinh viên: 23103100091
-// Nội dung thực hiện: Module 1 - Entity TaiKhoan và thuộc tính theo thiết kế chung.
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +7,6 @@ namespace QLyDatPhongKhachSan.Models
     public class TaiKhoan
     {
         [Key]
-        [Display(Name = "Mã tài khoản")]
         public int MaTaiKhoan { get; set; }
 
         [Required(ErrorMessage = "Tên đăng nhập không được để trống")]

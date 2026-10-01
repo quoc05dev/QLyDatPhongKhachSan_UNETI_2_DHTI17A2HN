@@ -1,7 +1,3 @@
-// Họ và tên: Sinh viên 1
-// Mã sinh viên: 23103100091
-// Nội dung thực hiện: Cấu hình DbContext và các mối quan hệ Entity giữ nguyên CSDL ban đầu.
-
 using Microsoft.EntityFrameworkCore;
 using QLyDatPhongKhachSan.Models;
 
