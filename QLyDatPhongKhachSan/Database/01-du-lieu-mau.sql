@@ -333,15 +333,16 @@ GO
    9. Đồng bộ trạng thái phòng theo giao dịch thực tế (mục 6.1)
       - Phòng có khách đang ở        -> DangSuDung
       - Phòng đã có đơn chờ xử lý   -> DangXuLy
-      - 2 phòng cuối đưa vào bảo trì -> BaoTri
+      - 2 phòng đưa vào bảo trì      -> BaoTri
       - Còn lại                      -> Trong
-   --------------------------------------------------------------------------- */
+    --------------------------------------------------------------------------- */
 
--- Phòng đưa vào bảo trì được ưu tiên đặt trước, để luôn có ít nhất 2 phòng
--- ở trạng thái này dù phòng đó đã có lịch đặt trước đó.
+-- Thứ tự ưu tiên: khách đang ở > đơn đang xử lý > bảo trì > trống.
+-- Nhờ vậy trạng thái phòng luôn khớp với giao dịch thực tế.
+-- Hai phòng đưa vào bảo trì (105, 203) được chọn trong số phòng chưa có
+-- khách ở và chưa có đơn chờ xử lý, để không mâu thuẫn với đơn đặt phòng.
 UPDATE p
 SET p.TrangThai = CASE
-        WHEN p.SoPhong IN ('403', '105') THEN N'BaoTri'
         WHEN EXISTS (
             SELECT 1 FROM ChiTietDatPhong ct
             INNER JOIN DatPhong dp ON dp.MaDatPhong = ct.MaDatPhong
@@ -352,12 +353,13 @@ SET p.TrangThai = CASE
             INNER JOIN DatPhong dp ON dp.MaDatPhong = ct.MaDatPhong
             WHERE ct.MaPhong = p.MaPhong AND dp.TrangThai IN (N'ChoXuLy', N'DangXuLy', N'DaXacNhan')
         ) THEN N'DangXuLy'
+        WHEN p.SoPhong IN ('105', '203') THEN N'BaoTri'
         ELSE N'Trong'
     END,
-    p.NgayBaoTri = CASE WHEN p.SoPhong IN ('403', '105') THEN '2026-10-01' ELSE NULL END,
+    p.NgayBaoTri = CASE WHEN p.SoPhong IN ('105', '203') THEN '2026-10-01' ELSE NULL END,
     p.GhiChuBaoTri = CASE
-        WHEN p.SoPhong = '403' THEN N'Thay bóng đèn ngọc và sơn lại tường phòng khách'
         WHEN p.SoPhong = '105' THEN N'Bảo dưỡng điều hòa do chảy nước nhẹ'
+        WHEN p.SoPhong = '203' THEN N'Thay bóng đèn ngọc và sơn lại tường phòng ngủ'
         ELSE NULL
     END
 FROM Phong p;
