@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    ĐỀ TÀI 15 - HỆ THỐNG QUẢN LÝ ĐẶT PHÒNG KHÁCH SẠN
    DỮ LIỆU MẪU PHỤC VỤ KIỂM THỬ (không phải CRUD bắt buộc)
 
@@ -16,6 +16,12 @@
      sqlcmd -S "(localdb)\MSSQLLocalDB" -d QLyDatPhongKhachSanDB -f 65001 -i <duong-dan-file>
 
    LƯU Ý KỸ THUẬT
+   - File này được lưu ở dạng UTF-8 CÓ BOM. Nếu không có BOM và chạy sqlcmd mà
+     thiếu tham số -f 65001, sqlcmd sẽ đọc file theo codepage của Windows
+     (1258/437) rồi lưu vào database, khiến tiếng Việt có dấu bị hỏng thành
+     các ký tự lạ kiểu "Ph?ng Ti?u Chu?n". Nếu gặp lỗi này thì nạp lại database
+     bằng đúng lệnh ở mục CÁCH CHẠY ở trên. Khi mở bằng SSMS hoặc Visual Studio
+     thì không cần tham số này.
    - sqlcmd mặc định để QUOTED_IDENTIFIER ở trạng thái OFF, trong khi các index
      do EF Core tạo yêu cầu ON. Vì vậy script bắt buộc phải bật lại bằng
      câu lệnh SET ở phần đầu, nếu không sẽ báo lỗi Msg 1934.
