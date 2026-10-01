@@ -1,0 +1,91 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Giao diện Đăng nhập hệ thống Quản lý Đặt phòng Khách sạn.
+*@
+@model QLyDatPhongKhachSan.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i>ĐĂNG NHẬP</h3>
+                <small class="text-white-50">Hệ thống Quản lý Khách sạn UNETI</small>
+            </div>
+            <div class="card-body p-4">
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                            <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập..." autofocus />
+                        </div>
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                            <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu..." />
+                        </div>
+                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label text-secondary"></label>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-3 pt-3 border-top">
+                    <p class="mb-0 text-muted">Chưa có tài khoản khách hàng?</p>
+                    <a asp-action="Register" class="fw-bold text-decoration-none text-primary">Đăng ký ngay bây giờ</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 border-0 bg-light text-center p-3 shadow-sm">
+            <small class="text-muted fw-bold">Tài khoản demo kiểm thử:</small>
+            <small class="text-secondary">Admin: <code>admin</code> / <code>123456</code></small>
+            <small class="text-secondary">Nhân viên: <code>nhanvien</code> / <code>123456</code></small>
+            <small class="text-secondary">Khách hàng: <code>khachhang</code> / <code>123456</code></small>
+            <small class="text-danger">Bị khóa: <code>khoa</code> / <code>123456</code></small>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

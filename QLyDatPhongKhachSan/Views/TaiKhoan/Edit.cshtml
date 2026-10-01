@@ -1,0 +1,98 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Giao diện Cập nhật TaiKhoan dành cho Admin.
+*@
+@model QLyDatPhongKhachSan.Models.TaiKhoan
+
+@{
+    ViewData["Title"] = "Cập nhật tài khoản";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-warning text-dark py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>CẬP NHẬT TÀI KHOẢN #@Model.MaTaiKhoan</h4>
+                <a asp-action="Index" class="btn btn-sm btn-outline-dark rounded-3">
+                    <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+                </a>
+            </div>
+            <div class="card-body p-4">
+
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="MaTaiKhoan" />
+                    <input type="hidden" asp-for="NgayTao" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
+                            <input asp-for="TenDangNhap" class="form-control" />
+                            <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MatKhau" class="form-label fw-semibold"></label>
+                            <input asp-for="MatKhau" class="form-control" type="password" />
+                            <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HoTen" class="form-label fw-semibold"></label>
+                            <input asp-for="HoTen" class="form-control" />
+                            <span asp-validation-for="HoTen" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SoDienThoai" class="form-label fw-semibold"></label>
+                            <input asp-for="SoDienThoai" class="form-control" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="VaiTro" class="form-label fw-semibold"></label>
+                            <select asp-for="VaiTro" class="form-select">
+                                <option value="Admin">Admin (Quản trị hệ thống)</option>
+                                <option value="NhanVien">Nhân viên quản lý</option>
+                                <option value="KhachHang">Khách hàng</option>
+                            </select>
+                            <span asp-validation-for="VaiTro" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" asp-for="TrangThai" id="flexSwitchEditTrangThai">
+                            <label class="form-check-label fw-semibold" for="flexSwitchEditTrangThai">
+                                Trạng thái hoạt động (Mở khóa cho phép đăng nhập)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-secondary rounded-3">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-warning rounded-3 fw-bold">
+                            <i class="bi bi-save me-1"></i>Cập nhật tài khoản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

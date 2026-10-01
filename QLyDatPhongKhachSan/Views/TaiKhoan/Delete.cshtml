@@ -1,0 +1,48 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Giao diện Xác nhận xóa TaiKhoan dành cho Admin.
+*@
+@model QLyDatPhongKhachSan.Models.TaiKhoan
+
+@{
+    ViewData["Title"] = "Xóa tài khoản";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-7">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-danger text-white py-3 rounded-top-4">
+                <h4 class="mb-0 fw-bold text-center"><i class="bi bi-exclamation-triangle-fill me-2"></i>XÁC NHẬN XÓA TÀI KHOẢN</h4>
+            </div>
+            <div class="card-body p-4 text-center">
+
+                <div class="alert alert-warning border-warning" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    Bạn có chắc chắn muốn xóa tài khoản <strong>@Model.TenDangNhap</strong> (#@Model.MaTaiKhoan)? Hành động này không thể hoàn tác!
+                </div>
+
+                <div class="card bg-light border-0 p-3 mb-4 text-start rounded-3">
+                    <div class="row g-2">
+                        <div class="col-6">Họ và tên: <strong>@Model.HoTen</strong></div>
+                        <div class="col-6">Email: <strong>@Model.Email</strong></div>
+                        <div class="col-6">Vai trò: <strong>@Model.VaiTro</strong></div>
+                        <div class="col-6">Trạng thái: <strong>@(Model.TrangThai ? "Hoạt động" : "Bị khóa")</strong></div>
+                    </div>
+                </div>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="MaTaiKhoan" />
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-action="Index" class="btn btn-secondary btn-lg rounded-3">
+                            <i class="bi bi-x-circle me-1"></i>Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-danger btn-lg rounded-3 fw-bold">
+                            <i class="bi bi-trash me-1"></i>Xác nhận Xóa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
