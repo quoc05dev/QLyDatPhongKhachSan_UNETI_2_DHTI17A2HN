@@ -77,6 +77,13 @@
         <dd class="col-sm-9">
             @(Model.NgayBaoTri.HasValue ? Model.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "Không có")
         </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.GhiChuBaoTri)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.GhiChuBaoTri)
+        </dd>
     </dl>
 </div>
 <div>

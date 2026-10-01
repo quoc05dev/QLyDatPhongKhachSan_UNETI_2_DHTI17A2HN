@@ -27,6 +27,7 @@
                 <th>Đơn giá</th>
                 <th>Trạng thái</th>
                 <th>Ngày bảo trì</th>
+                <th>Ghi chú bảo trì</th>
                 <th>Hành động</th>
             </tr>
         </thead>
@@ -41,6 +42,7 @@
                     <td>@item.DonGia.ToString("N0") VNĐ</td>
                     <td>@item.TrangThai</td>
                     <td>@(item.NgayBaoTri.HasValue ? item.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "")</td>
+                    <td>@item.GhiChuBaoTri</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.MaPhong" class="btn btn-sm btn-warning">Sửa</a>
                         <a asp-action="Details" asp-route-id="@item.MaPhong" class="btn btn-sm btn-info">Chi tiết</a>

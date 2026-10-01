@@ -74,6 +74,12 @@
                 <span asp-validation-for="NgayBaoTri" class="text-danger"></span>
             </div>
             
+            <div class="form-group mb-3">
+                <label asp-for="GhiChuBaoTri" class="control-label"></label>
+                <textarea asp-for="GhiChuBaoTri" class="form-control"></textarea>
+                <span asp-validation-for="GhiChuBaoTri" class="text-danger"></span>
+            </div>
+            
             <div class="form-group">
                 <input type="submit" value="Tạo mới" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
