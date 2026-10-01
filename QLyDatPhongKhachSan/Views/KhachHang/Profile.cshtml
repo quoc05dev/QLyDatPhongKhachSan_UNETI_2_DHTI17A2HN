@@ -1,0 +1,250 @@
+@*
+// ==========================================
+// Họ và tên: Anh Tuấn
+// Mã sinh viên: 23103100086
+// Nội dung thực hiện: Module 3 - Hồ sơ cá nhân khách hàng
+// Giao diện: Xem và cập nhật thông tin cá nhân khách hàng
+// ==========================================
+*@
+
+@model QLyDatPhongKhachSan.ViewModels.HoSoCaNhanViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+        </ol>
+    </nav>
+
+    <!-- Thông báo kết quả thao tác -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <span class="fs-4 me-3">✅</span>
+            <div class="flex-grow-1">
+                <strong>Thành công!</strong> @TempData["SuccessMessage"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <span class="fs-4 me-3">⚠️</span>
+            <div class="flex-grow-1">
+                <strong>Lỗi!</strong> @TempData["ErrorMessage"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Cột trái: Thẻ tóm tắt thông tin tài khoản -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4">
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto shadow-sm"
+                         style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: bold;">
+                        @(string.IsNullOrEmpty(Model.HoTen) ? "KH" : Model.HoTen.Substring(0, 1).ToUpper())
+                    </div>
+                </div>
+
+                <h4 class="fw-bold mb-1">@Model.HoTen</h4>
+                <p class="text-muted small mb-2">@@@Model.TenDangNhap</p>
+
+                <div class="mb-3">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold">
+                        👤 @Model.VaiTro
+                    </span>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill fw-semibold ms-1">
+                        Mã KH: #@Model.MaKhachHang.ToString("D4")
+                    </span>
+                </div>
+
+                <hr class="my-3 text-muted opacity-25" />
+
+                <div class="text-start small text-muted">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>📅 Ngày tham gia:</span>
+                        <strong class="text-dark">@(Model.NgayTaoTaiKhoan?.ToString("dd/MM/yyyy") ?? "N/A")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>📞 Điện thoại:</span>
+                        <strong class="text-dark">@(string.IsNullOrEmpty(Model.SoDienThoai) ? "Chưa cập nhật" : Model.SoDienThoai)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>✉️ Email:</span>
+                        <strong class="text-dark">@(string.IsNullOrEmpty(Model.Email) ? "Chưa cập nhật" : Model.Email)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>🌏 Quốc tịch:</span>
+                        <strong class="text-dark">@Model.QuocTich</strong>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.GhiChu))
+                    {
+                        <div class="d-flex justify-content-between">
+                            <span>📝 Ghi chú:</span>
+                            <span class="text-dark text-end" style="max-width: 60%;">@Model.GhiChu</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="alert alert-light border mt-4 mb-0 text-start small">
+                    <div class="fw-bold text-primary mb-1">🛡️ Bảo mật & Riêng tư:</div>
+                    <p class="mb-0 text-muted" style="font-size: 0.85rem;">
+                        Chỉ có bạn mới có quyền xem và chỉnh sửa thông tin hồ sơ này. Mọi thay đổi sẽ được cập nhật đồng bộ cho tài khoản.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Form cập nhật thông tin cá nhân -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold text-primary mb-1">Chỉnh sửa thông tin cá nhân</h4>
+                        <p class="text-muted small mb-0">Cập nhật thông tin chính xác để thuận tiện trong quá trình đặt phòng và nhận phòng</p>
+                    </div>
+                    <span class="badge bg-light text-secondary border px-3 py-2">Module 3</span>
+                </div>
+
+                <hr class="mb-4 text-muted opacity-25" />
+
+                <form asp-action="Profile" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <!-- Validation Summary nếu có lỗi chung -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <!-- Hidden fields -->
+                    <input type="hidden" asp-for="MaKhachHang" />
+                    <input type="hidden" asp-for="MaTaiKhoan" />
+                    <input type="hidden" asp-for="TenDangNhap" />
+                    <input type="hidden" asp-for="VaiTro" />
+
+                    <!-- Hàng 1: Họ tên & Tên đăng nhập -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-7">
+                            <label asp-for="HoTen" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.HoTen) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="HoTen" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" />
+                            <span asp-validation-for="HoTen" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold text-muted">Tên đăng nhập (Tài khoản)</label>
+                            <input type="text" class="form-control bg-light text-muted" value="@Model.TenDangNhap" readonly disabled />
+                            <div class="form-text small">Tên đăng nhập không thể thay đổi</div>
+                        </div>
+                    </div>
+
+                    <!-- Hàng 2: Ngày sinh & Giới tính -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NgaySinh" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.NgaySinh)
+                            </label>
+                            <input asp-for="NgaySinh" type="date" class="form-control" />
+                            <span asp-validation-for="NgaySinh" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="GioiTinh" class="form-label fw-semibold d-block">
+                                @Html.DisplayNameFor(m => m.GioiTinh)
+                            </label>
+                            <div class="d-flex align-items-center gap-4 mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="GioiTinh" value="Nam" id="gtNam" checked="@(Model.GioiTinh == "Nam")" />
+                                    <label class="form-check-label" for="gtNam">Nam</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="GioiTinh" value="Nữ" id="gtNu" checked="@(Model.GioiTinh == "Nữ")" />
+                                    <label class="form-check-label" for="gtNu">Nữ</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="GioiTinh" value="Khác" id="gtKhac" checked="@(Model.GioiTinh == "Khác")" />
+                                    <label class="form-check-label" for="gtKhac">Khác</label>
+                                </div>
+                            </div>
+                            <span asp-validation-for="GioiTinh" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Hàng 3: CCCD / Hộ chiếu & Số điện thoại -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CCCD" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.CCCD) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="CCCD" class="form-control" placeholder="12 chữ số CCCD hoặc số Hộ chiếu" />
+                            <span asp-validation-for="CCCD" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SoDienThoai" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.SoDienThoai) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="SoDienThoai" class="form-control" placeholder="Ví dụ: 0987111222" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Hàng 4: Email & Quốc tịch -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.Email)
+                            </label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="example@email.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="QuocTich" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.QuocTich) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="QuocTich" class="form-control" placeholder="Ví dụ: Việt Nam" />
+                            <span asp-validation-for="QuocTich" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Hàng 5: Địa chỉ liên hệ -->
+                    <div class="mb-3">
+                        <label asp-for="DiaChi" class="form-label fw-semibold">
+                            @Html.DisplayNameFor(m => m.DiaChi)
+                        </label>
+                        <textarea asp-for="DiaChi" class="form-control" rows="2" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."></textarea>
+                        <span asp-validation-for="DiaChi" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Hàng 6: Ghi chú cá nhân / Yêu cầu đặc biệt -->
+                    <div class="mb-4">
+                        <label asp-for="GhiChu" class="form-label fw-semibold">
+                            @Html.DisplayNameFor(m => m.GhiChu)
+                        </label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="2" placeholder="Ghi chú thêm về sở thích hoặc yêu cầu cá nhân (nếu có, tối đa 500 ký tự)..."></textarea>
+                        <span asp-validation-for="GhiChu" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Nút thao tác -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a asp-action="Profile" class="btn btn-outline-secondary px-4">
+                            🔄 Tải lại dữ liệu
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm">
+                            💾 Lưu thay đổi hồ sơ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
