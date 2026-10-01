@@ -1,0 +1,140 @@
+@* Ho va ten: Nguyen Hai Nam - MSV: 22103100118 *@
+@* Noi dung: Module 4 - View chi tiet dat phong va cac thao tac duyet, check-in, check-out, huy *@
+@model QLyDatPhongKhachSan.Models.DatPhong
+
+@{
+    ViewData["Title"] = "Chi tiết đặt phòng #" + Model.MaDatPhong;
+}
+
+<div class="container mt-4">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">ĐƠN ĐẶT PHÒNG #@Model.MaDatPhong</h5>
+            <span>Trạng thái: <strong>@Model.TrangThai</strong></span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h6>Thông tin khách hàng:</h6>
+                    <p class="mb-1"><strong>Họ tên:</strong> @Model.KhachHang?.HoTen</p>
+                    <p class="mb-1"><strong>CCCD:</strong> @Model.KhachHang?.CCCD</p>
+                    <p class="mb-1"><strong>Điện thoại:</strong> @Model.KhachHang?.SoDienThoai</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Thông tin lưu trú:</h6>
+                    <p class="mb-1"><strong>Ngày nhận phòng:</strong> @Model.NgayNhan.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Ngày trả dự kiến:</strong> @Model.NgayTraDuKien.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Số người:</strong> @Model.SoNguoi người</p>
+                    <p class="mb-1"><strong>Tiền cọc:</strong> @Model.TienCoc.ToString("N0") VNĐ</p>
+                </div>
+            </div>
+
+            <h6>Danh sách phòng chỉ định:</h6>
+            <table class="table table-bordered mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>Số phòng</th>
+                        <th>Loại phòng</th>
+                        <th>Tầng</th>
+                        <th>Đơn giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ct in Model.ChiTietDatPhongs)
+                    {
+                        <tr>
+                            <td><strong>@ct.Phong?.SoPhong</strong></td>
+                            <td>@ct.Phong?.LoaiPhong?.TenLoai</td>
+                            <td>@ct.Phong?.Tang</td>
+                            <td>@ct.DonGia.ToString("N0") VNĐ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- KHU VỰC THAO TÁC LUỒNG TRẠNG THÁI -->
+            <div class="border-top pt-3 d-flex gap-2">
+                @if (Model.TrangThai == "ChoXuLy")
+                {
+                    <form asp-action="DuyetDatPhong" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Duyệt đơn đặt phòng
+                        </button>
+                    </form>
+                }
+
+                @if (Model.TrangThai == "DaXacNhan")
+                {
+                    <form asp-action="CheckIn" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-box-arrow-in-right"></i> Nhận phòng (Check-in)
+                        </button>
+                    </form>
+                }
+
+                @if (Model.TrangThai == "DangXuLy")
+                {
+                    <form asp-action="CheckOut" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+                        <button type="submit" class="btn btn-warning text-dark">
+                            <i class="bi bi-box-arrow-right"></i> Trả phòng (Check-out)
+                        </button>
+                    </form>
+                }
+
+                @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DaXacNhan")
+                {
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalHuy">
+                        <i class="bi bi-x-circle"></i> Hủy đặt phòng
+                    </button>
+                }
+
+                <a asp-action="Index" class="btn btn-secondary ms-auto">Quay lại danh sách</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận lý do hủy -->
+<div class="modal fade" id="modalHuy" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="HuyDatPhong" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận hủy đặt phòng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Lý do hủy:</label>
+                    <textarea name="lyDoHuy" class="form-control" rows="3" required placeholder="Nhập lý do hủy đặt phòng..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

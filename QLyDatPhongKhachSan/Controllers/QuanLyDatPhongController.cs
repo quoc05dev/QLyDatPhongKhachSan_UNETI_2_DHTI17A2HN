@@ -30,7 +30,7 @@ namespace QLyDatPhongKhachSan.Controllers
         public async Task<IActionResult> Index(string? tuKhoa, string? trangThai, int? maLoaiPhong, 
                                                DateTime? tuNgay, DateTime? denNgay, string? sapXep, int trang = 1)
         {
-            if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            //if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
 
             int pageSize = 10;
             var query = _context.DatPhongs
