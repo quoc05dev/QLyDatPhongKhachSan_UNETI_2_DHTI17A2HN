@@ -34,7 +34,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 string term = searchTerm.Trim().ToLower();
                 query = query.Where(t => t.TenDangNhap.ToLower().Contains(term) ||
                                          t.HoTen.ToLower().Contains(term) ||
-                                         t.Email.ToLower().Contains(term));
+                                         (t.Email != null && t.Email.ToLower().Contains(term)));
             }
 
             // 2. Lọc theo Vai Trò (Admin, NhanVien, KhachHang)

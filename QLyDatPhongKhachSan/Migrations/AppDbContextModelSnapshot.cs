@@ -299,7 +299,6 @@ namespace QLyDatPhongKhachSan.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaTaiKhoan"));
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -339,56 +338,6 @@ namespace QLyDatPhongKhachSan.Migrations
                         .IsUnique();
 
                     b.ToTable("TaiKhoan");
-
-                    b.HasData(
-                        new
-                        {
-                            MaTaiKhoan = 1,
-                            Email = "admin@hotel.com",
-                            HoTen = "Quản Trị Viên",
-                            MatKhau = "123456",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SoDienThoai = "0901234567",
-                            TenDangNhap = "admin",
-                            TrangThai = true,
-                            VaiTro = "Admin"
-                        },
-                        new
-                        {
-                            MaTaiKhoan = 2,
-                            Email = "nhanvien@hotel.com",
-                            HoTen = "Nhân Viên Lễ Tân",
-                            MatKhau = "123456",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SoDienThoai = "0902345678",
-                            TenDangNhap = "nhanvien",
-                            TrangThai = true,
-                            VaiTro = "NhanVien"
-                        },
-                        new
-                        {
-                            MaTaiKhoan = 3,
-                            Email = "khachhang@gmail.com",
-                            HoTen = "Nguyễn Văn Khách",
-                            MatKhau = "123456",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SoDienThoai = "0903456789",
-                            TenDangNhap = "khachhang",
-                            TrangThai = true,
-                            VaiTro = "KhachHang"
-                        },
-                        new
-                        {
-                            MaTaiKhoan = 4,
-                            Email = "khoa@gmail.com",
-                            HoTen = "Tài Khoản Bị Khóa",
-                            MatKhau = "123456",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            SoDienThoai = "0904567890",
-                            TenDangNhap = "khoa",
-                            TrangThai = false,
-                            VaiTro = "KhachHang"
-                        });
                 });
 
             modelBuilder.Entity("QLyDatPhongKhachSan.Models.ChiTietDatPhong", b =>

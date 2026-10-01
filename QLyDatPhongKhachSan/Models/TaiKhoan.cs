@@ -1,6 +1,6 @@
 // Họ và tên: Sinh viên 1
 // Mã sinh viên: 23103100091
-// Nội dung thực hiện: Module 1 - Entity TaiKhoan, Đăng nhập, Đăng ký, Đăng xuất, Phân quyền và Quản lý tài khoản.
+// Nội dung thực hiện: Module 1 - Entity TaiKhoan và thuộc tính theo thiết kế chung.
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -30,24 +30,23 @@ namespace QLyDatPhongKhachSan.Models
         [Display(Name = "Họ và tên")]
         public string HoTen { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email không được để trống")]
         [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
-        [StringLength(100, ErrorMessage = "Email không quá 100 ký tự")]
+        [StringLength(100)]
         [Display(Name = "Email")]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        [StringLength(20, ErrorMessage = "Số điện thoại không quá 20 ký tự")]
+        [StringLength(20)]
         [Display(Name = "Số điện thoại")]
         public string? SoDienThoai { get; set; }
 
-        [Required(ErrorMessage = "Vai trò không được để trống")]
+        [Required]
         [StringLength(20)]
         [Display(Name = "Vai trò")]
         public string VaiTro { get; set; } = "KhachHang"; // Admin, NhanVien, KhachHang
 
         [Display(Name = "Trạng thái")]
-        public bool TrangThai { get; set; } = true; // true: Hoạt động, false: Bị khóa
+        public bool TrangThai { get; set; } = true;
 
         [Display(Name = "Ngày tạo")]
         public DateTime NgayTao { get; set; } = DateTime.Now;
