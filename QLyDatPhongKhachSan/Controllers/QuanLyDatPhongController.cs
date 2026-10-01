@@ -30,7 +30,7 @@ namespace QLyDatPhongKhachSan.Controllers
         public async Task<IActionResult> Index(string? tuKhoa, string? trangThai, int? maLoaiPhong, 
                                                DateTime? tuNgay, DateTime? denNgay, string? sapXep, int trang = 1)
         {
-            //if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            //if (!KiemTraQuyenNhanVien()) return RedirectToAction("Login", "DangNhap");
 
             int pageSize = 10;
             var query = _context.DatPhongs
@@ -94,7 +94,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // 2. CHI TIẾT ĐẶT PHÒNG
         public async Task<IActionResult> ChiTiet(int id)
         {
-            if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            if (!KiemTraQuyenNhanVien()) return RedirectToAction("Login", "DangNhap");
 
             var datPhong = await _context.DatPhongs
                 .Include(d => d.KhachHang)
@@ -113,7 +113,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DuyetDatPhong(int maDatPhong)
         {
-            if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            if (!KiemTraQuyenNhanVien()) return RedirectToAction("Login", "DangNhap");
 
             var datPhong = await _context.DatPhongs
                 .Include(d => d.ChiTietDatPhongs)
@@ -178,7 +178,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CheckIn(int maDatPhong)
         {
-            if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            if (!KiemTraQuyenNhanVien()) return RedirectToAction("Login", "DangNhap");
 
             var datPhong = await _context.DatPhongs
                 .Include(d => d.ChiTietDatPhongs)
@@ -211,7 +211,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CheckOut(int maDatPhong)
         {
-            if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            if (!KiemTraQuyenNhanVien()) return RedirectToAction("Login", "DangNhap");
 
             var datPhong = await _context.DatPhongs
                 .Include(d => d.ChiTietDatPhongs)
@@ -244,7 +244,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HuyDatPhong(int maDatPhong, string lyDoHuy)
         {
-            if (!KiemTraQuyenNhanVien()) return RedirectToAction("DangNhap", "TaiKhoan");
+            if (!KiemTraQuyenNhanVien()) return RedirectToAction("Login", "DangNhap");
 
             var datPhong = await _context.DatPhongs.FindAsync(maDatPhong);
             if (datPhong == null) return NotFound();
