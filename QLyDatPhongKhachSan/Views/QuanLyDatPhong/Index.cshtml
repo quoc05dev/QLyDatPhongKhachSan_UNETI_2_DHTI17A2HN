@@ -1,0 +1,117 @@
+@* Ho va ten: Nguyen Hai Nam - MSV: 22103100118 *@
+@* Noi dung: Task 1 - View danh sach tiep nhan dat phong co loc va phan trang *@
+@model QLyDatPhongKhachSan.ViewModels.TiepNhanDatPhongViewModel
+
+@{
+    ViewData["Title"] = "Tiếp nhận & Quản lý Đặt phòng";
+}
+
+<div class="container-fluid mt-3">
+    <h3 class="text-primary mb-3"><i class="bi bi-journal-check"></i> TIẾP NHẬN ĐẶT PHÒNG</h3>
+
+    <!-- BỘ LỌC TÌM KIẾM -->
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên khách, SĐT, Mã đơn..." />
+                </div>
+                <div class="col-md-2">
+                    <select name="trangThai" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="ChoXuLy" selected="@(Model.TrangThai == "ChoXuLy")">Chờ xử lý</option>
+                        <option value="DaXacNhan" selected="@(Model.TrangThai == "DaXacNhan")">Đã xác nhận</option>
+                        <option value="DangXuLy" selected="@(Model.TrangThai == "DangXuLy")">Đang ở</option>
+                        <option value="HoanThanh" selected="@(Model.TrangThai == "HoanThanh")">Hoàn thành</option>
+                        <option value="DaHuy" selected="@(Model.TrangThai == "DaHuy")">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="maLoaiPhong" asp-items="ViewBag.LoaiPhongs" class="form-select">
+                        <option value="">-- Tất cả loại phòng --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="tuNgay" value="@(Model.TuNgay?.ToString("yyyy-MM-dd"))" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="denNgay" value="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" class="form-control" />
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Lọc</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG DỮ LIỆU -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-bordered mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Số điện thoại</th>
+                        <th>Phòng gán</th>
+                        <th>Ngày nhận</th>
+                        <th>Ngày trả dự kiến</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.DanhSachDatPhong != null && Model.DanhSachDatPhong.Any())
+                    {
+                        foreach (var item in Model.DanhSachDatPhong)
+                        {
+                            <tr>
+                                <td><strong>#@item.MaDatPhong</strong></td>
+                                <td>@item.KhachHang?.HoTen</td>
+                                <td>@item.KhachHang?.SoDienThoai</td>
+                                <td>
+                                    @foreach (var ct in item.ChiTietDatPhongs)
+                                    {
+                                        <span class="badge bg-secondary">P.@ct.Phong?.SoPhong</span>
+                                    }
+                                </td>
+                                <td>@item.NgayNhan.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@item.NgayTraDuKien.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <span class="badge bg-info text-dark">@item.TrangThai</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Không tìm thấy đơn đặt phòng nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PHÂN TRANG -->
+        @if (Model.TongSoTrang > 1)
+        {
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span>Trang @Model.TrangHienTai / @Model.TongSoTrang (Tổng cộng @Model.TongBanGhi bản ghi)</span>
+                <ul class="pagination mb-0">
+                    @for (int i = 1; i <= Model.TongSoTrang; i++)
+                    {
+                        <li class="page-item @(i == Model.TrangHienTai ? "active" : "")">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-trang="@i"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-trangThai="@Model.TrangThai"
+                               asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                               asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))"
+                               asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))">@i</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
