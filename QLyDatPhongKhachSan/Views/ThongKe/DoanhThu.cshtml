@@ -73,6 +73,16 @@
     </div>
 
     @* ============ TỔNG QUAN KỲ ĐANG XEM ============ *@
+    @if (ViewBag.CoDuLieuKyChon == false)
+    {
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-info-circle"></i>
+            <span>
+                Tháng <strong>@ViewBag.ThangChon/@ViewBag.NamChon</strong> không có giao dịch nào còn hiệu lực,
+                nên các con số bên dưới đều bằng 0. Hãy chọn kỳ khác nếu cần xem dữ liệu.
+            </span>
+        </div>
+    }
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100 border-start border-primary border-3">

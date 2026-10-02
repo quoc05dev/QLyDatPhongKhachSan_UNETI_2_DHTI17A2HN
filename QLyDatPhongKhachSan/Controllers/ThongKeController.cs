@@ -82,8 +82,14 @@ namespace QLyDatPhongKhachSan.Controllers
             // có thể cho thuê (bỏ qua phòng đang bảo trì).
             var phongChoThue = phongs.Count(p => p.TrangThai != "BaoTri");
 
+            // Any(): khách sạn đã có giao dịch chi tiết đặt phòng chưa? Nếu chưa
+            // có thì không cần chạy truy vấn gom nhóm, các bảng thống kê sẽ hiện
+            // thông báo "chưa có dữ liệu" đúng như thiết kế ở View.
+            var coGiaoDich = chiTiets.Any();
+
             // Top phòng được đặt nhiều nhất, sắp theo số lượt đặt giảm dần.
-            model.PhongDatNhieuNhat = chiTiets
+            model.PhongDatNhieuNhat = coGiaoDich
+                ? chiTiets
                 .GroupBy(ct => new { ct.MaPhong, ct.Phong!.SoPhong, ct.Phong.LoaiPhong!.TenLoai })
                 .Select(g => new PhongThongKeItem
                 {
@@ -95,10 +101,12 @@ namespace QLyDatPhongKhachSan.Controllers
                 .OrderByDescending(p => p.SoLuotDat)
                 .ThenByDescending(p => p.DoanhThu)
                 .Take(SoPhongDatNhieuNhatToiDa)
-                .ToList();
+                .ToList()
+                : new List<PhongThongKeItem>();
 
             // Doanh thu và số lượt đặt theo từng tháng trong năm hiện tại.
-            model.DoanhThuTheoThang = chiTiets
+            model.DoanhThuTheoThang = coGiaoDich
+                ? chiTiets
                 .Where(ct => ct.NgayNhan.Year == DateTime.Now.Year)
                 .GroupBy(ct => new { ct.NgayNhan.Year, ct.NgayNhan.Month })
                 .Select(g => new DoanhThuThangItem
@@ -109,7 +117,8 @@ namespace QLyDatPhongKhachSan.Controllers
                     SoLuotDat = g.Count()
                 })
                 .OrderBy(x => x.Thang)
-                .ToList();
+                .ToList()
+                : new List<DoanhThuThangItem>();
 
             // Tỷ lệ phòng theo từng loại, tính trên tổng số phòng đang có thể thuê.
             model.TyLePhongTheoLoai = loaiPhongs
@@ -143,13 +152,17 @@ namespace QLyDatPhongKhachSan.Controllers
             int namChon = nam ?? namHienTai;
             int thangChon = thang ?? thangHienTai;
 
-            // Danh sách năm có phát sinh giao dịch để đổ vào ô chọn trong form.
-            ViewBag.DanhSachNam = _context.ChiTietDatPhongs
+            // Any(): có giao dịch nào trong hệ thống không? Nếu chưa có thì đưa năm hiện
+            // tại vào ô chọn để người dùng vẫn xem được báo cáo (dù rỗng) thay vì
+            // bị ô chọn năm trống hoàn toàn.
+            ViewBag.DanhSachNam = _context.ChiTietDatPhongs.Any()
+                ? _context.ChiTietDatPhongs
                 .AsNoTracking()
                 .Select(ct => ct.NgayNhan.Year)
                 .Distinct()
                 .OrderByDescending(y => y)
-                .ToList();
+                .ToList()
+                : new List<int> { namHienTai };
 
             ViewBag.NamChon = namChon;
             ViewBag.ThangChon = thangChon;
@@ -165,6 +178,11 @@ namespace QLyDatPhongKhachSan.Controllers
             // Lưu cả chi tiết đã hủy để thống kê số lượt hủy, nhưng các con số
             // doanh thu bên dưới chỉ cộng những chi tiết còn hiệu lực.
             var chiTietsHieuLuc = chiTietsThang.Where(ct => ct.TrangThai != "DaHuy").ToList();
+
+            // Any(): tháng/năm đang chọn có phát sinh giao dịch nào không?
+            // Dùng để báo cho người dùng biết chính xác vì sao báo cáo rỗng,
+            // thay vì chỉ hiện mấy con số 0 không giải thích được.
+            ViewBag.CoDuLieuKyChon = chiTietsHieuLuc.Any();
 
             ViewBag.DoanhThuKyChon = chiTietsHieuLuc.Sum(ct => ct.ThanhTien);
             ViewBag.SoLuotDatKyChon = chiTietsHieuLuc.Count;
