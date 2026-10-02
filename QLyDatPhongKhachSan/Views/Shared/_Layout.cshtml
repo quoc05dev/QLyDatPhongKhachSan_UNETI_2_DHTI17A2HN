@@ -43,6 +43,16 @@
                                 <i class="bi bi-concierge-bell me-1"></i>Dịch vụ
                             </a>
                         </li>
+                        @* Module 4 - Sinh viên 22103100118: menu Tiếp nhận đặt phòng *@
+                        @if (Context.Session.IsLoggedIn() &&
+                            (Context.Session.GetVaiTro() == "Admin" || Context.Session.GetVaiTro() == "NhanVien"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="QuanLyDatPhong" asp-action="Index">
+                                    <i class="bi bi-calendar2-check me-1"></i>Tiếp nhận đặt phòng
+                                </a>
+                            </li>
+                        }
                         @* Module 5 - Sinh viên 23103100069: menu Thống kê chỉ hiện cho Admin và Nhân viên *@
                         @if (Context.Session.IsLoggedIn() &&
                             (Context.Session.GetVaiTro() == "Admin" || Context.Session.GetVaiTro() == "NhanVien"))
