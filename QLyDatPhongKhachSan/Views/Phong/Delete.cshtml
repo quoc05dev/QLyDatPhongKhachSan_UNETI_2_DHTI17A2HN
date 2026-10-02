@@ -71,6 +71,13 @@ else
         <dd class="col-sm-9">
             @Html.DisplayFor(model => model.TrangThai)
         </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.GhiChuBaoTri)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.GhiChuBaoTri)
+        </dd>
     </dl>
     
     <form asp-action="Delete" asp-route-id="@Model.MaPhong" method="post">
