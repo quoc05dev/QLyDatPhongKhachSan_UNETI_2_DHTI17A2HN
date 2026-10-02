@@ -11,9 +11,15 @@
 
 <h1>Danh sách phòng</h1>
 
-<p>
+<div class="d-flex justify-content-between mb-3">
     <a asp-action="Create" class="btn btn-primary">Thêm phòng</a>
-</p>
+
+    <form method="get" asp-action="Index" class="d-flex">
+        <input type="text" name="keyword" class="form-control me-2" value="@Model.Keyword" placeholder="Tìm theo số phòng hoặc loại phòng..." style="width: 300px;" />
+        <button type="submit" class="btn btn-success me-2">Tìm kiếm</button>
+        <a asp-action="Index" class="btn btn-secondary">Xóa tìm kiếm</a>
+    </form>
+</div>
 
 @if (Model.Phongs != null && Model.Phongs.Any())
 {
@@ -56,6 +62,13 @@
 else
 {
     <div class="alert alert-info">
-        Chưa có dữ liệu phòng trong hệ thống.
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword))
+        {
+            <text>Không tìm thấy phòng phù hợp.</text>
+        }
+        else
+        {
+            <text>Chưa có dữ liệu phòng trong hệ thống.</text>
+        }
     </div>
 }

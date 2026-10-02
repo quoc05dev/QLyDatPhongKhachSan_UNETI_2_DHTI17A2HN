@@ -23,12 +23,26 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? keyword)
         {
-            var phongs = await _context.Phongs.Include(p => p.LoaiPhong).AsNoTracking().ToListAsync();
+            var query = _context.Phongs
+                .Include(p => p.LoaiPhong)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim();
+                query = query.Where(p =>
+                    p.SoPhong.Contains(keyword) ||
+                    (p.LoaiPhong != null && p.LoaiPhong.TenLoai.Contains(keyword)));
+            }
+
+            var phongs = await query.ToListAsync();
             var viewModel = new PhongListViewModel
             {
-                Phongs = phongs
+                Phongs = phongs,
+                Keyword = keyword
             };
             return View(viewModel);
         }
