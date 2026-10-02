@@ -35,7 +35,11 @@ namespace QLyDatPhongKhachSan.Controllers
                 keyword = keyword.Trim();
                 query = query.Where(p =>
                     p.SoPhong.Contains(keyword) ||
-                    (p.LoaiPhong != null && p.LoaiPhong.TenLoai.Contains(keyword)));
+                    (p.LoaiPhong != null && p.LoaiPhong.TenLoai.Contains(keyword)) ||
+                    p.ChiTietDatPhongs.Any(ct =>
+                        ct.DatPhong != null &&
+                        ct.DatPhong.KhachHang != null &&
+                        ct.DatPhong.KhachHang.HoTen.Contains(keyword)));
             }
 
             var phongs = await query.ToListAsync();
