@@ -4,6 +4,29 @@
 
 @{
     ViewData["Title"] = "Chi tiết đặt phòng #" + Model.MaDatPhong;
+
+    // Helper map trạng thái sang tiếng Việt
+    string MapTrangThai(string? tt) => tt switch
+    {
+        "ChoXuLy" => "Chờ xử lý",
+        "DangXuLy" => "Đang xử lý",
+        "DaXacNhan" => "Đã xác nhận",
+        "DangSuDung" => "Đang ở",
+        "HoanThanh" => "Hoàn thành",
+        "DaHuy" => "Đã hủy",
+        _ => tt ?? "Không rõ"
+    };
+
+    string BadgeClass(string? tt) => tt switch
+    {
+        "ChoXuLy" => "bg-warning text-dark",
+        "DangXuLy" => "bg-secondary",
+        "DaXacNhan" => "bg-info text-dark",
+        "DangSuDung" => "bg-primary",
+        "HoanThanh" => "bg-success",
+        "DaHuy" => "bg-danger",
+        _ => "bg-secondary"
+    };
 }
 
 <div class="container mt-4">
@@ -21,11 +44,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle-fill"></i> @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <div class="card shadow">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">ĐƠN ĐẶT PHÒNG #@Model.MaDatPhong</h5>
-            <span>Trạng thái: <strong>@Model.TrangThai</strong></span>
+            <span class="badge @BadgeClass(Model.TrangThai) fs-6">@MapTrangThai(Model.TrangThai)</span>
         </div>
         <div class="card-body">
             <div class="row mb-3">
@@ -37,12 +67,25 @@
                 </div>
                 <div class="col-md-6">
                     <h6>Thông tin lưu trú:</h6>
-                    <p class="mb-1"><strong>Ngày nhận phòng:</strong> @Model.NgayNhan.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Ngày nhận phòng (dự kiến):</strong> @Model.NgayNhan.ToString("dd/MM/yyyy HH:mm")</p>
                     <p class="mb-1"><strong>Ngày trả dự kiến:</strong> @Model.NgayTraDuKien.ToString("dd/MM/yyyy HH:mm")</p>
                     <p class="mb-1"><strong>Số người:</strong> @Model.SoNguoi người</p>
                     <p class="mb-1"><strong>Tiền cọc:</strong> @Model.TienCoc.ToString("N0") VNĐ</p>
+                    @if (Model.TongTien > 0)
+                    {
+                        <p class="mb-1"><strong>Tổng tiền:</strong> <span class="text-success fw-bold fs-5">@Model.TongTien.ToString("N0") VNĐ</span></p>
+                    }
                 </div>
             </div>
+
+            @* Hiển thị Ghi chú / Lý do hủy nếu có *@
+            @if (!string.IsNullOrWhiteSpace(Model.GhiChu))
+            {
+                <div class="alert @(Model.TrangThai == "DaHuy" ? "alert-danger" : "alert-secondary") py-2 mb-3">
+                    <strong><i class="bi bi-chat-left-text"></i> Ghi chú:</strong> @Model.GhiChu
+                </div>
+            }
 
             <h6>Danh sách phòng chỉ định:</h6>
             <table class="table table-bordered mb-4">
@@ -52,6 +95,11 @@
                         <th>Loại phòng</th>
                         <th>Tầng</th>
                         <th>Đơn giá</th>
+                        <th>Ngày nhận TT</th>
+                        <th>Ngày trả TT</th>
+                        <th>Số ngày</th>
+                        <th>Thành tiền</th>
+                        <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,24 +110,72 @@
                             <td>@ct.Phong?.LoaiPhong?.TenLoai</td>
                             <td>@ct.Phong?.Tang</td>
                             <td>@ct.DonGia.ToString("N0") VNĐ</td>
+                            <td>@(ct.NgayNhan != default ? ct.NgayNhan.ToString("dd/MM/yyyy HH:mm") : "—")</td>
+                            <td>@(ct.NgayTra != default ? ct.NgayTra.ToString("dd/MM/yyyy HH:mm") : "—")</td>
+                            <td>@(ct.SoNgay > 0 ? ct.SoNgay.ToString() : "—")</td>
+                            <td>@(ct.ThanhTien > 0 ? ct.ThanhTien.ToString("N0") + " VNĐ" : "—")</td>
+                            <td>
+                                @switch (ct.TrangThai)
+                                {
+                                    case "ChoNhan":
+                                        <span class="badge bg-secondary">Chờ nhận</span>
+                                        break;
+                                    case "DaNhan":
+                                        <span class="badge bg-primary">Đã nhận</span>
+                                        break;
+                                    case "DaTra":
+                                        <span class="badge bg-success">Đã trả</span>
+                                        break;
+                                    case "DaHuy":
+                                        <span class="badge bg-danger">Đã hủy</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@ct.TrangThai</span>
+                                        break;
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
+                @if (Model.TongTien > 0)
+                {
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="7" class="text-end fw-bold">Tổng cộng:</td>
+                            <td class="fw-bold text-success">@Model.TongTien.ToString("N0") VNĐ</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
 
             <!-- KHU VỰC THAO TÁC LUỒNG TRẠNG THÁI -->
-            <div class="border-top pt-3 d-flex gap-2">
+            <div class="border-top pt-3 d-flex gap-2 flex-wrap">
+                @* Bước 1 — Tiếp nhận đơn: ChoXuLy → DangXuLy *@
                 @if (Model.TrangThai == "ChoXuLy")
                 {
-                    <form asp-action="DuyetDatPhong" method="post">
+                    <form asp-action="TiepNhanDon" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg"></i> Duyệt đơn đặt phòng
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="bi bi-clipboard-check"></i> Tiếp nhận đơn
                         </button>
                     </form>
                 }
 
+                @* Bước 2 — Xác nhận đơn: DangXuLy → DaXacNhan *@
+                @if (Model.TrangThai == "DangXuLy")
+                {
+                    <form asp-action="XacNhanDatPhong" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Xác nhận đặt phòng
+                        </button>
+                    </form>
+                }
+
+                @* Bước 3 — Nhận phòng (Check-in): DaXacNhan → DangSuDung *@
                 @if (Model.TrangThai == "DaXacNhan")
                 {
                     <form asp-action="CheckIn" method="post">
@@ -91,7 +187,8 @@
                     </form>
                 }
 
-                @if (Model.TrangThai == "DangXuLy")
+                @* Bước 4 — Trả phòng (Check-out): DangSuDung → HoanThanh *@
+                @if (Model.TrangThai == "DangSuDung")
                 {
                     <form asp-action="CheckOut" method="post">
                         @Html.AntiForgeryToken()
@@ -102,7 +199,16 @@
                     </form>
                 }
 
-                @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DaXacNhan")
+                @* Từ chối — cho ChoXuLy và DangXuLy *@
+                @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DangXuLy")
+                {
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalTuChoi">
+                        <i class="bi bi-x-lg"></i> Từ chối
+                    </button>
+                }
+
+                @* Hủy — cho ChoXuLy, DangXuLy, DaXacNhan *@
+                @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DangXuLy" || Model.TrangThai == "DaXacNhan")
                 {
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalHuy">
                         <i class="bi bi-x-circle"></i> Hủy đặt phòng
@@ -133,6 +239,30 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                     <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal xác nhận lý do từ chối -->
+<div class="modal fade" id="modalTuChoi" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="TuChoiDatPhong" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Từ chối đơn đặt phòng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Lý do từ chối:</label>
+                    <textarea name="lyDoTuChoi" class="form-control" rows="3" required placeholder="Nhập lý do từ chối đơn..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-outline-danger">Xác nhận từ chối</button>
                 </div>
             </div>
         </form>
