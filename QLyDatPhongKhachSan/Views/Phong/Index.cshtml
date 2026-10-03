@@ -15,7 +15,7 @@
     <a asp-action="Create" class="btn btn-primary">Thêm phòng</a>
 
     <form method="get" asp-action="Index" class="d-flex">
-        <input type="text" name="keyword" class="form-control me-2" value="@Model.Keyword" placeholder="Tìm theo số phòng hoặc loại phòng..." style="width: 300px;" />
+        <input type="text" name="keyword" class="form-control me-2" value="@Model.Keyword" placeholder="Tìm theo số phòng, loại phòng hoặc tên khách hàng..." style="width: 400px;" />
         <button type="submit" class="btn btn-success me-2">Tìm kiếm</button>
         <a asp-action="Index" class="btn btn-secondary">Xóa tìm kiếm</a>
     </form>
