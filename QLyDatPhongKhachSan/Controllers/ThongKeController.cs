@@ -67,7 +67,9 @@ namespace QLyDatPhongKhachSan.Controllers
                 SoPhongDangSuDung = phongs.Count(p => p.TrangThai == "DangSuDung"),
                 SoPhongBaoTri = phongs.Count(p => p.TrangThai == "BaoTri"),
                 TongKhachHang = _context.KhachHangs.AsNoTracking().Count(),
-                TongDonDatPhong = datPhongs.Count,
+                // Tổng số giao dịch theo đề là TẤT CẢ các đơn, kể cả đơn đã hủy
+                // (đơn đã hủy được thống kê riêng ở thẻ "Đơn đã hủy" bên dưới).
+                TongDonDatPhong = _context.DatPhongs.AsNoTracking().Count(),
                 DonChoXuLy = datPhongs.Count(dp => dp.TrangThai == "ChoXuLy"),
                 DonDangXuLy = datPhongs.Count(dp => dp.TrangThai == "DangXuLy"),
                 DonHoanThanh = datPhongs.Count(dp => dp.TrangThai == "HoanThanh"),

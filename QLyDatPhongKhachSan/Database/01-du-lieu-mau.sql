@@ -227,6 +227,16 @@ BEGIN
         DECLARE @NgayNhan DATE = DATEADD(DAY, @i - 1, @NgayDau);
         DECLARE @NgayTra DATE = DATEADD(DAY, 2, @NgayNhan);
 
+        -- Sức chứa của phòng sẽ được gán cho đơn này. Mục 7 gán phòng xoay vòng
+        -- theo MaDatPhong, nên lấy đúng công thức đó để số người không bao giờ
+        -- vượt quá sức chứa (vượt thì Module 4 sẽ chặn xác nhận đơn).
+        DECLARE @SucChua INT = (
+            SELECT TOP 1 l.SoNguoiToiDa
+            FROM Phong p
+            INNER JOIN LoaiPhong l ON l.MaLoaiPhong = p.MaLoaiPhong
+            WHERE p.MaPhong = ((@MaDon - 1) % 18) + 1
+        );
+
         INSERT INTO DatPhong (MaDatPhong, MaKhachHang, NgayDat, NgayNhan, NgayTraDuKien, SoNguoi, TienCoc, TongTien, TrangThai, GhiChu)
         VALUES
         (
@@ -235,7 +245,11 @@ BEGIN
             DATEADD(DAY, -@Lech, @NgayNhan),
             @NgayNhan,
             @NgayTra,
-            CASE WHEN @i % 4 = 0 THEN 3 WHEN @i % 3 = 0 THEN 2 ELSE 1 END,
+            CASE
+                WHEN 3 <= @SucChua THEN CASE WHEN @i % 4 = 0 THEN 3 WHEN @i % 3 = 0 THEN 2 ELSE 1 END
+                WHEN 2 <= @SucChua THEN 2
+                ELSE 1
+            END,
             500000.00,
             0,
             @TrangThai,
