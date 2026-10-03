@@ -7,28 +7,58 @@
 }
 
 <div class="container-fluid mt-3">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle-fill"></i> @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <h3 class="text-primary mb-3"><i class="bi bi-journal-check"></i> TIẾP NHẬN & QUẢN LÝ ĐẶT PHÒNG</h3>
 
     <!-- BỘ LỌC TÌM KIẾM -->
     <div class="card mb-3 shadow-sm">
         <div class="card-body">
             <form method="get" asp-action="Index" class="row g-2">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên khách, SĐT, Mã đơn..." />
                 </div>
                 <div class="col-md-2">
                     <select name="trangThai" class="form-select">
                         <option value="">-- Tất cả trạng thái --</option>
                         <option value="ChoXuLy" selected="@(Model.TrangThai == "ChoXuLy")">Chờ xử lý</option>
+                        <option value="DangXuLy" selected="@(Model.TrangThai == "DangXuLy")">Đang xử lý</option>
                         <option value="DaXacNhan" selected="@(Model.TrangThai == "DaXacNhan")">Đã xác nhận</option>
-                        <option value="DangXuLy" selected="@(Model.TrangThai == "DangXuLy")">Đang ở</option>
+                        <option value="DangSuDung" selected="@(Model.TrangThai == "DangSuDung")">Đang ở</option>
                         <option value="HoanThanh" selected="@(Model.TrangThai == "HoanThanh")">Hoàn thành</option>
                         <option value="DaHuy" selected="@(Model.TrangThai == "DaHuy")">Đã hủy</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <select name="maLoaiPhong" asp-items="ViewBag.LoaiPhongs" class="form-select">
+                    <select name="maLoaiPhong" class="form-select">
                         <option value="">-- Tất cả loại phòng --</option>
+                        @if (ViewBag.LoaiPhongs != null)
+                        {
+                            foreach (SelectListItem item in ViewBag.LoaiPhongs)
+                            {
+                                <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -37,6 +67,7 @@
                 <div class="col-md-2">
                     <input type="date" name="denNgay" value="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" class="form-control" title="Đến ngày nhận" />
                 </div>
+                <input type="hidden" name="sapXep" value="@Model.SapXep" />
                 <div class="col-md-1">
                     <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Lọc</button>
                 </div>
@@ -54,7 +85,18 @@
                         <th>Khách hàng</th>
                         <th>Số điện thoại</th>
                         <th>Phòng gán</th>
-                        <th>Ngày nhận</th>
+                        <th>
+                            <a asp-action="Index"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-trangThai="@Model.TrangThai"
+                               asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                               asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))"
+                               asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))"
+                               asp-route-sapXep="@(Model.SapXep == "ngaynhan_asc" ? "ngaynhan_desc" : "ngaynhan_asc")"
+                               class="text-dark text-decoration-none">
+                                Ngày nhận <i class="bi @(Model.SapXep == "ngaynhan_asc" ? "bi-sort-up" : Model.SapXep == "ngaynhan_desc" ? "bi-sort-down" : "bi-arrow-down-up")"></i>
+                            </a>
+                        </th>
                         <th>Ngày trả DK</th>
                         <th>Trạng thái</th>
                         <th class="text-center">Thao tác</th>
@@ -83,10 +125,13 @@
                                         case "ChoXuLy":
                                             <span class="badge bg-warning text-dark">Chờ xử lý</span>
                                             break;
+                                        case "DangXuLy":
+                                            <span class="badge bg-secondary">Đang xử lý</span>
+                                            break;
                                         case "DaXacNhan":
                                             <span class="badge bg-info text-dark">Đã xác nhận</span>
                                             break;
-                                        case "DangXuLy":
+                                        case "DangSuDung":
                                             <span class="badge bg-primary">Đang ở</span>
                                             break;
                                         case "HoanThanh":
@@ -131,7 +176,8 @@
                            asp-route-trangThai="@Model.TrangThai"
                            asp-route-maLoaiPhong="@Model.MaLoaiPhong"
                            asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))"
-                           asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))">Trước</a>
+                           asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))"
+                           asp-route-sapXep="@Model.SapXep">Trước</a>
                     </li>
                     @for (int i = 1; i <= Model.TongSoTrang; i++)
                     {
@@ -142,7 +188,8 @@
                                asp-route-trangThai="@Model.TrangThai"
                                asp-route-maLoaiPhong="@Model.MaLoaiPhong"
                                asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))"
-                               asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))">@i</a>
+                               asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))"
+                               asp-route-sapXep="@Model.SapXep">@i</a>
                         </li>
                     }
                     <li class="page-item @(Model.TrangHienTai == Model.TongSoTrang ? "disabled" : "")">
@@ -152,11 +199,11 @@
                            asp-route-trangThai="@Model.TrangThai"
                            asp-route-maLoaiPhong="@Model.MaLoaiPhong"
                            asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))"
-                           asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))">Sau</a>
+                           asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))"
+                           asp-route-sapXep="@Model.SapXep">Sau</a>
                     </li>
                 </ul>
             </div>
         }
     </div>
-</div>
 </div>

@@ -1,5 +1,5 @@
 // Ho va ten: Nguyen Hai Nam
-// Ma sinh vien: 23103100118
+// Ma sinh vien: 22103100118
 // Noi dung: ViewModel chua bo loc, tim kiem va phan trang
 
 using System;
