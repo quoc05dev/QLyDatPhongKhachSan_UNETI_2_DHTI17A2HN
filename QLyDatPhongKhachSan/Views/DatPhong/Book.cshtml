@@ -1,0 +1,278 @@
+@*
+// ==========================================
+// Họ và tên: Anh Tuấn
+// Mã sinh viên: 23103100086
+// Nội dung thực hiện: Module 3 - Giao diện đặt phòng (Book) kèm tính toán chi phí realtime
+// ==========================================
+*@
+
+@model QLyDatPhongKhachSan.ViewModels.DatPhongCreateViewModel
+@{
+    ViewData["Title"] = $"Đặt phòng {Model.SoPhong}";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Phong" asp-action="Index">Danh sách phòng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Đặt phòng @Model.SoPhong</li>
+        </ol>
+    </nav>
+
+    <!-- Thông báo lỗi chung nếu có -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <span class="fs-4 me-3">⚠️</span>
+            <div class="flex-grow-1">
+                <strong>Thông báo:</strong> @TempData["ErrorMessage"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="Book" method="post" id="formDatPhong" novalidate>
+        @Html.AntiForgeryToken()
+
+        <!-- Validation Summary -->
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small shadow-sm" role="alert"></div>
+
+        <!-- Hidden Fields giữ thông tin phòng -->
+        <input type="hidden" asp-for="MaPhong" />
+        <input type="hidden" asp-for="SoPhong" />
+        <input type="hidden" asp-for="TenLoaiPhong" />
+        <input type="hidden" asp-for="DonGia" id="txtDonGia" />
+        <input type="hidden" asp-for="SoNguoiToiDa" id="txtSoNguoiToiDa" />
+        <input type="hidden" asp-for="Tang" />
+        <input type="hidden" asp-for="HuongPhong" />
+        <input type="hidden" asp-for="TienNghi" />
+
+        <div class="row g-4">
+            <!-- Cột trái: Form nhập thông tin đặt phòng -->
+            <div class="col-lg-8">
+                <!-- 1. Thông tin người đặt -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-3">👤 1. Thông tin người đặt phòng</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="HoTenKhachHang" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.HoTenKhachHang) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="HoTenKhachHang" class="form-control" placeholder="Nguyễn Văn A" />
+                            <span asp-validation-for="HoTenKhachHang" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SoDienThoai" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.SoDienThoai) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="SoDienThoai" class="form-control" placeholder="0987111222" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CCCD" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.CCCD) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="CCCD" class="form-control" placeholder="Số CCCD hoặc Hộ chiếu" />
+                            <span asp-validation-for="CCCD" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.Email)
+                            </label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="example@email.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Thông tin lịch ở & Yêu cầu -->
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold text-primary mb-3">📅 2. Thời gian lưu trú & Số lượng khách</h5>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NgayNhan" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.NgayNhan) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="NgayNhan" type="date" class="form-control" id="dtNgayNhan" 
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="NgayNhan" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NgayTraDuKien" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.NgayTraDuKien) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="NgayTraDuKien" type="date" class="form-control" id="dtNgayTra" 
+                                   min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="NgayTraDuKien" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="SoNguoi" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.SoNguoi) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">👥</span>
+                                <input asp-for="SoNguoi" type="number" min="1" max="@Model.SoNguoiToiDa" class="form-control" />
+                            </div>
+                            <div class="form-text small text-muted">
+                                Sức chứa tối đa: <strong class="text-primary">@Model.SoNguoiToiDa người</strong>
+                            </div>
+                            <span asp-validation-for="SoNguoi" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TienCoc" class="form-label fw-semibold">
+                                @Html.DisplayNameFor(m => m.TienCoc)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">💳</span>
+                                <input asp-for="TienCoc" type="number" step="50000" min="0" class="form-control" id="txtTienCoc" />
+                                <span class="input-group-text">VNĐ</span>
+                            </div>
+                            <div class="form-text small text-muted">Khách có thể đặt cọc trước (hoặc để 0 thanh toán khi nhận phòng)</div>
+                            <span asp-validation-for="TienCoc" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="GhiChu" class="form-label fw-semibold">
+                            @Html.DisplayNameFor(m => m.GhiChu)
+                        </label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="3" 
+                                  placeholder="Ghi chú về giờ check-in dự kiến, yêu cầu giường phụ, phòng không hút thuốc..."></textarea>
+                        <span asp-validation-for="GhiChu" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Tóm tắt thông tin phòng & Tính tiền -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 20px;">
+                    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">🏨 Thông tin phòng</h5>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                             style="width: 55px; height: 55px; font-size: 1.5rem; font-weight: bold;">
+                            @Model.SoPhong
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Phòng @Model.SoPhong</h5>
+                            <span class="badge bg-primary-subtle text-primary">@Model.TenLoaiPhong</span>
+                        </div>
+                    </div>
+
+                    <ul class="list-unstyled small text-muted mb-3">
+                        <li class="mb-1">📍 <strong>Vị trí:</strong> Tầng @Model.Tang @(!string.IsNullOrEmpty(Model.HuongPhong) ? $" - Hướng {Model.HuongPhong}" : "")</li>
+                        <li class="mb-1">👥 <strong>Sức chứa:</strong> Tối đa @Model.SoNguoiToiDa người lớn</li>
+                        @if (!string.IsNullOrEmpty(Model.TienNghi))
+                        {
+                            <li class="mb-1">✨ <strong>Tiện nghi:</strong> @Model.TienNghi</li>
+                        }
+                    </ul>
+
+                    <hr class="text-muted opacity-25" />
+
+                    <!-- Bảng tạm tính chi phí -->
+                    <h6 class="fw-bold text-dark mb-3">💵 Chi phí tạm tính</h6>
+                    <div class="d-flex justify-content-between small text-muted mb-2">
+                        <span>Đơn giá ngày:</span>
+                        <strong class="text-dark">@Model.DonGia.ToString("N0") VNĐ</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-2">
+                        <span>Số đêm lưu trú:</span>
+                        <strong class="text-dark"><span id="lblSoDem">1</span> đêm</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-2">
+                        <span>Tiền đặt cọc:</span>
+                        <span id="lblTienCoc" class="text-success fw-bold">0 VNĐ</span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mt-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-dark">Tổng tiền phòng:</span>
+                            <span class="fs-5 fw-bold text-primary" id="lblTongTien">@Model.DonGia.ToString("N0") VNĐ</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                            <span>Còn lại khi nhận phòng:</span>
+                            <span class="fw-bold text-danger" id="lblConLai">@Model.DonGia.ToString("N0") VNĐ</span>
+                        </div>
+                    </div>
+
+                    <!-- Nút thao tác -->
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm mb-2">
+                        ✅ Xác nhận đặt phòng
+                    </button>
+                    <a asp-controller="Phong" asp-action="Index" class="btn btn-outline-secondary w-100">
+                        ⬅️ Chọn phòng khác
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dtNgayNhan = document.getElementById("dtNgayNhan");
+            const dtNgayTra = document.getElementById("dtNgayTra");
+            const txtTienCoc = document.getElementById("txtTienCoc");
+            const donGia = parseFloat(document.getElementById("txtDonGia").value) || 0;
+
+            const lblSoDem = document.getElementById("lblSoDem");
+            const lblTongTien = document.getElementById("lblTongTien");
+            const lblTienCoc = document.getElementById("lblTienCoc");
+            const lblConLai = document.getElementById("lblConLai");
+
+            function formatVND(number) {
+                return new Intl.NumberFormat('vi-VN').format(Math.max(0, number)) + " VNĐ";
+            }
+
+            function tinhToanChiPhi() {
+                const nhan = new Date(dtNgayNhan.value);
+                const tra = new Date(dtNgayTra.value);
+
+                let soDem = 1;
+                if (!isNaN(nhan.getTime()) && !isNaN(tra.getTime())) {
+                    const diffTime = tra.getTime() - nhan.getTime();
+                    soDem = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                    if (soDem < 1) soDem = 1;
+                }
+
+                const tongTien = soDem * donGia;
+                let tienCoc = parseFloat(txtTienCoc.value) || 0;
+                if (tienCoc > tongTien) tienCoc = tongTien;
+                const conLai = tongTien - tienCoc;
+
+                lblSoDem.textContent = soDem;
+                lblTongTien.textContent = formatVND(tongTien);
+                lblTienCoc.textContent = formatVND(tienCoc);
+                lblConLai.textContent = formatVND(conLai);
+            }
+
+            dtNgayNhan.addEventListener("change", function () {
+                // Tự động gán ngày trả tối thiểu là ngày nhận + 1
+                if (dtNgayNhan.value) {
+                    const nextDay = new Date(dtNgayNhan.value);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    const formatted = nextDay.toISOString().split('T')[0];
+                    dtNgayTra.min = formatted;
+                    if (dtNgayTra.value <= dtNgayNhan.value) {
+                        dtNgayTra.value = formatted;
+                    }
+                }
+                tinhToanChiPhi();
+            });
+
+            dtNgayTra.addEventListener("change", tinhToanChiPhi);
+            txtTienCoc.addEventListener("input", tinhToanChiPhi);
+
+            tinhToanChiPhi();
+        });
+    </script>
+}
