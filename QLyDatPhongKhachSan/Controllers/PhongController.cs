@@ -23,7 +23,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong
-        public async Task<IActionResult> Index(string? keyword)
+        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai)
         {
             var query = _context.Phongs
                 .Include(p => p.LoaiPhong)
@@ -42,11 +42,42 @@ namespace QLyDatPhongKhachSan.Controllers
                         ct.DatPhong.KhachHang.HoTen.Contains(keyword)));
             }
 
+            if (maLoaiPhong.HasValue)
+            {
+                query = query.Where(p => p.MaLoaiPhong == maLoaiPhong);
+            }
+
+            if (tang.HasValue)
+            {
+                query = query.Where(p => p.Tang == tang);
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                query = query.Where(p => p.TrangThai == trangThai);
+            }
+
             var phongs = await query.ToListAsync();
+
+            var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
+            var trangThaiList = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Trong", Text = "Trong" },
+                new SelectListItem { Value = "DangXuLy", Text = "DangXuLy" },
+                new SelectListItem { Value = "DaDat", Text = "DaDat" },
+                new SelectListItem { Value = "DangSuDung", Text = "DangSuDung" },
+                new SelectListItem { Value = "BaoTri", Text = "BaoTri" }
+            };
+
             var viewModel = new PhongListViewModel
             {
                 Phongs = phongs,
-                Keyword = keyword
+                Keyword = keyword,
+                MaLoaiPhong = maLoaiPhong,
+                Tang = tang,
+                TrangThai = trangThai,
+                LoaiPhongList = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", maLoaiPhong),
+                TrangThaiList = new SelectList(trangThaiList, "Value", "Text", trangThai)
             };
             return View(viewModel);
         }
