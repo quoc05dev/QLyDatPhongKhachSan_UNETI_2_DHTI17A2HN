@@ -22,6 +22,11 @@ namespace QLyDatPhongKhachSan.Filters
         {
             var session = context.HttpContext.Session;
 
+            // Thêm Anti-Cache Headers cho các trang yêu cầu bảo mật đăng nhập
+            context.HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            context.HttpContext.Response.Headers["Pragma"] = "no-cache";
+            context.HttpContext.Response.Headers["Expires"] = "0";
+
             // 1. Kiểm tra chưa đăng nhập -> Chuyển hướng về Login
             if (!session.IsLoggedIn())
             {
