@@ -1,7 +1,7 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Layout chung tích hợp Bootstrap Icons, Navbar phân quyền & Session (Tông màu Navy / Platinum sang trọng).
+    Nội dung thực hiện: Giao diện Layout chung tích hợp Bootstrap Icons, Navbar phân quyền & Sticky Footer luôn cố định chân trang.
 *@
 @using QLyDatPhongKhachSan.Helpers
 <!DOCTYPE html>
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QLyDatPhongKhachSan.styles.css" asp-append-version="true" />
 </head>
-<body class="bg-light-subtle">
+<body class="bg-light-subtle d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-lg mb-4 py-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;">
             <div class="container-fluid px-4">
@@ -108,13 +108,13 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container flex-grow-1">
         <main role="main" class="pb-5">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-dark text-white-50 py-4 mt-5">
+    <footer class="footer border-top text-white-50 bg-dark py-4 mt-auto" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;">
         <div class="container text-center">
             <small>&copy; 2026 - UNETI Grand Hotel & Spa - Hệ thống Quản lý Đặt phòng Khách sạn</small>
         </div>
