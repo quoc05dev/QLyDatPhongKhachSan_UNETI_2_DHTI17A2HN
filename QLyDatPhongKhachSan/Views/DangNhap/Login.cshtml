@@ -1,26 +1,32 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Đăng nhập hệ thống Quản lý Đặt phòng Khách sạn.
+    Nội dung thực hiện: Giao diện Đăng nhập hệ thống UI/UX 2026 hiện đại, hỗ trợ kiểm thử nhanh theo vai trò.
 *@
 @model QLyDatPhongKhachSan.ViewModels.LoginViewModel
 
 @{
-    ViewData["Title"] = "Đăng nhập";
+    ViewData["Title"] = "Đăng nhập hệ thống";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow-lg border-0 rounded-4">
-            <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
-                <h3 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i>ĐĂNG NHẬP</h3>
-                <small class="text-white-50">Hệ thống Quản lý Khách sạn UNETI</small>
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-6 col-lg-5">
+        <!-- Bento Card Layout UI 2026 -->
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-gradient bg-primary text-white text-center py-4 border-0">
+                <div class="mb-2">
+                    <span class="p-3 bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center">
+                        <i class="bi bi-person-circle fs-1 text-white"></i>
+                    </span>
+                </div>
+                <h3 class="fw-bold mb-1">ĐĂNG NHẬP HỆ THỐNG</h3>
+                <p class="text-white-50 mb-0 small">Quản lý Đặt phòng Khách sạn UNETI</p>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-4 p-md-5">
 
                 @if (TempData["SuccessMessage"] != null)
                 {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
                         <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -28,8 +34,8 @@
 
                 @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
                 {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 fw-bold"></i>
                         @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
                         {
                             <div>@error.ErrorMessage</div>
@@ -40,52 +46,90 @@
 
                 <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
                     <div class="mb-3">
-                        <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold text-secondary"></label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                            <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập..." autofocus />
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="bi bi-person-fill"></i></span>
+                            <input asp-for="TenDangNhap" id="inputTenDangNhap" class="form-control border-start-0 ps-0" placeholder="Nhập tên đăng nhập..." autofocus />
                         </div>
                         <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="MatKhau" class="form-label fw-semibold"></label>
+                        <label asp-for="MatKhau" class="form-label fw-semibold text-secondary"></label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                            <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu..." />
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="bi bi-lock-fill"></i></span>
+                            <input asp-for="MatKhau" id="inputMatKhau" class="form-control border-start-0 ps-0" placeholder="Nhập mật khẩu..." />
                         </div>
                         <span asp-validation-for="MatKhau" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label text-secondary"></label>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label text-secondary small"></label>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2 mb-3">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold shadow-sm py-3">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>ĐĂNG NHẬP NGAY
                         </button>
                     </div>
                 </form>
 
-                <div class="text-center mt-3 pt-3 border-top">
-                    <p class="mb-0 text-muted">Chưa có tài khoản khách hàng?</p>
-                    <a asp-action="Register" class="fw-bold text-decoration-none text-primary">Đăng ký ngay bây giờ</a>
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="mb-1 text-secondary small">Chưa có tài khoản khách hàng?</p>
+                    <a asp-action="Register" class="fw-bold text-decoration-none text-primary">
+                        <i class="bi bi-person-plus-fill me-1"></i>Đăng ký tài khoản Khách hàng mới
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="card mt-3 border-0 bg-light text-center p-3 shadow-sm">
-            <small class="text-muted fw-bold">Tài khoản demo kiểm thử:</small>
-            <small class="text-secondary">Admin: <code>admin</code> / <code>123456</code></small>
-            <small class="text-secondary">Nhân viên: <code>nhanvien</code> / <code>123456</code></small>
-            <small class="text-secondary">Khách hàng: <code>khachhang</code> / <code>123456</code></small>
-            <small class="text-danger">Bị khóa: <code>khoa</code> / <code>123456</code></small>
+        <!-- Bento Grid Interactive Quick Test Controls for Management Review -->
+        <div class="card mt-4 border-0 shadow-sm rounded-4 bg-white p-3">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-lightning-charge-fill text-warning me-2 fs-5"></i>
+                <span class="fw-bold text-dark small">BỘ CHỌN NHANH TÀI KHOẢN DEMO KIỂM THỬ UI (SV1)</span>
+            </div>
+            <p class="text-muted small mb-3">Bấm nút bên dưới để tự động điền tài khoản mẫu vào form:</p>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <button type="button" class="btn btn-sm btn-outline-danger w-100 text-start py-2 px-3 rounded-3" onclick="fillCredentials('admin', '123456')">
+                        <div class="fw-bold"><i class="bi bi-shield-lock-fill me-1"></i>1. Admin</div>
+                        <small class="text-muted">admin / 123456</small>
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-sm btn-outline-info w-100 text-start py-2 px-3 rounded-3" onclick="fillCredentials('nhanvien', '123456')">
+                        <div class="fw-bold"><i class="bi bi-person-badge-fill me-1"></i>2. Nhân viên</div>
+                        <small class="text-muted">nhanvien / 123456</small>
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100 text-start py-2 px-3 rounded-3" onclick="fillCredentials('khachhang', '123456')">
+                        <div class="fw-bold"><i class="bi bi-person-fill me-1"></i>3. Khách hàng</div>
+                        <small class="text-muted">khachhang / 123456</small>
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-sm btn-outline-warning w-100 text-start py-2 px-3 rounded-3" onclick="fillCredentials('khoa', '123456')">
+                        <div class="fw-bold text-danger"><i class="bi bi-slash-circle-fill me-1"></i>4. Bị khóa</div>
+                        <small class="text-danger">khoa / 123456</small>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function fillCredentials(username, password) {
+            document.getElementById('inputTenDangNhap').value = username;
+            document.getElementById('inputMatKhau').value = password;
+        }
+    </script>
 }
