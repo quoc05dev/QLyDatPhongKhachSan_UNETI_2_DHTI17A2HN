@@ -114,23 +114,34 @@ namespace QLyDatPhongKhachSan.ViewModels
         public string? GhiChu { get; set; }
 
         /// <summary>
-        /// Chỉ cho phép hủy khi đơn ở trạng thái 'ChoXuLy'
+        /// Cho phép hủy khi đơn ở trạng thái 'ChoXuLy' hoặc 'DangXuLy'
         /// </summary>
-        public bool CoTheHuy => TrangThai == "ChoXuLy";
+        public bool CoTheHuy => TrangThai == "ChoXuLy" || TrangThai == "DangXuLy";
     }
 
     /// <summary>
-    /// ViewModel cho trang danh sách lịch sử đặt phòng (/DatPhong/Index)
+    /// ViewModel cho trang danh sách lịch sử đặt phòng (/DatPhong/Index) kèm phân trang và sắp xếp
     /// </summary>
     public class DatPhongLichSuViewModel
     {
         public List<DatPhongItemViewModel> DanhSachDon { get; set; } = new List<DatPhongItemViewModel>();
         public string? TrangThaiFilter { get; set; }
+        public string? SortOrder { get; set; } = "date_desc";
+
+        // Thống kê nhanh theo trạng thái
         public int TongDon { get; set; }
         public int DonChoXuLy { get; set; }
         public int DonDaXacNhan { get; set; }
         public int DonHoanThanh { get; set; }
         public int DonDaHuy { get; set; }
+
+        // Phân trang (Mục 22 - De_15)
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; } = 1;
+        public int PageSize { get; set; } = 5;
+        public int TotalItems { get; set; }
+        public bool HasPreviousPage => CurrentPage > 1;
+        public bool HasNextPage => CurrentPage < TotalPages;
     }
 
     /// <summary>
@@ -144,6 +155,6 @@ namespace QLyDatPhongKhachSan.ViewModels
         public KhachHang? KhachHang { get; set; }
         public int SoNgayO { get; set; }
         public decimal ConLaiPhaiThanhToan => DatPhong != null ? Math.Max(0, DatPhong.TongTien - DatPhong.TienCoc) : 0;
-        public bool CoTheHuy => DatPhong != null && DatPhong.TrangThai == "ChoXuLy";
+        public bool CoTheHuy => DatPhong != null && (DatPhong.TrangThai == "ChoXuLy" || DatPhong.TrangThai == "DangXuLy");
     }
 }

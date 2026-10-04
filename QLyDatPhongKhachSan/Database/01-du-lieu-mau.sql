@@ -1,4 +1,4 @@
-﻿/* ============================================================================
+/* ============================================================================
    ĐỀ TÀI 15 - HỆ THỐNG QUẢN LÝ ĐẶT PHÒNG KHÁCH SẠN
    DỮ LIỆU MẪU PHỤC VỤ KIỂM THỬ (không phải CRUD bắt buộc)
 
@@ -78,7 +78,8 @@ VALUES
     (1, 'admin',     '123456', N'Quản Trị Viên',      'admin@hotel.com',     '0901234567', 'Admin',     1, '2026-01-05'),
     (2, 'nhanvien',  '123456', N'Nguyễn Thị Lan',     'nhanvien@hotel.com',  '0902345678', 'NhanVien',  1, '2026-01-05'),
     (3, 'khachhang', '123456', N'Lê Minh Anh',        'khachhang@gmail.com', '0903456789', 'KhachHang', 1, '2026-01-05'),
-    (4, 'khoa',      '123456', N'Tài Khoản Bị Khóa',  'khoa@gmail.com',      '0904567890', 'KhachHang', 0, '2026-01-05');
+    (4, 'khoa',      '123456', N'Tài Khoản Bị Khóa',  'khoa@gmail.com',      '0904567890', 'KhachHang', 0, '2026-01-05'),
+    (5, 'khachhang2','123456', N'Nguyễn Thị Bích',    'bich@gmail.com',      '0912000002', 'KhachHang', 1, '2026-01-05');
 
 SET IDENTITY_INSERT TaiKhoan OFF;
 GO
@@ -144,7 +145,7 @@ SET IDENTITY_INSERT KhachHang ON;
 INSERT INTO KhachHang (MaKhachHang, MaTaiKhoan, HoTen, NgaySinh, GioiTinh, CCCD, SoDienThoai, Email, DiaChi, QuocTich, TrangThai, GhiChu)
 VALUES
     ( 1, 3,    N'Lê Minh Anh',         '1990-05-12', N'Nam', '001095001234', '0912000001', 'leminhanh@gmail.com',  N'12 Nguyễn Huệ, Q.1, TP.HCM',      N'Việt Nam', 1, N'Khách quay lại nhiều lần'),
-    ( 2, NULL, N'Nguyễn Thị Bích',     '1988-11-03', N'Nữ',  '001088002345', '0912000002', NULL,                   N'45 Lê Lợi, Q.1, TP.HCM',          N'Việt Nam', 1, NULL),
+    ( 2, 5,    N'Nguyễn Thị Bích',     '1988-11-03', N'Nữ',  '001088002345', '0912000002', 'bich@gmail.com',        N'45 Lê Lợi, Q.1, TP.HCM',          N'Việt Nam', 1, NULL),
     ( 3, NULL, N'Trần Văn Hùng',       '1995-02-18', N'Nam', '001095003456', '0912000003', NULL,                   N'78 Nguyễn Trãi, Q.5, TP.HCM',     N'Việt Nam', 1, NULL),
     ( 4, NULL, N'Phạm Thị Dung',       '1993-07-25', N'Nữ',  '001093004567', '0912000004', NULL,                   N'23 Hai Bà Trưng, Q.1, TP.HCM',    N'Việt Nam', 1, N'Yêu cầu phòng tầng cao'),
     ( 5, NULL, N'Hoàng Minh Giang',    '1985-09-30', N'Nam', '001085005678', '0912000005', NULL,                   N'150 Võ Văn Tần, Q.3, TP.HCM',     N'Việt Nam', 1, NULL),
