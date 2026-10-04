@@ -1,8 +1,154 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Demo giao diện Trang chủ Khách sạn UNETI theo xu hướng UI/UX 2026 (Bento Grid, Responsive, Modern Design System).
+*@
+@{
+    ViewData["Title"] = "Trang Chủ - Hệ Thống Quản Lý Khách Sạn UNETI";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Banner UI/UX 2026 -->
+<div class="p-5 mb-4 bg-gradient bg-primary text-white rounded-4 shadow-sm position-relative overflow-hidden">
+    <div class="row align-items-center py-3">
+        <div class="col-lg-7">
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
+                <i class="bi bi-star-fill me-1"></i>HỆ THỐNG QUẢN LÝ ĐẶT PHÒNG KHÁCH SẠN 5 SAO
+            </span>
+            <h1 class="display-4 fw-extrabold mb-3 text-white">Trải Nghiệm Đặt Phòng Sang Trọng & Hiện Đại</h1>
+            <p class="lead text-white-50 mb-4">
+                Chào mừng đến với UNETI Hotel System. Giải pháp quản lý trực tuyến tối ưu với quy trình từ đặt phòng, tiếp nhận, quản lý và thống kê theo chuẩn .NET 10 MVC.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a asp-controller="Phong" asp-action="Index" class="btn btn-warning btn-lg rounded-3 fw-bold px-4 shadow-sm text-dark">
+                    <i class="bi bi-door-open-fill me-2"></i>Khám Phá Danh Sách Phòng
+                </a>
+                <a asp-controller="DangNhap" asp-action="Login" class="btn btn-outline-light btn-lg rounded-3 fw-semibold px-4">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Đăng Nhập Kiểm Thử
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+            <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-20 backdrop-blur">
+                <i class="bi bi-building-fill-check display-1 text-warning"></i>
+                <h4 class="fw-bold mt-3 text-white">Đề Tài 15 - UNETI</h4>
+                <p class="text-white-50 small mb-0">Ứng dụng ASP.NET Core 10 MVC & EF Core</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bento Grid 2026 - Tổng Quan 5 Module Dự Án -->
+<div class="mb-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="bi bi-grid-1x2-fill me-2 text-primary"></i>5 MODULE CHỨC NĂNG HỆ THỐNG</h2>
+        <p class="text-muted">Phân công nhiệm vụ thực hiện nhóm 05 Sinh viên theo chuẩn Đề tài 15</p>
+    </div>
+
+    <div class="row g-3">
+        <!-- Module 1: Sinh viên 1 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift border-start border-primary border-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 me-3">
+                            <i class="bi bi-shield-lock-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary rounded-pill">Module 1 (SV1)</span>
+                            <h5 class="fw-bold mb-0 text-dark">Tài Khoản & Đăng Nhập</h5>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        Quản lý TaiKhoan, Đăng nhập Session, Đăng ký khách hàng, Đăng xuất an toàn, Phân quyền 3 vai trò (Admin, NhanVien, KhachHang).
+                    </p>
+                    <a asp-controller="DangNhap" asp-action="Login" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">
+                        <i class="bi bi-arrow-right me-1"></i>Xem Demo Module 1
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 2: Sinh viên 2 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift border-start border-success border-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-success bg-opacity-10 text-success rounded-3 me-3">
+                            <i class="bi bi-door-open-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-success rounded-pill">Module 2 (SV2)</span>
+                            <h5 class="fw-bold mb-0 text-dark">Quản Lý Phòng</h5>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        Quản lý danh sách phòng khách sạn, Tìm kiếm, Lọc theo loại/tầng/trạng thái/khoảng giá, Sắp xếp và Phân trang LINQ.
+                    </p>
+                    <a asp-controller="Phong" asp-action="Index" class="btn btn-sm btn-outline-success rounded-3 fw-semibold">
+                        <i class="bi bi-arrow-right me-1"></i>Xem Danh Sách Phòng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 3: Sinh viên 3 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift border-start border-info border-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-info bg-opacity-10 text-info rounded-3 me-3">
+                            <i class="bi bi-person-lines-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-info text-dark rounded-pill">Module 3 (SV3)</span>
+                            <h5 class="fw-bold mb-0 text-dark">Khách Hàng & Đặt Phòng</h5>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        Quản lý khách hàng, cập nhật hồ sơ cá nhân, tạo phiếu đặt phòng trực tuyến và theo dõi lịch sử đặt phòng.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4: Sinh viên 4 -->
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift border-start border-warning border-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3 me-3">
+                            <i class="bi bi-clipboard-check-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-warning text-dark rounded-pill">Module 4 (SV4)</span>
+                            <h5 class="fw-bold mb-0 text-dark">Tiếp Nhận & Xử Lý Trạng Thái</h5>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-0">
+                        Nhận phòng, trả phòng, quản lý luồng chuyển đổi trạng thái giao dịch (Chờ xử lý $\rightarrow$ Đang xử lý $\rightarrow$ Hoàn thành / Hủy).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5: Sinh viên 5 -->
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift border-start border-danger border-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-3 me-3">
+                            <i class="bi bi-bar-chart-line-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-danger rounded-pill">Module 5 (SV5)</span>
+                            <h5 class="fw-bold mb-0 text-dark">Thống Kê & Dashboard</h5>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-0">
+                        Tính tiền phòng, báo cáo doanh thu theo tháng, thống kê tỷ lệ sử dụng phòng và hiển thị chỉ số Dashboard tổng quan.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
