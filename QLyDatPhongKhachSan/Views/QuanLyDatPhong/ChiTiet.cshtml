@@ -87,6 +87,20 @@
                 </div>
             }
 
+            @* Yêu cầu 8.5: Kiểm soát khả năng đáp ứng bằng LINQ đếm dữ liệu liên quan *@
+            @if (ViewBag.ThongTinKhaNangDapUng is List<string> khaNangList && khaNangList.Any())
+            {
+                <div class="alert alert-info py-2 mb-3">
+                    <strong><i class="bi bi-info-circle-fill"></i> Tình trạng khả năng đáp ứng phòng (LINQ kiểm tra):</strong>
+                    <ul class="mb-0 ps-3 mt-1">
+                        @foreach (var info in khaNangList)
+                        {
+                            <li>@info</li>
+                        }
+                    </ul>
+                </div>
+            }
+
             <h6>Danh sách phòng chỉ định:</h6>
             <table class="table table-bordered mb-4">
                 <thead class="table-light">

@@ -36,7 +36,7 @@
         <div class="card-body">
             <form method="get" asp-action="Index" class="row g-2">
                 <div class="col-md-2">
-                    <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên khách, SĐT, Mã đơn..." />
+                    <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên khách, SĐT, Số phòng, Mã đơn..." />
                 </div>
                 <div class="col-md-2">
                     <select name="trangThai" class="form-select">
@@ -82,7 +82,18 @@
                 <thead class="table-light">
                     <tr>
                         <th>Mã đơn</th>
-                        <th>Khách hàng</th>
+                        <th>
+                            <a asp-action="Index"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-trangThai="@Model.TrangThai"
+                               asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                               asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))"
+                               asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))"
+                               asp-route-sapXep="@(Model.SapXep == "tenkhach_asc" ? "tenkhach_desc" : "tenkhach_asc")"
+                               class="text-dark text-decoration-none">
+                                Khách hàng <i class="bi @(Model.SapXep == "tenkhach_asc" ? "bi-sort-alpha-down" : Model.SapXep == "tenkhach_desc" ? "bi-sort-alpha-down-alt" : "bi-arrow-down-up")"></i>
+                            </a>
+                        </th>
                         <th>Số điện thoại</th>
                         <th>Phòng gán</th>
                         <th>

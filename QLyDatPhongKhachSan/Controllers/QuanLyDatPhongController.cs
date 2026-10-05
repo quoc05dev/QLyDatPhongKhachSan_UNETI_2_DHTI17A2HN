@@ -41,9 +41,11 @@ namespace QLyDatPhongKhachSan.Controllers
             if (!string.IsNullOrWhiteSpace(tuKhoa))
             {
                 tuKhoa = tuKhoa.Trim().ToLower();
+                // 8.1: Tim kiem theo nguoi dung (ten, sdt), doi tuong chinh (so phong) va ma don
                 query = query.Where(d => d.KhachHang!.HoTen.ToLower().Contains(tuKhoa) || 
                                          d.KhachHang!.SoDienThoai.Contains(tuKhoa) ||
-                                         d.MaDatPhong.ToString().Contains(tuKhoa));
+                                         d.MaDatPhong.ToString().Contains(tuKhoa) ||
+                                         d.ChiTietDatPhongs.Any(ct => ct.Phong!.SoPhong.ToLower().Contains(tuKhoa)));
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))
@@ -60,11 +62,14 @@ namespace QLyDatPhongKhachSan.Controllers
             if (tuNgay.HasValue) query = query.Where(d => d.NgayNhan >= tuNgay.Value.Date);
             if (denNgay.HasValue) query = query.Where(d => d.NgayNhan < denNgay.Value.Date.AddDays(1));
 
+            // 8.1: Sắp xếp theo ngày hoặc tên
             query = sapXep switch
             {
                 "ngaynhan_asc" => query.OrderBy(d => d.NgayNhan),
                 "ngaynhan_desc" => query.OrderByDescending(d => d.NgayNhan),
                 "tenkhach_asc" => query.OrderBy(d => d.KhachHang!.HoTen),
+                "tenkhach_desc" => query.OrderByDescending(d => d.KhachHang!.HoTen),
+                "ngaydat_asc" => query.OrderBy(d => d.NgayDat),
                 _ => query.OrderByDescending(d => d.NgayDat)
             };
 
@@ -106,6 +111,33 @@ namespace QLyDatPhongKhachSan.Controllers
                 .FirstOrDefaultAsync(d => d.MaDatPhong == id);
 
             if (datPhong == null) return NotFound();
+
+            // Yêu cầu 8.5: Sử dụng LINQ kiểm soát số lượng / khả năng đáp ứng của phòng
+            var thongTinKhaNangDapUng = new List<string>();
+            foreach (var ct in datPhong.ChiTietDatPhongs)
+            {
+                if (ct.Phong?.LoaiPhong != null)
+                {
+                    int maLoai = ct.Phong.MaLoaiPhong;
+                    int tongPhongLoai = await _context.Phongs
+                        .CountAsync(p => p.MaLoaiPhong == maLoai && p.TrangThai != "BaoTri");
+
+                    int phongDaDat = await _context.ChiTietDatPhongs
+                        .Where(c => c.Phong!.MaLoaiPhong == maLoai
+                                    && c.MaDatPhong != id
+                                    && c.DatPhong!.TrangThai != "DaHuy"
+                                    && c.DatPhong!.TrangThai != "HoanThanh"
+                                    && datPhong.NgayNhan < c.DatPhong!.NgayTraDuKien
+                                    && datPhong.NgayTraDuKien > c.DatPhong!.NgayNhan)
+                        .Select(c => c.MaPhong)
+                        .Distinct()
+                        .CountAsync();
+
+                    int phongConTrong = tongPhongLoai - phongDaDat;
+                    thongTinKhaNangDapUng.Add($"Phòng {ct.Phong.SoPhong} ({ct.Phong.LoaiPhong.TenLoai}): Còn {phongConTrong}/{tongPhongLoai} phòng cùng loại trống trong khoảng thời gian này.");
+                }
+            }
+            ViewBag.ThongTinKhaNangDapUng = thongTinKhaNangDapUng;
 
             return View(datPhong);
         }
@@ -207,6 +239,31 @@ namespace QLyDatPhongKhachSan.Controllers
                 {
                     TempData["Error"] = $"Phòng {p.SoPhong} đã có khách đặt trùng thời gian này!";
                     return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+                }
+
+                // Yêu cầu 8.5: Kiểm soát khả năng đáp ứng bằng LINQ đếm số lượng
+                int tongPhongLoai = await _context.Phongs
+                    .CountAsync(ph => ph.MaLoaiPhong == p.MaLoaiPhong && ph.TrangThai != "BaoTri");
+
+                int phongDaBan = await _context.ChiTietDatPhongs
+                    .Where(c => c.Phong!.MaLoaiPhong == p.MaLoaiPhong
+                                && c.MaDatPhong != maDatPhong
+                                && c.DatPhong!.TrangThai != "DaHuy"
+                                && c.DatPhong!.TrangThai != "HoanThanh"
+                                && datPhong.NgayNhan < c.DatPhong!.NgayTraDuKien
+                                && datPhong.NgayTraDuKien > c.DatPhong!.NgayNhan)
+                    .Select(c => c.MaPhong)
+                    .Distinct()
+                    .CountAsync();
+
+                int conLai = tongPhongLoai - phongDaBan - 1; // sau khi duyệt đơn này
+                if (conLai <= 0)
+                {
+                    TempData["Warning"] = $"Lưu ý (Yêu cầu 8.5): Loại phòng '{p.LoaiPhong.TenLoai}' sẽ hết phòng trống sau khi xác nhận đơn này!";
+                }
+                else if (conLai <= 2)
+                {
+                    TempData["Warning"] = $"Lưu ý (Yêu cầu 8.5): Loại phòng '{p.LoaiPhong.TenLoai}' chỉ còn {conLai} phòng trống khả dụng trong khoảng thời gian này.";
                 }
             }
 
