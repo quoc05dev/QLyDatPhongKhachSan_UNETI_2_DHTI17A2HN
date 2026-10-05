@@ -35,7 +35,8 @@
 
                         <div class="col-md-6 mb-3">
                             <label asp-for="MatKhau" class="form-label fw-semibold"></label>
-                            <input asp-for="MatKhau" class="form-control" type="password" />
+                            <input name="MatKhau" id="MatKhau" class="form-control" type="password" autocomplete="new-password" />
+                            <div class="form-text">Để trống nếu không muốn thay đổi mật khẩu.</div>
                             <span asp-validation-for="MatKhau" class="text-danger small"></span>
                         </div>
                     </div>

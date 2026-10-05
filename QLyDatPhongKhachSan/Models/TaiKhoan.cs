@@ -14,8 +14,10 @@ namespace QLyDatPhongKhachSan.Models
         [Display(Name = "Tên đăng nhập")]
         public string TenDangNhap { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        [StringLength(255, MinimumLength = 6, ErrorMessage = "Mật khẩu ít nhất 6 ký tự")]
+        // Không [Required] và không MinimumLength vì khi sửa tài khoản, để trống nghĩa là giữ mật khẩu cũ.
+        // Ràng buộc bắt buộc 6 ký tự được kiểm tra thủ công trong Controller khi tạo mới
+        // hoặc khi người dùng chủ động nhập mật khẩu mới.
+        [StringLength(255, ErrorMessage = "Mật khẩu không quá 255 ký tự")]
         [DataType(DataType.Password)]
         [Display(Name = "Mật khẩu")]
         public string MatKhau { get; set; } = string.Empty;

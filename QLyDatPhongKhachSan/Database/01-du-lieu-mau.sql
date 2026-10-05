@@ -75,11 +75,11 @@ SET IDENTITY_INSERT TaiKhoan ON;
 
 INSERT INTO TaiKhoan (MaTaiKhoan, TenDangNhap, MatKhau, HoTen, Email, SoDienThoai, VaiTro, TrangThai, NgayTao)
 VALUES
-    (1, 'admin',     '123456', N'Quản Trị Viên',      'admin@hotel.com',     '0901234567', 'Admin',     1, '2026-01-05'),
-    (2, 'nhanvien',  '123456', N'Nguyễn Thị Lan',     'nhanvien@hotel.com',  '0902345678', 'NhanVien',  1, '2026-01-05'),
-    (3, 'khachhang', '123456', N'Lê Minh Anh',        'khachhang@gmail.com', '0903456789', 'KhachHang', 1, '2026-01-05'),
-    (4, 'khoa',      '123456', N'Tài Khoản Bị Khóa',  'khoa@gmail.com',      '0904567890', 'KhachHang', 0, '2026-01-05'),
-    (5, 'khachhang2','123456', N'Nguyễn Thị Bích',    'bich@gmail.com',      '0912000002', 'KhachHang', 1, '2026-01-05');
+    (1, 'admin',     N'PBKDF2$100000$JRpD+oqrwHrc3OJtX+8Kmg==$w38/HX1xcoX1pVqA55fKs2oIS1EG5OfoUk+roL9RWVU=', N'Quản Trị Viên',      'admin@hotel.com',     '0901234567', 'Admin',     1, '2026-01-05'),
+    (2, 'nhanvien',  N'PBKDF2$100000$euCPBmIaNpz3zfvodEJ/pA==$29OSx3lRkX1nwf4ebGOrR55nwB4lth1mBef59QAhlIQ=', N'Nguyễn Thị Lan',     'nhanvien@hotel.com',  '0902345678', 'NhanVien',  1, '2026-01-05'),
+    (3, 'khachhang', N'PBKDF2$100000$67SomZLoLr+B9EIkzVp61Q==$Q5eyW3pY+/4Iq+fSXUj97HLAQT4AiCQDyD0lzr59Q38=', N'Lê Minh Anh',        'khachhang@gmail.com', '0903456789', 'KhachHang', 1, '2026-01-05'),
+    (4, 'khoa',      N'PBKDF2$100000$mC71K1N4WROlHumZPoUsjg==$+ER4s9mByhYSFloJtIuEcmDPJhk5OXOIQchontD+UuQ=', N'Tài Khoản Bị Khóa',  'khoa@gmail.com',      '0904567890', 'KhachHang', 0, '2026-01-05'),
+    (5, 'khachhang2',N'PBKDF2$100000$NXu0Bx5T+rQcLZv7e70gPg==$8TyUkVeOWHi1ClrK1g3lb+MFnwEr47OIH0Dx+8I83Z4=', N'Nguyễn Thị Bích',    'bich@gmail.com',      '0912000002', 'KhachHang', 1, '2026-01-05');
 
 SET IDENTITY_INSERT TaiKhoan OFF;
 GO
