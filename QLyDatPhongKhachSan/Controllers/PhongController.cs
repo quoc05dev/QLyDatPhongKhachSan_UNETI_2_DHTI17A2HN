@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLyDatPhongKhachSan.Data;
+using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
 using QLyDatPhongKhachSan.ViewModels;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong
+        // Khách hàng được xem danh sách phòng để đặt phòng, nhưng không được thêm/sửa/xóa.
+        [RoleAuthorize("Admin", "NhanVien", "KhachHang")]
         public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai)
         {
             var query = _context.Phongs
@@ -83,6 +86,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Details/5
+        [RoleAuthorize("Admin", "NhanVien", "KhachHang")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -119,6 +123,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Create
+        [RoleAuthorize("Admin", "NhanVien")]
         public IActionResult Create()
         {
             PopulateDropdowns();
@@ -128,6 +133,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: Phong/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Create([Bind("SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,GhiChuBaoTri")] Phong phong)
         {
             if (ModelState.IsValid)
@@ -149,6 +155,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Edit/5
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -168,6 +175,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: Phong/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int id, [Bind("MaPhong,SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,GhiChuBaoTri")] Phong phong)
         {
             if (id != phong.MaPhong)
@@ -208,6 +216,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Delete/5
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -234,6 +243,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: Phong/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             bool hasHistory = await _context.ChiTietDatPhongs.AnyAsync(ct => ct.MaPhong == id);

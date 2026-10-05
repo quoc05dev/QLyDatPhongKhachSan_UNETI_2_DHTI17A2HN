@@ -7,14 +7,22 @@
 
 @{
     ViewData["Title"] = "Danh sách phòng";
+
+    // Chỉ Admin và Nhân viên được thêm / sửa / xóa phòng.
+    // Khách hàng chỉ xem danh sách và xem chi tiết để đặt phòng.
+    var vaiTro = Context.Session.GetVaiTro();
+    var canQuanLyPhong = vaiTro == "Admin" || vaiTro == "NhanVien";
 }
 
 <h1>Danh sách phòng</h1>
 
 <div class="d-flex justify-content-between mb-3">
-    <div class="me-3">
-        <a asp-action="Create" class="btn btn-primary">Thêm phòng</a>
-    </div>
+@if (canQuanLyPhong)
+    {
+        <div class="me-3">
+            <a asp-action="Create" class="btn btn-primary">Thêm phòng</a>
+        </div>
+    }
 
     <form method="get" asp-action="Index" class="flex-grow-1">
         <div class="row gx-2">
@@ -71,9 +79,12 @@
                     <td>@(item.NgayBaoTri.HasValue ? item.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "")</td>
                     <td>@item.GhiChuBaoTri</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.MaPhong" class="btn btn-sm btn-warning">Sửa</a>
                         <a asp-action="Details" asp-route-id="@item.MaPhong" class="btn btn-sm btn-info">Chi tiết</a>
-                        <a asp-action="Delete" asp-route-id="@item.MaPhong" class="btn btn-sm btn-danger">Xóa</a>
+                        @if (canQuanLyPhong)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.MaPhong" class="btn btn-sm btn-warning">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@item.MaPhong" class="btn btn-sm btn-danger">Xóa</a>
+                        }
                     </td>
                 </tr>
             }
