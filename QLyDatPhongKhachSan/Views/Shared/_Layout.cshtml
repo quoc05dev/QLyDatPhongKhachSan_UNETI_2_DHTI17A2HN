@@ -102,6 +102,11 @@
                                     <li class="dropdown-header">Đã đăng nhập làm @Context.Session.GetTenDangNhap()</li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
+                                        <a class="dropdown-item" asp-controller="DangNhap" asp-action="DoiMatKhau">
+                                            <i class="bi bi-key me-2"></i>Đổi mật khẩu
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item text-danger fw-semibold" asp-controller="DangNhap" asp-action="Logout">
                                             <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                                         </a>
