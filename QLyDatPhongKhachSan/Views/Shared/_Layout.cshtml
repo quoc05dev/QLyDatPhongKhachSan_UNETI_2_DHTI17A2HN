@@ -1,7 +1,7 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Layout chung tích hợp Bootstrap Icons, Navbar phân quyền & Sticky Footer luôn cố định chân trang.
+    Nội dung thực hiện: Giao diện Layout chung tích hợp Bootstrap Icons, Navbar phẫn quyền & Session.
 *@
 @using QLyDatPhongKhachSan.Helpers
 <!DOCTYPE html>
@@ -15,31 +15,31 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QLyDatPhongKhachSan.styles.css" asp-append-version="true" />
 </head>
-<body class="bg-light-subtle d-flex flex-column min-vh-100">
+<body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-lg mb-4 py-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-3">
             <div class="container-fluid px-4">
-                <a class="navbar-brand fw-bold fs-4 tracking-tight" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-building me-2 text-primary"></i>UNETI HOTEL
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-building me-2"></i>UNETI HOTEL
                 </a>
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-white-50 fw-semibold px-3" asp-area="" asp-controller="Home" asp-action="Index">
+                            <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house-door me-1"></i>Trang chủ
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white-50 fw-semibold px-3" asp-area="" asp-controller="Phong" asp-action="Index">
+                            <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="Phong" asp-action="Index">
                                 <i class="bi bi-door-open me-1"></i>Danh sách phòng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white-50 fw-semibold px-3" asp-area="" asp-controller="DichVu" asp-action="Index">
+                            <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="DichVu" asp-action="Index">
                                 <i class="bi bi-concierge-bell me-1"></i>Dịch vụ
                             </a>
                         </li>
@@ -69,18 +69,18 @@
                             var userRole = Context.Session.GetVaiTro();
                             if (userRole == "Admin")
                             {
-                                <li class="nav-item dropdown ms-lg-2">
-                                    <a class="nav-link dropdown-toggle text-white fw-bold bg-white bg-opacity-15 rounded-pill px-3" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-warning fw-bold" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="bi bi-shield-lock me-1"></i>Quản trị (Admin)
                                     </a>
-                                    <ul class="dropdown-menu shadow-lg rounded-3 border-0 mt-2" aria-labelledby="adminDropdown">
+                                    <ul class="dropdown-menu shadow rounded-3" aria-labelledby="adminDropdown">
                                         <li>
-                                            <a class="dropdown-item fw-semibold text-primary py-2" asp-controller="TaiKhoan" asp-action="Index">
+                                            <a class="dropdown-item fw-semibold text-primary" asp-controller="TaiKhoan" asp-action="Index">
                                                 <i class="bi bi-people-fill me-2"></i>Quản lý Tài khoản
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item fw-semibold py-2" asp-controller="LoaiPhong" asp-action="Index">
+                                            <a class="dropdown-item fw-semibold" asp-controller="LoaiPhong" asp-action="Index">
                                                 <i class="bi bi-grid-3x3-gap-fill me-2"></i>Quản lý Loại phòng
                                             </a>
                                         </li>
@@ -90,19 +90,19 @@
                         }
                     </ul>
 
-                    <ul class="navbar-nav align-items-center">
+                    <ul class="navbar-nav">
                         @if (Context.Session.IsLoggedIn())
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white fw-bold bg-white bg-opacity-10 rounded-pill px-3 py-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle text-white fw-bold bg-white bg-opacity-10 rounded-3 px-3" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-person-circle me-1"></i>@Context.Session.GetHoTen()
-                                    <span class="badge bg-light text-primary fw-bold ms-1">@Context.Session.GetVaiTro()</span>
+                                    <span class="badge bg-warning text-dark ms-1">@Context.Session.GetVaiTro()</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-3 border-0 mt-2" aria-labelledby="userDropdown">
+                                <ul class="dropdown-menu dropdown-menu-end shadow rounded-3" aria-labelledby="userDropdown">
                                     <li class="dropdown-header">Đã đăng nhập làm @Context.Session.GetTenDangNhap()</li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item text-danger fw-semibold py-2" asp-controller="DangNhap" asp-action="Logout">
+                                        <a class="dropdown-item text-danger fw-semibold" asp-controller="DangNhap" asp-action="Logout">
                                             <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                                         </a>
                                     </li>
@@ -112,12 +112,12 @@
                         else
                         {
                             <li class="nav-item me-2">
-                                <a class="btn btn-outline-light rounded-pill fw-semibold px-4" asp-controller="DangNhap" asp-action="Login">
+                                <a class="btn btn-outline-light rounded-3 fw-semibold" asp-controller="DangNhap" asp-action="Login">
                                     <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="btn btn-light rounded-pill fw-bold text-primary px-4 shadow-sm" asp-controller="DangNhap" asp-action="Register">
+                                <a class="btn btn-warning rounded-3 fw-bold text-dark" asp-controller="DangNhap" asp-action="Register">
                                     <i class="bi bi-person-plus me-1"></i>Đăng ký
                                 </a>
                             </li>
@@ -128,15 +128,15 @@
         </nav>
     </header>
 
-    <div class="container flex-grow-1">
-        <main role="main" class="pb-5">
+    <div class="container">
+        <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="footer border-top text-white-50 bg-dark py-4 mt-auto" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;">
+    <footer class="border-top footer text-muted bg-light py-3 mt-5">
         <div class="container text-center">
-            <small>&copy; 2026 - UNETI Grand Hotel & Spa - Hệ thống Quản lý Đặt phòng Khách sạn</small>
+            &copy; 2026 - Hệ thống Quản lý Đặt phòng Khách sạn UNETI - Bài Tập Lớn .NET Core MVC
         </div>
     </footer>
 

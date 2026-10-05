@@ -1,17 +1,5 @@
-/* UNETI Hotel Luxury 5-Star Custom Styles UI/UX 2026 */
-
-:root {
-  --hotel-navy: #0f172a;
-  --hotel-blue: #1e3a8a;
-  --hotel-gold: #c5a059;
-  --hotel-gold-light: #dfb76c;
-  --hotel-bg: #f8fafc;
-}
-
 html {
   font-size: 14px;
-  scroll-behavior: smooth;
-  height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -20,78 +8,24 @@ html {
   }
 }
 
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: var(--hotel-bg);
-  color: #1e293b;
-  min-height: 100vh;
-  margin-bottom: 0 !important;
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 60px;
 }
 
-/* Fix Absolute Positioning Bug on ASP.NET Core Footer */
-.footer {
-  position: relative !important;
-  bottom: auto !important;
-  top: auto !important;
-  width: 100% !important;
-  margin-top: auto !important;
-  line-height: normal !important;
-  white-space: normal !important;
-  clear: both;
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
 }
 
-/* Gold Accent Classes */
-.text-gold {
-  color: var(--hotel-gold) !important;
-}
-
-.bg-gold {
-  background-color: var(--hotel-gold) !important;
-  color: #ffffff !important;
-}
-
-.btn-gold {
-  background-color: var(--hotel-gold);
-  color: #ffffff;
-  border: none;
-  transition: all 0.3s ease;
-}
-
-.btn-gold:hover {
-  background-color: var(--hotel-gold-light);
-  color: #ffffff;
-  box-shadow: 0 8px 15px rgba(197, 160, 89, 0.3);
-}
-
-/* Card Hover Lift Effect */
-.hover-lift {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 10px 10px -5px rgba(15, 23, 42, 0.04) !important;
-}
-
-/* Custom Input Focus Ring */
-.form-control:focus, .form-select:focus {
-  border-color: var(--hotel-blue);
-  box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.15);
-}
-
-/* Navbar Brand & Links */
-.navbar-brand-gold {
-  color: var(--hotel-gold) !important;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.nav-link {
-  transition: color 0.2s ease;
-}
-
-.nav-link:hover {
-  color: var(--hotel-gold) !important;
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
 }

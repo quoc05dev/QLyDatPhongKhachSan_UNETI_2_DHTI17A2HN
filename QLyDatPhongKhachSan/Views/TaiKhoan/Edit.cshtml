@@ -1,7 +1,7 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Cập nhật TaiKhoan dành cho Admin (Tông màu Navy / Primary sang trọng).
+    Nội dung thực hiện: Giao diện Cập nhật TaiKhoan dành cho Admin.
 *@
 @model QLyDatPhongKhachSan.Models.TaiKhoan
 
@@ -12,9 +12,9 @@
 <div class="row justify-content-center mt-3">
     <div class="col-md-8">
         <div class="card shadow-lg border-0 rounded-4">
-            <div class="card-header bg-primary text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-warning text-dark py-3 rounded-top-4 d-flex justify-content-between align-items-center">
                 <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>CẬP NHẬT TÀI KHOẢN #@Model.MaTaiKhoan</h4>
-                <a asp-action="Index" class="btn btn-sm btn-outline-light rounded-3">
+                <a asp-action="Index" class="btn btn-sm btn-outline-dark rounded-3">
                     <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
                 </a>
             </div>
@@ -83,7 +83,7 @@
 
                     <div class="d-flex justify-content-end gap-2 pt-3 border-top">
                         <a asp-action="Index" class="btn btn-secondary rounded-3">Hủy bỏ</a>
-                        <button type="submit" class="btn btn-primary rounded-3 fw-bold">
+                        <button type="submit" class="btn btn-warning rounded-3 fw-bold">
                             <i class="bi bi-save me-1"></i>Cập nhật tài khoản
                         </button>
                     </div>
