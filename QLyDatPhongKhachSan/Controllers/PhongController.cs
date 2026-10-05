@@ -24,8 +24,8 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong
-        // Khách hàng được xem danh sách phòng để đặt phòng, nhưng không được thêm/sửa/xóa.
-        [RoleAuthorize("Admin", "NhanVien", "KhachHang")]
+        // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
+        // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
         public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai)
         {
             var query = _context.Phongs
@@ -86,7 +86,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Details/5
-        [RoleAuthorize("Admin", "NhanVien", "KhachHang")]
+        // Tạm thời cho phép xem công khai, giống Index. Xem Create/Edit/Delete.
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
