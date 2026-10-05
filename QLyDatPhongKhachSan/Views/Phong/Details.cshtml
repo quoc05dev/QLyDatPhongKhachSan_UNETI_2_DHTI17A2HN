@@ -7,6 +7,10 @@
 
 @{
     ViewData["Title"] = "Chi tiết phòng";
+
+    // Chỉ Admin và Nhân viên được sửa phòng.
+    var vaiTro = Context.Session.GetVaiTro();
+    var canQuanLyPhong = vaiTro == "Admin" || vaiTro == "NhanVien";
 }
 
 <h1>Chi tiết phòng</h1>
@@ -87,6 +91,9 @@
     </dl>
 </div>
 <div>
+    @if (canQuanLyPhong)
+{
     <a asp-action="Edit" asp-route-id="@Model.MaPhong" class="btn btn-warning">Sửa</a>
+}
     <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </div>
