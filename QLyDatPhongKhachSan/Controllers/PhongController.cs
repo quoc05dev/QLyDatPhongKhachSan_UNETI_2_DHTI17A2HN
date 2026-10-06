@@ -26,8 +26,40 @@ namespace QLyDatPhongKhachSan.Controllers
         // GET: Phong
         // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
         // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
-        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai)
+        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax)
         {
+            bool isPriceFilterValid = true;
+
+            // Lỗi binding (nhập chữ thay vì số) của framework là tiếng Anh,
+            // đổi sang tiếng Việt cho khớp giao diện.
+            foreach (var ten in new[] { "GiaMin", "GiaMax" })
+            {
+                if (ModelState.TryGetValue(ten, out var entry) && entry.Errors.Count > 0)
+                {
+                    entry.Errors.Clear();
+                    ModelState.AddModelError(ten, ten == "GiaMin"
+                        ? "Giá tối thiểu không hợp lệ. Vui lòng nhập một số."
+                        : "Giá tối đa không hợp lệ. Vui lòng nhập một số.");
+                    isPriceFilterValid = false;
+                }
+            }
+
+            if (giaMin.HasValue && giaMin.Value < 0)
+            {
+                ModelState.AddModelError("GiaMin", "Giá tối thiểu phải lớn hơn hoặc bằng 0.");
+                isPriceFilterValid = false;
+            }
+            if (giaMax.HasValue && giaMax.Value < 0)
+            {
+                ModelState.AddModelError("GiaMax", "Giá tối đa phải lớn hơn hoặc bằng 0.");
+                isPriceFilterValid = false;
+            }
+            if (giaMin.HasValue && giaMax.HasValue && giaMin.Value > giaMax.Value)
+            {
+                ModelState.AddModelError("GiaMin", "Giá tối thiểu không được lớn hơn giá tối đa.");
+                isPriceFilterValid = false;
+            }
+
             var query = _context.Phongs
                 .Include(p => p.LoaiPhong)
                 .AsNoTracking()
@@ -60,6 +92,18 @@ namespace QLyDatPhongKhachSan.Controllers
                 query = query.Where(p => p.TrangThai == trangThai);
             }
 
+            if (isPriceFilterValid)
+            {
+                if (giaMin.HasValue)
+                {
+                    query = query.Where(p => p.DonGia >= giaMin.Value);
+                }
+                if (giaMax.HasValue)
+                {
+                    query = query.Where(p => p.DonGia <= giaMax.Value);
+                }
+            }
+
             var phongs = await query.ToListAsync();
 
             var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
@@ -79,6 +123,8 @@ namespace QLyDatPhongKhachSan.Controllers
                 MaLoaiPhong = maLoaiPhong,
                 Tang = tang,
                 TrangThai = trangThai,
+                GiaMin = giaMin,
+                GiaMax = giaMax,
                 LoaiPhongList = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", maLoaiPhong),
                 TrangThaiList = new SelectList(trangThaiList, "Value", "Text", trangThai)
             };

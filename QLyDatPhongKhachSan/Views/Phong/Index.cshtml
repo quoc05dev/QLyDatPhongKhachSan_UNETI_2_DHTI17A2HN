@@ -25,11 +25,11 @@
     }
 
     <form method="get" asp-action="Index" class="flex-grow-1">
-        <div class="row gx-2">
+        <div class="row gx-2 mb-2">
             <div class="col-md-4">
                 <input type="text" name="keyword" class="form-control" value="@Model.Keyword" placeholder="Tìm theo số phòng, loại phòng hoặc tên khách hàng..." />
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select name="maLoaiPhong" asp-items="@Model.LoaiPhongList" class="form-select">
                     <option value="">Tất cả loại phòng</option>
                 </select>
@@ -37,14 +37,24 @@
             <div class="col-md-2">
                 <input type="number" name="tang" class="form-control" value="@Model.Tang" placeholder="Tầng" min="1" max="100" />
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select name="trangThai" asp-items="@Model.TrangThaiList" class="form-select">
                     <option value="">Tất cả trạng thái</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex">
-                <button type="submit" class="btn btn-success me-2 w-50">Lọc</button>
-                <a asp-action="Index" class="btn btn-secondary w-50 text-center">Xóa</a>
+        </div>
+        <div class="row gx-2">
+            <div class="col-md-3">
+                <input asp-for="GiaMin" type="number" class="form-control" placeholder="Giá từ" min="0" step="any" />
+                <span asp-validation-for="GiaMin" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <input asp-for="GiaMax" type="number" class="form-control" placeholder="Giá đến" min="0" step="any" />
+                <span asp-validation-for="GiaMax" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end align-items-start">
+                <button type="submit" class="btn btn-success me-2 px-4">Lọc</button>
+                <a asp-action="Index" class="btn btn-secondary px-4">Xóa bộ lọc</a>
             </div>
         </div>
     </form>
@@ -94,7 +104,7 @@
 else
 {
     <div class="alert alert-info">
-        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.MaLoaiPhong.HasValue || Model.Tang.HasValue || !string.IsNullOrWhiteSpace(Model.TrangThai))
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.MaLoaiPhong.HasValue || Model.Tang.HasValue || !string.IsNullOrWhiteSpace(Model.TrangThai) || Model.GiaMin.HasValue || Model.GiaMax.HasValue)
         {
             <text>Không tìm thấy phòng phù hợp.</text>
         }
