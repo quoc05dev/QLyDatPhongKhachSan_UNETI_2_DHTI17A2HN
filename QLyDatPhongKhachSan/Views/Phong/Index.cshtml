@@ -45,11 +45,11 @@
         </div>
         <div class="row gx-2">
             <div class="col-md-3">
-                <input asp-for="GiaMin" class="form-control" placeholder="Giá từ" min="0" step="any" />
+                <input asp-for="GiaMin" type="number" class="form-control" placeholder="Giá từ" min="0" step="any" />
                 <span asp-validation-for="GiaMin" class="text-danger small"></span>
             </div>
             <div class="col-md-3">
-                <input asp-for="GiaMax" class="form-control" placeholder="Giá đến" min="0" step="any" />
+                <input asp-for="GiaMax" type="number" class="form-control" placeholder="Giá đến" min="0" step="any" />
                 <span asp-validation-for="GiaMax" class="text-danger small"></span>
             </div>
             <div class="col-md-6 d-flex justify-content-end align-items-start">

@@ -30,6 +30,20 @@ namespace QLyDatPhongKhachSan.Controllers
         {
             bool isPriceFilterValid = true;
 
+            // Lỗi binding (nhập chữ thay vì số) của framework là tiếng Anh,
+            // đổi sang tiếng Việt cho khớp giao diện.
+            foreach (var ten in new[] { "GiaMin", "GiaMax" })
+            {
+                if (ModelState.TryGetValue(ten, out var entry) && entry.Errors.Count > 0)
+                {
+                    entry.Errors.Clear();
+                    ModelState.AddModelError(ten, ten == "GiaMin"
+                        ? "Giá tối thiểu không hợp lệ. Vui lòng nhập một số."
+                        : "Giá tối đa không hợp lệ. Vui lòng nhập một số.");
+                    isPriceFilterValid = false;
+                }
+            }
+
             if (giaMin.HasValue && giaMin.Value < 0)
             {
                 ModelState.AddModelError("GiaMin", "Giá tối thiểu phải lớn hơn hoặc bằng 0.");
