@@ -26,7 +26,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // GET: Phong
         // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
         // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
-        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax)
+        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra)
         {
             bool isPriceFilterValid = true;
 
@@ -58,6 +58,45 @@ namespace QLyDatPhongKhachSan.Controllers
             {
                 ModelState.AddModelError("GiaMin", "Giá tối thiểu không được lớn hơn giá tối đa.");
                 isPriceFilterValid = false;
+            }
+
+            bool isAvailabilityFilterValid = true;
+
+            bool ngayNhanHasBindingError = false;
+            if (ModelState.TryGetValue("NgayNhan", out var nnEntry) && nnEntry.Errors.Count > 0)
+            {
+                nnEntry.Errors.Clear();
+                ModelState.AddModelError("NgayNhan", "Ngày nhận không hợp lệ.");
+                isAvailabilityFilterValid = false;
+                ngayNhanHasBindingError = true;
+            }
+
+            bool ngayTraHasBindingError = false;
+            if (ModelState.TryGetValue("NgayTra", out var ntEntry) && ntEntry.Errors.Count > 0)
+            {
+                ntEntry.Errors.Clear();
+                ModelState.AddModelError("NgayTra", "Ngày trả không hợp lệ.");
+                isAvailabilityFilterValid = false;
+                ngayTraHasBindingError = true;
+            }
+
+            if (!ngayNhanHasBindingError && !ngayTraHasBindingError)
+            {
+                if (ngayNhan.HasValue && !ngayTra.HasValue)
+                {
+                    ModelState.AddModelError("NgayTra", "Vui lòng nhập ngày trả.");
+                    isAvailabilityFilterValid = false;
+                }
+                else if (!ngayNhan.HasValue && ngayTra.HasValue)
+                {
+                    ModelState.AddModelError("NgayNhan", "Vui lòng nhập ngày nhận.");
+                    isAvailabilityFilterValid = false;
+                }
+                else if (ngayNhan.HasValue && ngayTra.HasValue && ngayNhan.Value.Date >= ngayTra.Value.Date)
+                {
+                    ModelState.AddModelError("NgayTra", "Ngày trả phải sau ngày nhận.");
+                    isAvailabilityFilterValid = false;
+                }
             }
 
             var query = _context.Phongs
@@ -104,6 +143,18 @@ namespace QLyDatPhongKhachSan.Controllers
                 }
             }
 
+            if (ngayNhan.HasValue && ngayTra.HasValue && isAvailabilityFilterValid)
+            {
+                var requestedStart = ngayNhan.Value.Date;
+                var requestedEnd = ngayTra.Value.Date;
+                query = query.Where(p =>
+                    !p.ChiTietDatPhongs.Any(ct =>
+                        ct.DatPhong != null
+                        && ct.DatPhong.TrangThai != "DaHuy"
+                        && ct.NgayNhan.Date < requestedEnd
+                        && ct.NgayTra.Date > requestedStart));
+            }
+
             var phongs = await query.ToListAsync();
 
             var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
@@ -125,6 +176,8 @@ namespace QLyDatPhongKhachSan.Controllers
                 TrangThai = trangThai,
                 GiaMin = giaMin,
                 GiaMax = giaMax,
+                NgayNhan = ngayNhan,
+                NgayTra = ngayTra,
                 LoaiPhongList = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", maLoaiPhong),
                 TrangThaiList = new SelectList(trangThaiList, "Value", "Text", trangThai)
             };
