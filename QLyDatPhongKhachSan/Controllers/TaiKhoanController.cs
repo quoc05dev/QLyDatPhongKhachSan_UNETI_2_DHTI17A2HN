@@ -107,6 +107,16 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TenDangNhap,MatKhau,HoTen,Email,SoDienThoai,VaiTro,TrangThai")] TaiKhoan taiKhoan)
         {
+            // Khi tạo mới, mật khẩu là bắt buộc (không áp dụng quy tắc "để trống = giữ mật khẩu cũ")
+            if (string.IsNullOrWhiteSpace(taiKhoan.MatKhau))
+            {
+                ModelState.AddModelError("MatKhau", "Mật khẩu không được để trống.");
+            }
+            else if (taiKhoan.MatKhau.Length < 6)
+            {
+                ModelState.AddModelError("MatKhau", "Mật khẩu ít nhất 6 ký tự.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(taiKhoan);
@@ -127,6 +137,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             taiKhoan.NgayTao = DateTime.Now;
+            taiKhoan.MatKhau = MatKhauHelper.Hash(taiKhoan.MatKhau);
             _context.Add(taiKhoan);
             await _context.SaveChangesAsync();
 
@@ -178,9 +189,33 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
+            // Nếu không nhập mật khẩu mới thì coi như giữ mật khẩu cũ.
+            bool doiMatKhau = !string.IsNullOrWhiteSpace(taiKhoan.MatKhau);
+            if (doiMatKhau)
+            {
+                if (taiKhoan.MatKhau.Length < 6)
+                {
+                    ModelState.AddModelError("MatKhau", "Mật khẩu mới phải có ít nhất 6 ký tự.");
+                }
+            }
+            else
+            {
+                // Ô mật khẩu gửi lên rỗng sẽ bị model binder đổi thành null, khiến
+                // framework tự sinh lỗi [Required] và chặn lưu. Để trống ở đây
+                // có nghĩa là không đổi mật khẩu nên phải bỏ lỗi này đi.
+                ModelState.Remove("MatKhau");
+                taiKhoan.MatKhau = string.Empty;
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(taiKhoan);
+            }
+
+            var taiKhoanCu = await _context.TaiKhoans.FindAsync(id);
+            if (taiKhoanCu == null)
+            {
+                return NotFound();
             }
 
             // Kiểm tra trùng Tên Đăng Nhập ngoại trừ tài khoản hiện tại
@@ -199,7 +234,19 @@ namespace QLyDatPhongKhachSan.Controllers
 
             try
             {
-                _context.Update(taiKhoan);
+                // Cập nhật từng trường để không ghi đè mật khẩu khi người dùng để trống
+                taiKhoanCu.TenDangNhap = taiKhoan.TenDangNhap;
+                taiKhoanCu.HoTen = taiKhoan.HoTen;
+                taiKhoanCu.Email = taiKhoan.Email;
+                taiKhoanCu.SoDienThoai = taiKhoan.SoDienThoai;
+                taiKhoanCu.VaiTro = taiKhoan.VaiTro;
+                taiKhoanCu.TrangThai = taiKhoan.TrangThai;
+
+                if (doiMatKhau)
+                {
+                    taiKhoanCu.MatKhau = MatKhauHelper.Hash(taiKhoan.MatKhau);
+                }
+
                 await _context.SaveChangesAsync();
 
                 // Cập nhật thông tin KhachHang liên kết nếu có
@@ -213,7 +260,9 @@ namespace QLyDatPhongKhachSan.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                TempData["SuccessMessage"] = $"Cập nhật tài khoản '{taiKhoan.TenDangNhap}' thành công!";
+                TempData["SuccessMessage"] = doiMatKhau
+                    ? $"Cập nhật tài khoản '{taiKhoan.TenDangNhap}' và đổi mật khẩu thành công!"
+                    : $"Cập nhật tài khoản '{taiKhoan.TenDangNhap}' thành công!";
             }
             catch (DbUpdateConcurrencyException)
             {

@@ -1,0 +1,57 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Giao diện Đổi mật khẩu cho tài khoản đang đăng nhập.
+*@
+@model QLyDatPhongKhachSan.ViewModels.DoiMatKhauViewModel
+@using QLyDatPhongKhachSan.Helpers
+
+@{
+    ViewData["Title"] = "Đổi mật khẩu";
+}
+
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-key-fill me-2"></i>ĐỔI MẬT KHẨU</h3>
+                <small class="text-white-50">Tài khoản: @ViewContext.HttpContext.Session.GetTenDangNhap()</small>
+            </div>
+            <div class="card-body p-4">
+
+                <form asp-action="DoiMatKhau" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhauHienTai" class="form-label fw-semibold"></label>
+                        <input asp-for="MatKhauHienTai" class="form-control" placeholder="Nhập mật khẩu hiện tại..." />
+                        <span asp-validation-for="MatKhauHienTai" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhauMoi" class="form-label fw-semibold"></label>
+                        <input asp-for="MatKhauMoi" class="form-control" placeholder="Mật khẩu mới ít nhất 6 ký tự..." />
+                        <span asp-validation-for="MatKhauMoi" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="XacNhanMatKhau" class="form-label fw-semibold"></label>
+                        <input asp-for="XacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu mới..." />
+                        <span asp-validation-for="XacNhanMatKhau" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">
+                            <i class="bi bi-check-circle me-2"></i>Đổi mật khẩu
+                        </button>
+                        <a asp-action="Login" class="btn btn-outline-secondary rounded-3">Quay lại</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

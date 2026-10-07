@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLyDatPhongKhachSan.Data;
+using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
 using QLyDatPhongKhachSan.ViewModels;
 using System.Collections.Generic;
@@ -23,8 +24,81 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong
-        public async Task<IActionResult> Index(string? keyword)
+        // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
+        // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
+        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra)
         {
+            bool isPriceFilterValid = true;
+
+            // Lỗi binding (nhập chữ thay vì số) của framework là tiếng Anh,
+            // đổi sang tiếng Việt cho khớp giao diện.
+            foreach (var ten in new[] { "GiaMin", "GiaMax" })
+            {
+                if (ModelState.TryGetValue(ten, out var entry) && entry.Errors.Count > 0)
+                {
+                    entry.Errors.Clear();
+                    ModelState.AddModelError(ten, ten == "GiaMin"
+                        ? "Giá tối thiểu không hợp lệ. Vui lòng nhập một số."
+                        : "Giá tối đa không hợp lệ. Vui lòng nhập một số.");
+                    isPriceFilterValid = false;
+                }
+            }
+
+            if (giaMin.HasValue && giaMin.Value < 0)
+            {
+                ModelState.AddModelError("GiaMin", "Giá tối thiểu phải lớn hơn hoặc bằng 0.");
+                isPriceFilterValid = false;
+            }
+            if (giaMax.HasValue && giaMax.Value < 0)
+            {
+                ModelState.AddModelError("GiaMax", "Giá tối đa phải lớn hơn hoặc bằng 0.");
+                isPriceFilterValid = false;
+            }
+            if (giaMin.HasValue && giaMax.HasValue && giaMin.Value > giaMax.Value)
+            {
+                ModelState.AddModelError("GiaMin", "Giá tối thiểu không được lớn hơn giá tối đa.");
+                isPriceFilterValid = false;
+            }
+
+            bool isAvailabilityFilterValid = true;
+
+            bool ngayNhanHasBindingError = false;
+            if (ModelState.TryGetValue("NgayNhan", out var nnEntry) && nnEntry.Errors.Count > 0)
+            {
+                nnEntry.Errors.Clear();
+                ModelState.AddModelError("NgayNhan", "Ngày nhận không hợp lệ.");
+                isAvailabilityFilterValid = false;
+                ngayNhanHasBindingError = true;
+            }
+
+            bool ngayTraHasBindingError = false;
+            if (ModelState.TryGetValue("NgayTra", out var ntEntry) && ntEntry.Errors.Count > 0)
+            {
+                ntEntry.Errors.Clear();
+                ModelState.AddModelError("NgayTra", "Ngày trả không hợp lệ.");
+                isAvailabilityFilterValid = false;
+                ngayTraHasBindingError = true;
+            }
+
+            if (!ngayNhanHasBindingError && !ngayTraHasBindingError)
+            {
+                if (ngayNhan.HasValue && !ngayTra.HasValue)
+                {
+                    ModelState.AddModelError("NgayTra", "Vui lòng nhập ngày trả.");
+                    isAvailabilityFilterValid = false;
+                }
+                else if (!ngayNhan.HasValue && ngayTra.HasValue)
+                {
+                    ModelState.AddModelError("NgayNhan", "Vui lòng nhập ngày nhận.");
+                    isAvailabilityFilterValid = false;
+                }
+                else if (ngayNhan.HasValue && ngayTra.HasValue && ngayNhan.Value.Date >= ngayTra.Value.Date)
+                {
+                    ModelState.AddModelError("NgayTra", "Ngày trả phải sau ngày nhận.");
+                    isAvailabilityFilterValid = false;
+                }
+            }
+
             var query = _context.Phongs
                 .Include(p => p.LoaiPhong)
                 .AsNoTracking()
@@ -42,16 +116,76 @@ namespace QLyDatPhongKhachSan.Controllers
                         ct.DatPhong.KhachHang.HoTen.Contains(keyword)));
             }
 
+            if (maLoaiPhong.HasValue)
+            {
+                query = query.Where(p => p.MaLoaiPhong == maLoaiPhong);
+            }
+
+            if (tang.HasValue)
+            {
+                query = query.Where(p => p.Tang == tang);
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                query = query.Where(p => p.TrangThai == trangThai);
+            }
+
+            if (isPriceFilterValid)
+            {
+                if (giaMin.HasValue)
+                {
+                    query = query.Where(p => p.DonGia >= giaMin.Value);
+                }
+                if (giaMax.HasValue)
+                {
+                    query = query.Where(p => p.DonGia <= giaMax.Value);
+                }
+            }
+
+            if (ngayNhan.HasValue && ngayTra.HasValue && isAvailabilityFilterValid)
+            {
+                var requestedStart = ngayNhan.Value.Date;
+                var requestedEnd = ngayTra.Value.Date;
+                query = query.Where(p =>
+                    !p.ChiTietDatPhongs.Any(ct =>
+                        ct.DatPhong != null
+                        && ct.DatPhong.TrangThai != "DaHuy"
+                        && ct.NgayNhan.Date < requestedEnd
+                        && ct.NgayTra.Date > requestedStart));
+            }
+
             var phongs = await query.ToListAsync();
+
+            var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
+            var trangThaiList = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Trong", Text = "Trong" },
+                new SelectListItem { Value = "DangXuLy", Text = "DangXuLy" },
+                new SelectListItem { Value = "DaDat", Text = "DaDat" },
+                new SelectListItem { Value = "DangSuDung", Text = "DangSuDung" },
+                new SelectListItem { Value = "BaoTri", Text = "BaoTri" }
+            };
+
             var viewModel = new PhongListViewModel
             {
                 Phongs = phongs,
-                Keyword = keyword
+                Keyword = keyword,
+                MaLoaiPhong = maLoaiPhong,
+                Tang = tang,
+                TrangThai = trangThai,
+                GiaMin = giaMin,
+                GiaMax = giaMax,
+                NgayNhan = ngayNhan,
+                NgayTra = ngayTra,
+                LoaiPhongList = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", maLoaiPhong),
+                TrangThaiList = new SelectList(trangThaiList, "Value", "Text", trangThai)
             };
             return View(viewModel);
         }
 
         // GET: Phong/Details/5
+        // Tạm thời cho phép xem công khai, giống Index. Xem Create/Edit/Delete.
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -88,6 +222,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Create
+        [RoleAuthorize("Admin", "NhanVien")]
         public IActionResult Create()
         {
             PopulateDropdowns();
@@ -97,6 +232,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: Phong/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Create([Bind("SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,GhiChuBaoTri")] Phong phong)
         {
             if (ModelState.IsValid)
@@ -118,6 +254,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Edit/5
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -137,6 +274,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: Phong/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int id, [Bind("MaPhong,SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,GhiChuBaoTri")] Phong phong)
         {
             if (id != phong.MaPhong)
@@ -177,6 +315,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Delete/5
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -203,6 +342,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: Phong/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             bool hasHistory = await _context.ChiTietDatPhongs.AnyAsync(ct => ct.MaPhong == id);

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using QLyDatPhongKhachSan.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace QLyDatPhongKhachSan.ViewModels
 {
@@ -12,7 +13,11 @@ namespace QLyDatPhongKhachSan.ViewModels
         public int? MaLoaiPhong { get; set; }
         public int? Tang { get; set; }
         public string? TrangThai { get; set; }
+
+        [Display(Name = "Giá tối thiểu")]
         public decimal? GiaMin { get; set; }
+
+        [Display(Name = "Giá tối đa")]
         public decimal? GiaMax { get; set; }
         public DateTime? NgayNhan { get; set; }
         public DateTime? NgayTra { get; set; }

@@ -7,17 +7,72 @@
 
 @{
     ViewData["Title"] = "Danh sách phòng";
+
+    // Chỉ Admin và Nhân viên được thêm / sửa / xóa phòng.
+    // Khách hàng chỉ xem danh sách và xem chi tiết để đặt phòng.
+    var vaiTro = Context.Session.GetVaiTro();
+    var canQuanLyPhong = vaiTro == "Admin" || vaiTro == "NhanVien";
 }
 
 <h1>Danh sách phòng</h1>
 
 <div class="d-flex justify-content-between mb-3">
-    <a asp-action="Create" class="btn btn-primary">Thêm phòng</a>
+@if (canQuanLyPhong)
+    {
+        <div class="me-3">
+            <a asp-action="Create" class="btn btn-primary">Thêm phòng</a>
+        </div>
+    }
 
-    <form method="get" asp-action="Index" class="d-flex">
-        <input type="text" name="keyword" class="form-control me-2" value="@Model.Keyword" placeholder="Tìm theo số phòng, loại phòng hoặc tên khách hàng..." style="width: 400px;" />
-        <button type="submit" class="btn btn-success me-2">Tìm kiếm</button>
-        <a asp-action="Index" class="btn btn-secondary">Xóa tìm kiếm</a>
+    <form method="get" asp-action="Index" class="flex-grow-1">
+        <div class="row gx-2 mb-2">
+            <div class="col-md-4">
+                <input type="text" name="keyword" class="form-control" value="@Model.Keyword" placeholder="Tìm theo số phòng, loại phòng hoặc tên khách hàng..." />
+            </div>
+            <div class="col-md-3">
+                <select name="maLoaiPhong" asp-items="@Model.LoaiPhongList" class="form-select">
+                    <option value="">Tất cả loại phòng</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="tang" class="form-control" value="@Model.Tang" placeholder="Tầng" min="1" max="100" />
+            </div>
+            <div class="col-md-3">
+                <select name="trangThai" asp-items="@Model.TrangThaiList" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                </select>
+            </div>
+        </div>
+        <div class="row gx-2 mb-2">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">Ngày nhận</span>
+                    <input asp-for="NgayNhan" type="date" class="form-control" />
+                </div>
+                <span asp-validation-for="NgayNhan" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">Ngày trả</span>
+                    <input asp-for="NgayTra" type="date" class="form-control" />
+                </div>
+                <span asp-validation-for="NgayTra" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <input asp-for="GiaMin" type="number" class="form-control" placeholder="Giá từ" min="0" step="any" />
+                <span asp-validation-for="GiaMin" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <input asp-for="GiaMax" type="number" class="form-control" placeholder="Giá đến" min="0" step="any" />
+                <span asp-validation-for="GiaMax" class="text-danger small"></span>
+            </div>
+        </div>
+        <div class="row gx-2">
+            <div class="col-md-12 d-flex justify-content-end align-items-start">
+                <button type="submit" class="btn btn-success me-2 px-4">Lọc</button>
+                <a asp-action="Index" class="btn btn-secondary px-4">Xóa bộ lọc</a>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -50,9 +105,12 @@
                     <td>@(item.NgayBaoTri.HasValue ? item.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "")</td>
                     <td>@item.GhiChuBaoTri</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.MaPhong" class="btn btn-sm btn-warning">Sửa</a>
                         <a asp-action="Details" asp-route-id="@item.MaPhong" class="btn btn-sm btn-info">Chi tiết</a>
-                        <a asp-action="Delete" asp-route-id="@item.MaPhong" class="btn btn-sm btn-danger">Xóa</a>
+                        @if (canQuanLyPhong)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.MaPhong" class="btn btn-sm btn-warning">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@item.MaPhong" class="btn btn-sm btn-danger">Xóa</a>
+                        }
                     </td>
                 </tr>
             }
@@ -62,7 +120,7 @@
 else
 {
     <div class="alert alert-info">
-        @if (!string.IsNullOrWhiteSpace(Model.Keyword))
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.MaLoaiPhong.HasValue || Model.Tang.HasValue || !string.IsNullOrWhiteSpace(Model.TrangThai) || Model.GiaMin.HasValue || Model.GiaMax.HasValue || Model.NgayNhan.HasValue || Model.NgayTra.HasValue)
         {
             <text>Không tìm thấy phòng phù hợp.</text>
         }

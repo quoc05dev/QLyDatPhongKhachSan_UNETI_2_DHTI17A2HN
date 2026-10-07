@@ -47,12 +47,13 @@ namespace QLyDatPhongKhachSan.Controllers
                 return View(model);
             }
 
-            // LINQ kiểm tra tài khoản trong Database
+            // Tìm theo tên đăng nhập, sau đó kiểm tra mật khẩu bằng PBKDF2.
+            // Không so sánh trực tiếp trong LINQ vì mật khẩu được lưu dạng băm.
             var taiKhoan = await _context.TaiKhoans
-                .FirstOrDefaultAsync(t => t.TenDangNhap == model.TenDangNhap && t.MatKhau == model.MatKhau);
+                .FirstOrDefaultAsync(t => t.TenDangNhap == model.TenDangNhap);
 
             // 1. Kiểm tra thông tin sai
-            if (taiKhoan == null)
+            if (taiKhoan == null || !MatKhauHelper.Verify(taiKhoan.MatKhau, model.MatKhau))
             {
                 ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không chính xác.");
                 return View(model);
@@ -129,7 +130,7 @@ namespace QLyDatPhongKhachSan.Controllers
             var taiKhoan = new TaiKhoan
             {
                 TenDangNhap = model.TenDangNhap,
-                MatKhau = model.MatKhau,
+                MatKhau = MatKhauHelper.Hash(model.MatKhau),
                 HoTen = model.HoTen,
                 Email = model.Email,
                 SoDienThoai = model.SoDienThoai,
@@ -160,17 +161,67 @@ namespace QLyDatPhongKhachSan.Controllers
             return RedirectToAction("Login");
         }
 
+        // GET: /DangNhap/DoiMatKhau
+        [HttpGet]
+        public IActionResult DoiMatKhau()
+        {
+            if (!HttpContext.Session.IsLoggedIn())
+            {
+                return RedirectToAction(nameof(Login));
+            }
+            return View(new DoiMatKhauViewModel());
+        }
+
+        // POST: /DangNhap/DoiMatKhau
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiMatKhau(DoiMatKhauViewModel model)
+        {
+            if (!HttpContext.Session.IsLoggedIn())
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var maTaiKhoan = HttpContext.Session.GetMaTaiKhoan();
+            var taiKhoan = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+            if (taiKhoan == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra mật khẩu hiện tại trước khi cho đổi
+            if (!MatKhauHelper.Verify(taiKhoan.MatKhau, model.MatKhauHienTai))
+            {
+                ModelState.AddModelError("MatKhauHienTai", "Mật khẩu hiện tại không chính xác.");
+                return View(model);
+            }
+
+            // Không cho đổi sang mật khẩu mới trùng mật khẩu cũ
+            if (MatKhauHelper.Verify(taiKhoan.MatKhau, model.MatKhauMoi))
+            {
+                ModelState.AddModelError("MatKhauMoi", "Mật khẩu mới không được trùng mật khẩu hiện tại.");
+                return View(model);
+            }
+
+            taiKhoan.MatKhau = MatKhauHelper.Hash(model.MatKhauMoi);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đổi mật khẩu thành công! Vui lòng đăng nhập lại bằng mật khẩu mới.";
+            return RedirectToAction(nameof(Login));
+        }
+
         // GET: /DangNhap/Logout
         [HttpGet]
         public IActionResult Logout()
         {
             HttpContext.Session.ClearUserSession();
-            HttpContext.Session.Clear();
-            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-            Response.Headers["Pragma"] = "no-cache";
-            Response.Headers["Expires"] = "0";
             TempData["SuccessMessage"] = "Bạn đã đăng xuất khỏi hệ thống thành công.";
-            return RedirectToAction("Login", "DangNhap");
+            return RedirectToAction("Login");
         }
 
         // GET: /DangNhap/AccessDenied
