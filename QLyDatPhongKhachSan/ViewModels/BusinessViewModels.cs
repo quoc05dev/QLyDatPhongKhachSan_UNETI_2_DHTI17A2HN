@@ -76,6 +76,17 @@ namespace QLyDatPhongKhachSan.ViewModels
         public List<PhongThongKeItem> PhongDatNhieuNhat { get; set; } = new List<PhongThongKeItem>();
         public List<DoanhThuThangItem> DoanhThuTheoThang { get; set; } = new List<DoanhThuThangItem>();
         public List<LoaiPhongThongKeItem> TyLePhongTheoLoai { get; set; } = new List<LoaiPhongThongKeItem>();
+
+        // Bổ sung cho giao diện quản trị mới (bản thiết kế Dashboard & báo cáo).
+        public List<DatPhong> DatPhongGanNhat { get; set; } = new List<DatPhong>();
+        public List<LoaiPhongOccupancyItem> TyLeSuDungTheoLoai { get; set; } = new List<LoaiPhongOccupancyItem>();
+    }
+
+    public class LoaiPhongOccupancyItem
+    {
+        public string TenLoai { get; set; } = string.Empty;
+        public int SoLuongPhong { get; set; }
+        public double TyLeSuDung { get; set; }
     }
 
     public class PhongThongKeItem

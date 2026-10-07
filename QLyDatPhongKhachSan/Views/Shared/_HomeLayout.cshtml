@@ -1,0 +1,20 @@
+@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Layout trang chủ công khai theo bản thiết kế
+    DesignProjectWithSuggestions (hero, hạng phòng, đặt phòng).
+*@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UNETI Grand Hotel & Spa</title>
+    <meta name="description" content="UNETI Grand - Nơi mỗi khoảnh khắc trở thành di sản. Đặt phòng khách sạn UNETI, hạng phòng và trải nghiệm nghỉ dưỡng 5 sao." />
+    <link rel="stylesheet" href="~/css/design.css" asp-append-version="true" />
+</head>
+<body>
+    @RenderBody()
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

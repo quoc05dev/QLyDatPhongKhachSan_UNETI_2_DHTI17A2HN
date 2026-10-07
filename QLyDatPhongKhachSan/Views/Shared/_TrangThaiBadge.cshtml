@@ -1,0 +1,30 @@
+@*
+    Hiển thị trạng thái đặt phòng / phòng dưới dạng badge màu theo bản thiết kế.
+    Nhận vào chuỗi trạng thái gốc (Ví dụ: ChoXuLy, DangSuDung, Trong, BaoTri...).
+*@
+@model string
+@{
+    var map = new Dictionary<string, (string Tone, string Text)>
+    {
+        { "ChoXuLy", ("warning", "Chờ xử lý") },
+        { "DangXuLy", ("info", "Đang xử lý") },
+        { "DaXacNhan", ("success", "Đã xác nhận") },
+        { "DangSuDung", ("info", "Đang lưu trú") },
+        { "HoanThanh", ("muted", "Hoàn thành") },
+        { "DaHuy", ("muted", "Đã hủy") },
+        { "Trong", ("success", "Sẵn sàng") },
+        { "DaDat", ("warning", "Đã đặt") },
+        { "BaoTri", ("muted", "Bảo trì") }
+    };
+    var value = Model ?? string.Empty;
+    (string Tone, string Text) badge;
+    if (map.TryGetValue(value, out var item))
+    {
+        badge = item;
+    }
+    else
+    {
+        badge = (Tone: "muted", Text: value);
+    }
+}
+<span class="status-badge status-badge--@badge.Tone"><i></i>@badge.Text</span>

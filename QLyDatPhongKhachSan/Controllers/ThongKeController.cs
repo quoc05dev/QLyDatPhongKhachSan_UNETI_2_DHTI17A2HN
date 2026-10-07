@@ -136,6 +136,36 @@ namespace QLyDatPhongKhachSan.Controllers
                 .OrderByDescending(x => x.SoLuongPhong)
                 .ToList();
 
+            // Tỷ lệ sử dụng phòng riêng cho từng loại (phòng lưu trú / phòng của loại)
+            // để vẽ danh sách "Công suất theo hạng phòng" đúng với bản thiết kế.
+            model.TyLeSuDungTheoLoai = loaiPhongs
+                .Select(lp =>
+                {
+                    var soPhongLoai = phongs.Count(p => p.MaLoaiPhong == lp.MaLoaiPhong);
+                    var dangSuDung = phongs.Count(p => p.MaLoaiPhong == lp.MaLoaiPhong && p.TrangThai == "DangSuDung");
+                    return new LoaiPhongOccupancyItem
+                    {
+                        TenLoai = lp.TenLoai,
+                        SoLuongPhong = soPhongLoai,
+                        TyLeSuDung = soPhongLoai == 0 ? 0 : Math.Round((double)dangSuDung / soPhongLoai * 100, 0)
+                    };
+                })
+                .Where(x => x.SoLuongPhong > 0)
+                .OrderByDescending(x => x.TyLeSuDung)
+                .ThenByDescending(x => x.SoLuongPhong)
+                .Take(4)
+                .ToList();
+
+            // Các đơn đặt phòng mới nhất để hiển thị bảng ở trang tổng quan.
+            model.DatPhongGanNhat = _context.DatPhongs
+                .AsNoTracking()
+                .Include(dp => dp.KhachHang)
+                .Include(dp => dp.ChiTietDatPhongs)
+                    .ThenInclude(ct => ct.Phong)
+                .OrderByDescending(dp => dp.NgayDat)
+                .Take(6)
+                .ToList();
+
             ViewBag.TyLeSuDungPhong = phongChoThue == 0
                 ? 0
                 : Math.Round((double)phongs.Count(p => p.TrangThai == "DangSuDung") / phongChoThue * 100, 1);

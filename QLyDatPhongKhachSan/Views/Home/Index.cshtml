@@ -1,8 +1,473 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Trang chủ công khai theo bản thiết kế
+    DesignProjectWithSuggestions; hạng phòng lấy dữ liệu thật từ Phong/LoaiPhong.
+*@
+@using System.Globalization
+@model QLyDatPhongKhachSan.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "_HomeLayout";
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
+    var tomorrow = DateTime.Today.AddDays(1).ToString("yyyy-MM-dd");
+    var isNhanVien = Model.VaiTro == "Admin" || Model.VaiTro == "NhanVien";
+    var activeFilter = Model.LoaiPhongFilter;
+    var gD = CultureInfo.GetCultureInfo("vi-VN");
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<main id="top">
+    <header class="site-header">
+        <div class="container nav-wrap">
+            <a class="brand" href="#top" aria-label="UNETI Grand Hotel trang chủ">
+                <span class="brand-mark">U</span>
+                <span>
+                    <strong>UNETI GRAND</strong>
+                    <small>HOTEL &amp; SPA</small>
+                </span>
+            </a>
+
+            <nav class="main-nav" id="main-nav">
+                <a href="#top" class="is-active">Trang chủ</a>
+                <a href="#rooms">Hạng phòng</a>
+                <a href="#experience">Trải nghiệm</a>
+                <a href="#story">Về chúng tôi</a>
+                @if (Model.IsLoggedIn && isNhanVien)
+                {
+                    <a class="nav-admin-link" asp-controller="ThongKe" asp-action="Dashboard">Quản trị</a>
+                }
+                else if (Model.IsLoggedIn && Model.VaiTro == "KhachHang")
+                {
+                    <a class="nav-admin-link" asp-controller="DatPhong" asp-action="Index">Lịch sử đặt phòng</a>
+                }
+            </nav>
+
+            <div class="nav-actions">
+                @if (Model.IsLoggedIn)
+                {
+                    <span class="button button--ghost desktop-action">
+                        <i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7dd3a0;margin-right:6px;"></i>@(Model.HoTen ?? Model.VaiTro)
+                    </span>
+                    <a class="button button--ghost desktop-action" asp-controller="DangNhap" asp-action="Logout">
+                        Đăng xuất
+                    </a>
+                }
+                else
+                {
+                    <a class="button button--ghost desktop-action" asp-controller="DangNhap" asp-action="Login">Đăng nhập</a>
+                }
+                <a class="button button--gold desktop-action" href="#booking">Đặt phòng</a>
+                <button aria-label="Mở menu" class="button button--icon menu-button" id="menu-button" type="button">
+                    <svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="hero">
+        <img class="hero-image"
+             src="https://images.unsplash.com/photo-1668277155756-0ebb2801f6b4?auto=format&fit=crop&w=2200&q=90"
+             alt="Không gian nghỉ dưỡng nhìn ra biển lúc hoàng hôn" />
+        <div class="hero-overlay" />
+        <div class="container hero-content">
+            <div class="eyebrow light"><span></span> Trải nghiệm nghỉ dưỡng 5 sao</div>
+            <h1>Nơi mỗi khoảnh khắc<br />trở thành <em>di sản.</em></h1>
+            <p>
+                Vẻ đẹp tinh tuyển, lòng hiếu khách chân thành và những trải nghiệm
+                được thiết kế riêng cho bạn.
+            </p>
+            <div class="hero-actions">
+                <a class="button button--gold" href="#booking">Khám phá kỳ nghỉ
+                    <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                </a>
+                <a class="text-link text-link--light" href="#rooms">Xem hạng phòng
+                    <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                </a>
+            </div>
+        </div>
+        <div class="hero-index"><span>01</span><i></i><small>03</small></div>
+    </section>
+
+    <section class="booking-shell" id="booking">
+        <div class="container">
+            <form class="booking-panel" method="get" asp-controller="Phong" asp-action="Index" id="booking-form">
+                <div class="booking-heading">
+                    <span class="booking-icon">
+                        <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3Z" /><path d="m19 15 .7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15Z" /></svg>
+                    </span>
+                    <div>
+                        <small>Đặt phòng trực tiếp</small>
+                        <strong>Giá tốt nhất được đảm bảo</strong>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="checkin">Ngày nhận phòng</label>
+                    <div class="input-wrap">
+                        <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg>
+                        <input id="checkin" name="ngayNhan" type="date" value="@today" min="@today" required />
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="checkout">Ngày trả phòng</label>
+                    <div class="input-wrap">
+                        <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg>
+                        <input id="checkout" name="ngayTra" type="date" value="@tomorrow" min="@tomorrow" required />
+                    </div>
+                </div>
+                <div class="field guest-field">
+                    <label>Số khách lưu trú</label>
+                    <div class="guest-control">
+                        <span class="guest-btn" id="guest-minus" role="button" aria-label="Giảm số khách">
+                            <svg class="icon" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /></svg>
+                        </span>
+                        <span class="guest-value" id="guest-value">
+                            <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" /></svg>
+                            2 khách
+                        </span>
+                        <span class="guest-btn" id="guest-plus" role="button" aria-label="Tăng số khách">
+                            <svg class="icon" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                        </span>
+                    </div>
+                </div>
+                <button class="button button--navy search-button" type="submit" id="search-button">
+                    <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+                    Tìm phòng trống
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <section class="section rooms-section" id="rooms">
+        <div class="container">
+            @if (activeFilter != null)
+            {
+                <div class="search-status" role="status">
+                    <span>
+                        <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 12 4 4L19 6" /></svg>
+                    </span>
+                    Hiển thị <strong>@Model.Phongs.Count</strong> hạng phòng thuộc loại @activeFilter.
+                    <a class="text-link" href="#rooms" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;">
+                        Xem tất cả
+                        <svg class="icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                    </a>
+                </div>
+            }
+
+            <div class="section-header">
+                <div>
+                    <div class="eyebrow"><span></span> Hạng phòng nổi bật</div>
+                    <h2>Không gian nghỉ dưỡng<br /><em>thượng hạng</em></h2>
+                </div>
+                <p>
+                    Mỗi căn phòng là một không gian riêng tư, nơi từng chi tiết được
+                    hoàn thiện để mang đến cảm giác thư thái trọn vẹn.
+                </p>
+            </div>
+
+            <div class="filters" aria-label="Lọc hạng phòng">
+                <a class="button button--light @(activeFilter == null ? "is-selected" : "")" href="#rooms">Tất cả</a>
+                @foreach (var loai in Model.LoaiPhongs)
+                {
+                    var selected = activeFilter != null && string.Equals(activeFilter, loai, StringComparison.OrdinalIgnoreCase);
+                    <a class="button button--light @(selected ? "is-selected" : "")" href="?loai=@Uri.EscapeDataString(loai)#rooms">@loai</a>
+                }
+            </div>
+
+            @if (Model.Phongs.Any())
+            {
+                <div class="room-grid">
+                    @foreach (var card in Model.Phongs)
+                    {
+                        <article class="room-card">
+                            <div class="room-media @(string.IsNullOrEmpty(card.HinhAnh) ? "room-media--placeholder" : "")">
+                                @if (!string.IsNullOrEmpty(card.HinhAnh))
+                                {
+                                    <img src="@card.HinhAnh" alt="Phòng @card.SoPhong" />
+                                }
+                                else
+                                {
+                                    <span class="media-monogram">@card.TenLoai.Substring(0, 1)</span>
+                                    <span class="media-caption">Phòng @card.SoPhong</span>
+                                }
+                                <span class="room-label">@card.Label</span>
+                            </div>
+                            <div class="room-body">
+                                <div class="room-title-row">
+                                    <div>
+                                        <span class="room-type">@card.TenLoai</span>
+                                        <h3>Phòng @card.SoPhong</h3>
+                                    </div>
+                                    <div class="rating">
+                                        <svg class="icon" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.8 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9L6.4 20l1.1-6.2L3 9.4l6.2-.9L12 2.8Z" /></svg>
+                                        4.9
+                                    </div>
+                                </div>
+                                <p class="room-meta">@card.Meta</p>
+                                <p class="room-description">@card.MoTa</p>
+                                <div class="room-footer">
+                                    <div class="price">
+                                        <small>Chỉ từ</small>
+                                        <strong>@card.DonGia.ToString("N0", gD)₫</strong>
+                                        <span>/ đêm</span>
+                                    </div>
+                                    <a class="button button--navy open-booking"
+                                       href="javascript:void(0);"
+                                       data-ma-phong="@card.MaPhong"
+                                       data-ten-loai="@card.TenLoai"
+                                       data-so-phong="@card.SoPhong"
+                                       data-meta="@card.Meta"
+                                       data-gia="@card.DonGia.ToString(CultureInfo.InvariantCulture)"
+                                       data-don-vi="đêm">
+                                        Chọn phòng
+                                        <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="padding:60px 0;text-align:center;color:var(--muted);">
+                    Không tìm thấy hạng phòng phù hợp. Vui lòng chọn loại phòng khác.
+                </p>
+            }
+        </div>
+    </section>
+
+    <section class="section experience-section" id="experience">
+        <div class="container experience-layout">
+            <div class="experience-copy">
+                <div class="eyebrow light"><span></span> Trải nghiệm tinh tuyển</div>
+                <h2>Hơn cả một<br />kỳ nghỉ.</h2>
+                <p>
+                    Chạm đến sự cân bằng trong từng khoảnh khắc — từ làn nước xanh
+                    trên tầng cao đến liệu trình trị liệu được cá nhân hóa.
+                </p>
+                <a class="text-link text-link--gold" href="#story">Khám phá tiện ích
+                    <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                </a>
+            </div>
+            <div class="experience-grid">
+                <article class="experience-card card-1">
+                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=86" alt="Hồ bơi chân mây" />
+                    <div class="experience-gradient" />
+                    <div>
+                        <small>01</small>
+                        <h3>Hồ bơi chân mây</h3>
+                        <p>Mở cửa hằng ngày · 06:00—22:00</p>
+                    </div>
+                </article>
+                <article class="experience-card card-2">
+                    <img src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=86" alt="Serene Spa" />
+                    <div class="experience-gradient" />
+                    <div>
+                        <small>02</small>
+                        <h3>Serene Spa</h3>
+                        <p>Liệu trình thư giãn từ thảo mộc bản địa</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="story-section" id="story">
+        <div class="container story-grid">
+            <div class="story-image">
+                <img src="https://images.unsplash.com/photo-1428515613728-6b4607e44363?auto=format&fit=crop&w=1200&q=86" alt="Không gian ẩm thực riêng tư" />
+                <div class="seal"><span>U</span><small>Since 2008</small></div>
+            </div>
+            <div class="story-copy">
+                <div class="eyebrow"><span></span> Câu chuyện UNETI Grand</div>
+                <h2>Lòng hiếu khách,<br /><em>được nâng tầm.</em></h2>
+                <p class="lead">
+                    “Chúng tôi tin rằng sự sang trọng đích thực không nằm ở những gì
+                    hào nhoáng, mà ở cảm giác được thấu hiểu.”
+                </p>
+                <p>
+                    Từ lời chào đầu tiên đến từng chi tiết nhỏ trong căn phòng, đội
+                    ngũ của chúng tôi luôn hiện diện để biến kỳ nghỉ của bạn thành một
+                    ký ức đáng trân trọng.
+                </p>
+                <div class="stats">
+                    <div><strong>18+</strong><span>Năm kiến tạo<br />trải nghiệm</span></div>
+                    <div><strong>4.9</strong><span>Điểm đánh giá<br />trung bình</span></div>
+                    <div><strong>24/7</strong><span>Dịch vụ<br />tận tâm</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="container footer-main">
+            <div>
+                <a class="brand brand--footer" href="#top">
+                    <span class="brand-mark">U</span>
+                    <span><strong>UNETI GRAND</strong><small>HOTEL &amp; SPA</small></span>
+                </a>
+                <p>Nơi vẻ đẹp tinh tuyển gặp gỡ<br />lòng hiếu khách chân thành.</p>
+            </div>
+            <div class="footer-links">
+                <div>
+                    <strong>Khám phá</strong>
+                    <a href="#rooms">Hạng phòng</a>
+                    <a asp-controller="DichVu" asp-action="Index">Ẩm thực &amp; Spa</a>
+                    <a href="#story">Về chúng tôi</a>
+                </div>
+                <div>
+                    <strong>Hỗ trợ</strong>
+                    <a href="#booking">Đặt phòng</a>
+                    <a href="#contact">Liên hệ</a>
+                    <a asp-controller="Home" asp-action="Privacy">Chính sách</a>
+                </div>
+                <div>
+                    <strong>Liên hệ</strong>
+                    <span>353 Trần Hưng Đạo, Hà Nội</span>
+                    <span>+84 24 5555 8888</span>
+                    <span>hello@unetigrand.vn</span>
+                </div>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <span>© 2026 UNETI Grand Hotel &amp; Spa</span>
+            <span>Được tạo nên với sự tận tâm.</span>
+        </div>
+    </footer>
+
+    @* Modal đặt phòng *@
+    <div class="modal-backdrop" id="booking-modal" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+            <button aria-label="Đóng" class="button button--icon modal-close" id="modal-close" type="button">
+                <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+            <div id="modal-image-wrap">
+                <img id="modal-image" src="" alt="" style="display:none;" />
+                <div id="modal-monogram" class="room-media room-media--placeholder" style="display:none;height:220px;"></div>
+            </div>
+            <div class="modal-content">
+                <div class="eyebrow"><span></span> Yêu cầu đặt phòng</div>
+                <h2 id="booking-modal-title">Phòng</h2>
+                <p id="modal-meta"></p>
+                <div class="modal-summary">
+                    <span id="modal-dates"></span>
+                    <strong id="modal-total"></strong>
+                </div>
+                <a id="modal-cta" class="button button--gold modal-submit" href="#">
+                    Tiếp tục đặt phòng
+                    <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                </a>
+                <small class="modal-note">Đặt phòng sẽ được yêu cầu xác nhận với lễ tân. Chưa cần thanh toán ở bước này.</small>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function () {
+        var gD = new Intl.NumberFormat("vi-VN");
+
+        function fmt(v) { return gD.format(v) + "₫"; }
+
+        // Menu di động
+        var nav = document.getElementById("main-nav");
+        var menuBtn = document.getElementById("menu-button");
+        if (menuBtn && nav) {
+            menuBtn.addEventListener("click", function () {
+                nav.classList.toggle("is-open");
+            });
+        }
+
+        // Bộ đếm số khách
+        var guestValue = document.getElementById("guest-value");
+        var guests = 2;
+        var guestMinus = document.getElementById("guest-minus");
+        var guestPlus = document.getElementById("guest-plus");
+        function renderGuests() {
+            if (guestValue) guestValue.innerHTML = '<svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg> ' + guests + ' khách';
+        }
+        if (guestMinus) guestMinus.addEventListener("click", function () { if (guests > 1) { guests--; renderGuests(); } });
+        if (guestPlus) guestPlus.addEventListener("click", function () { if (guests < 6) { guests++; renderGuests(); } });
+
+        // Ngày trả phải lớn hơn ngày nhận
+        var checkin = document.getElementById("checkin");
+        var checkout = document.getElementById("checkout");
+        if (checkin && checkout) {
+            checkin.addEventListener("change", function () {
+                var next = new Date(checkin.value);
+                next.setDate(next.getDate() + 1);
+                checkout.min = next.toISOString().split("T")[0];
+                if (checkout.value && new Date(checkout.value) <= new Date(checkin.value)) {
+                    checkout.value = checkout.min;
+                }
+            });
+        }
+
+        // Modal đặt phòng
+        var modal = document.getElementById("booking-modal");
+        var modalClose = document.getElementById("modal-close");
+        function closeModal() { if (modal) modal.hidden = true; }
+        if (modalClose) modalClose.addEventListener("click", closeModal);
+        if (modal) {
+            modal.addEventListener("mousedown", function (e) { if (e.target === modal) closeModal(); });
+            document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+        }
+
+        function openModal(btn) {
+            if (!modal) return;
+            var maPhong = btn.getAttribute("data-ma-phong");
+            var tenLoai = btn.getAttribute("data-ten-loai");
+            var soPhong = btn.getAttribute("data-so-phong");
+            var meta = btn.getAttribute("data-meta");
+            var gia = parseFloat(btn.getAttribute("data-gia") || "0");
+            var soDem = 1;
+            if (checkin && checkout && checkin.value && checkout.value) {
+                var diff = (new Date(checkout.value) - new Date(checkin.value)) / 86400000;
+                if (diff > 0) soDem = diff;
+            }
+            document.getElementById("booking-modal-title").textContent = tenLoai + " · Phòng " + soPhong;
+            document.getElementById("modal-meta").textContent = meta;
+            var imgWrap = document.getElementById("modal-image-wrap");
+            var img = document.getElementById("modal-image");
+            var mono = document.getElementById("modal-monogram");
+            if (img && imgWrap && mono) {
+                var src = btn.getAttribute("data-img");
+                if (src) { img.src = src; img.alt = "Phòng " + soPhong; img.style.display = "block"; mono.style.display = "none"; }
+                else { mono.style.display = "block"; mono.innerHTML = '<span class="media-monogram">' + tenLoai.substring(0, 1) + '</span><span class="media-caption">Phòng ' + soPhong + '</span>'; img.style.display = "none"; }
+            }
+            var dCheckin = new Date(checkin ? checkin.value : "");
+            var dCheckout = new Date(checkout ? checkout.value : "");
+            var dateText = "Vui lòng chọn ngày";
+            if (dCheckin.getTime() && dCheckout.getTime()) {
+                dateText = dCheckin.toLocaleDateString("vi-VN") + " — " + dCheckout.toLocaleDateString("vi-VN") + " (" + soDem + " đêm)";
+            }
+            document.getElementById("modal-dates").textContent = dateText;
+            document.getElementById("modal-total").textContent = fmt(gia * soDem);
+            var cta = document.getElementById("modal-cta");
+            cta.href = "/DatPhong/Book?maPhong=" + maPhong + (checkin && checkin.value ? "&ngayNhan=" + encodeURIComponent(checkin.value) : "") + (checkout && checkout.value ? "&ngayTra=" + encodeURIComponent(checkout.value) : "");
+            modal.hidden = false;
+        }
+
+        var openers = document.querySelectorAll(".open-booking");
+        Array.prototype.forEach.call(openers, function (btn) {
+            btn.addEventListener("click", function () { openModal(btn); });
+        });
+
+        // Đưa ảnh phòng lên nút mở modal nếu có
+        var cards = document.querySelectorAll(".room-card");
+        Array.prototype.forEach.call(cards, function (card) {
+            var imgEl = card.querySelector(".room-media img");
+            if (imgEl) {
+                var btn = card.querySelector(".open-booking");
+                if (btn) btn.setAttribute("data-img", imgEl.getAttribute("src"));
+            }
+        });
+    })();
+</script>
+<style>
+    .guest-btn { cursor: pointer; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: var(--gold-500); }
+    .guest-btn:hover { background: rgba(201, 163, 93, 0.12); }
+    .guest-value { display: inline-flex !important; }
+</style>
