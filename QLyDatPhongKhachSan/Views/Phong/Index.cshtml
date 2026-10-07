@@ -43,7 +43,21 @@
                 </select>
             </div>
         </div>
-        <div class="row gx-2">
+        <div class="row gx-2 mb-2">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">Ngày nhận</span>
+                    <input asp-for="NgayNhan" type="date" class="form-control" />
+                </div>
+                <span asp-validation-for="NgayNhan" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">Ngày trả</span>
+                    <input asp-for="NgayTra" type="date" class="form-control" />
+                </div>
+                <span asp-validation-for="NgayTra" class="text-danger small"></span>
+            </div>
             <div class="col-md-3">
                 <input asp-for="GiaMin" type="number" class="form-control" placeholder="Giá từ" min="0" step="any" />
                 <span asp-validation-for="GiaMin" class="text-danger small"></span>
@@ -52,7 +66,9 @@
                 <input asp-for="GiaMax" type="number" class="form-control" placeholder="Giá đến" min="0" step="any" />
                 <span asp-validation-for="GiaMax" class="text-danger small"></span>
             </div>
-            <div class="col-md-6 d-flex justify-content-end align-items-start">
+        </div>
+        <div class="row gx-2">
+            <div class="col-md-12 d-flex justify-content-end align-items-start">
                 <button type="submit" class="btn btn-success me-2 px-4">Lọc</button>
                 <a asp-action="Index" class="btn btn-secondary px-4">Xóa bộ lọc</a>
             </div>
@@ -104,7 +120,7 @@
 else
 {
     <div class="alert alert-info">
-        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.MaLoaiPhong.HasValue || Model.Tang.HasValue || !string.IsNullOrWhiteSpace(Model.TrangThai) || Model.GiaMin.HasValue || Model.GiaMax.HasValue)
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.MaLoaiPhong.HasValue || Model.Tang.HasValue || !string.IsNullOrWhiteSpace(Model.TrangThai) || Model.GiaMin.HasValue || Model.GiaMax.HasValue || Model.NgayNhan.HasValue || Model.NgayTra.HasValue)
         {
             <text>Không tìm thấy phòng phù hợp.</text>
         }
