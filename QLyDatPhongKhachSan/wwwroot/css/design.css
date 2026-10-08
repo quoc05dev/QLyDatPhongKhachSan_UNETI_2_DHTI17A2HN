@@ -2699,3 +2699,47 @@ a.back-to-site {
 a.row-action {
   text-decoration: none;
 }
+
+/* Modal chỉ hiển thị khi ra lệnh mở (không bị class .modal-backdrop đè display) */
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+/* 1) Header: tách khỏi ảnh hero để logo + menu luôn đọc rõ, không bị trộn với nội dung hero */
+.site-header {
+  background: linear-gradient(180deg, rgba(4, 15, 28, 0.9) 0%, rgba(4, 15, 28, 0.55) 75%, transparent 100%);
+}
+
+/* 1) Logo: tagline nằm đúng dòng riêng, không bao giờ đè lên tên thương hiệu */
+.brand > span:last-child {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+  white-space: nowrap;
+}
+
+.brand strong {
+  line-height: 1.15;
+}
+
+.brand small {
+  line-height: 1.4;
+}
+
+/* 2) Nút trên header: đồng bộ chiều cao với nhau và căn giữa theo dọc thanh nav */
+.nav-actions .desktop-action,
+.nav-actions > .button {
+  height: 42px;
+  min-height: 42px;
+  padding-inline: 20px;
+}
+
+/* 3) Hero: nội dung luôn nằm dưới khung header, không bao giờ tràn/đè lên logo */
+.hero {
+  padding-top: 82px;
+}
