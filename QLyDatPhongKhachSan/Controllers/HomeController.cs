@@ -21,6 +21,18 @@ public class HomeController : Controller
         _context = context;
     }
 
+    // Hình minh họa mẫu dự phòng theo loại phòng khi cột LoaiPhong.HinhAnh chưa có dữ liệu
+    // (lấy từ bản thiết kế DesignProjectWithSuggestions + kho ảnh Unsplash).
+    private static readonly Dictionary<string, string> AnhMauTheoLoai =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Phòng Tiêu Chuẩn"] = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1100&q=86",
+            ["Phòng Nâng Cao"] = "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1100&q=86",
+            ["Phòng Cao Cấp"] = "https://images.unsplash.com/photo-1668277155881-9d3bccb1683a?auto=format&fit=crop&w=1100&q=86",
+            ["Phòng Suite"] = "https://images.unsplash.com/photo-1556426983-5705abbfcad6?auto=format&fit=crop&w=1100&q=86",
+            ["Phòng Hai Phòng"] = "https://images.unsplash.com/photo-1776876648949-63ccabf63b10?auto=format&fit=crop&w=1100&q=86",
+        };
+
     public IActionResult Index(string? loai)
     {
         var loaiPhongs = _context.LoaiPhongs
@@ -65,7 +77,9 @@ public class HomeController : Controller
                     ? "Không gian nghỉ dưỡng tinh tuyển với đầy đủ tiện nghi, được hoàn thiện để mang đến sự thư thái trọn vẹn."
                     : loaiPhong.MoTa!,
                 DonGia = daiDien.DonGia,
-                HinhAnh = loaiPhong.HinhAnh ?? string.Empty,
+                HinhAnh = string.IsNullOrWhiteSpace(loaiPhong.HinhAnh)
+                    ? (AnhMauTheoLoai.TryGetValue(loaiPhong.TenLoai, out var anhMau) ? anhMau : string.Empty)
+                    : loaiPhong.HinhAnh!,
                 Label = labels[index % labels.Length]
             });
 
