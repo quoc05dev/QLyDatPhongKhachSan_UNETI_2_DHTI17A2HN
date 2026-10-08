@@ -1,87 +1,84 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Đăng nhập hệ thống Quản lý Đặt phòng Khách sạn.
+    Nội dung thực hiện: Giao diện Đăng nhập hệ thống Quản lý Đặt phòng Khách sạn (Module 1 Restyle UI)
 *@
 @model QLyDatPhongKhachSan.ViewModels.LoginViewModel
 
 @{
     ViewData["Title"] = "Đăng nhập";
+    Layout = "_HomeLayout";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow-lg border-0 rounded-4">
-            <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
-                <h3 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i>ĐĂNG NHẬP</h3>
-                <small class="text-white-50">Hệ thống Quản lý Khách sạn UNETI</small>
-            </div>
-            <div class="card-body p-4">
+<div style="min-height: 100vh; background: var(--navy-950); display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: var(--white); position: relative; overflow: hidden;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(4,15,28,0.95), rgba(11,27,46,0.85)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat; opacity: 0.4;"></div>
 
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-
-                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
-                        {
-                            <div>@error.ErrorMessage</div>
-                        }
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-
-                <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
-                    <div class="mb-3">
-                        <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                            <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập..." autofocus />
-                        </div>
-                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="MatKhau" class="form-label fw-semibold"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                            <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu..." />
-                        </div>
-                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label text-secondary"></label>
-                    </div>
-
-                    <div class="d-grid gap-2 mb-3">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
-                        </button>
-                    </div>
-                </form>
-
-                <div class="text-center mt-3 pt-3 border-top">
-                    <p class="mb-0 text-muted">Chưa có tài khoản khách hàng?</p>
-                    <a asp-action="Register" class="fw-bold text-decoration-none text-primary">Đăng ký ngay bây giờ</a>
-                </div>
-            </div>
+    <div style="position: relative; z-index: 2; width: 100%; max-width: 440px; background: rgba(11, 27, 46, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(201, 163, 93, 0.25); border-radius: 6px; padding: 36px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <a href="/" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--white);">
+                <span style="width: 40px; height: 44px; display: grid; place-items: center; border: 1px solid var(--gold-500); color: var(--gold-400); font-family: 'Playfair Display', serif; font-size: 24px; clip-path: polygon(0 0, 100% 0, 100% 77%, 50% 100%, 0 77%);">U</span>
+                <span style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <strong style="font-family: 'Playfair Display', serif; font-size: 18px; letter-spacing: 0.08em; line-height: 1;">UNETI GRAND</strong>
+                    <small style="color: var(--gold-400); font-size: 8px; letter-spacing: 0.36em; margin-top: 2px;">HOTEL &amp; SPA</small>
+                </span>
+            </a>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; margin: 20px 0 6px;">Đăng nhập hệ thống</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 13px; margin: 0;">Truy cập tài khoản khách hàng hoặc quản trị viên</p>
         </div>
 
-        <div class="card mt-3 border-0 bg-light text-center p-3 shadow-sm">
-            <small class="text-muted fw-bold">Tài khoản demo kiểm thử:</small>
-            <small class="text-secondary">Admin: <code>admin</code> / <code>123456</code></small>
-            <small class="text-secondary">Nhân viên: <code>nhanvien</code> / <code>123456</code></small>
-            <small class="text-secondary">Khách hàng: <code>khachhang</code> / <code>123456</code></small>
-            <small class="text-danger">Bị khóa: <code>khoa</code> / <code>123456</code></small>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div style="padding: 12px 14px; background: rgba(79, 128, 104, 0.2); border: 1px solid rgba(79, 128, 104, 0.5); border-radius: 4px; color: #82d6a5; font-size: 13px; margin-bottom: 20px; text-align: center;">
+                ✓ @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+        {
+            <div style="padding: 12px 14px; background: rgba(192, 57, 43, 0.2); border: 1px solid rgba(192, 57, 43, 0.5); border-radius: 4px; color: #f5b7b1; font-size: 13px; margin-bottom: 20px;">
+                @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
+                {
+                    <div>⚠️ @error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+            <div style="margin-bottom: 18px;">
+                <label asp-for="TenDangNhap" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;"></label>
+                <input asp-for="TenDangNhap" placeholder="Nhập tên đăng nhập..." autofocus style="width: 100%; height: 44px; padding: 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                <span asp-validation-for="TenDangNhap" style="color: #e74c3c; font-size: 11px; margin-top: 4px; display: block;"></span>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label asp-for="MatKhau" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;"></label>
+                <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu..." style="width: 100%; height: 44px; padding: 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                <span asp-validation-for="MatKhau" style="color: #e74c3c; font-size: 11px; margin-top: 4px; display: block;"></span>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.7); cursor: pointer;">
+                    <input asp-for="RememberMe" style="accent-color: var(--gold-500);" />
+                    <span>Ghi nhớ đăng nhập</span>
+                </label>
+                <a href="/" style="color: var(--gold-400); font-size: 12px; text-decoration: none;">← Về trang chủ</a>
+            </div>
+
+            <button type="submit" class="button button--gold" style="width: 100%; height: 46px; justify-content: center; font-size: 13px; letter-spacing: 0.1em;">
+                Đăng nhập hệ thống
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; color: rgba(255,255,255,0.6);">
+            Chưa có tài khoản khách hàng?
+            <a asp-action="Register" style="color: var(--gold-400); font-weight: 700; text-decoration: none; margin-left: 4px;">Đăng ký ngay</a>
+        </div>
+
+        <div style="margin-top: 20px; padding: 12px 14px; background: rgba(4, 15, 28, 0.5); border: 1px dashed rgba(201, 163, 93, 0.3); border-radius: 4px; font-size: 11px; line-height: 1.6; color: rgba(255,255,255,0.6);">
+            <strong style="color: var(--gold-400); display: block; margin-bottom: 2px;">Tài khoản demo kiểm thử:</strong>
+            Admin: <code style="color:#d9ba7c;">admin</code> / <code style="color:#d9ba7c;">123456</code> ·
+            Lễ tân: <code style="color:#d9ba7c;">nhanvien</code> / <code style="color:#d9ba7c;">123456</code> ·
+            Khách: <code style="color:#d9ba7c;">khachhang</code> / <code style="color:#d9ba7c;">123456</code>
         </div>
     </div>
 </div>

@@ -57,12 +57,6 @@ public class HomeController : Controller
             var daiDien = group.First();
             var loaiPhong = daiDien.LoaiPhong!;
 
-            if (loai != null && !string.IsNullOrWhiteSpace(loai) &&
-                !string.Equals(loaiPhong.TenLoai, loai, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
             var tienNghi = string.IsNullOrWhiteSpace(daiDien.TienNghi) ? null : daiDien.TienNghi;
             var huong = string.IsNullOrWhiteSpace(daiDien.HuongPhong) ? "View đẹp" : daiDien.HuongPhong;
 

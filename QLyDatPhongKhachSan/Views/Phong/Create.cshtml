@@ -1,92 +1,99 @@
 @*
-    Ho va ten: Dau Duc Luu
-    Ma sinh vien: 23103100114
-    Noi dung: CRUD co ban quan ly Phong - Man hinh them moi
+    Họ và tên: Đậu Đức Lưu
+    Mã sinh viên: 23103100114
+    Nội dung thực hiện: CRUD cơ bản quản lý Phòng - Màn hình thêm mới (Module 2 Restyle UI)
 *@
 @model QLyDatPhongKhachSan.Models.Phong
 
 @{
-    ViewData["Title"] = "Thêm phòng";
+    ViewData["Title"] = "Thêm phòng mới";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "rooms";
 }
 
-<h1>Thêm phòng</h1>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 2 · Thêm mới phòng</span>
+        <h1>Tạo phòng mới</h1>
+        <p>Cấu hình thông tin phòng, chọn loại phòng, đơn giá và khai báo trạng thái khởi tạo.</p>
+    </div>
+    <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+</div>
 
-<h4>Phòng</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="SoPhong" class="control-label"></label>
-                <input asp-for="SoPhong" class="form-control" />
-                <span asp-validation-for="SoPhong" class="text-danger"></span>
+<article class="dashboard-card" style="padding: 28px; max-width: 800px;">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size:12px;"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="SoPhong" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Số phòng <span style="color:red;">*</span></label>
+                <input asp-for="SoPhong" placeholder="Ví dụ: 101, 202..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="SoPhong" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="MaLoaiPhong" class="control-label"></label>
-                <select asp-for="MaLoaiPhong" class="form-select" asp-items="ViewBag.MaLoaiPhong">
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="MaLoaiPhong" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Loại phòng <span style="color:red;">*</span></label>
+                <select asp-for="MaLoaiPhong" asp-items="ViewBag.MaLoaiPhong" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;">
                     <option value="">-- Chọn loại phòng --</option>
                 </select>
-                <span asp-validation-for="MaLoaiPhong" class="text-danger"></span>
+                <span asp-validation-for="MaLoaiPhong" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Tang" class="control-label"></label>
-                <input asp-for="Tang" class="form-control" type="number" />
-                <span asp-validation-for="Tang" class="text-danger"></span>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="Tang" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Tầng <span style="color:red;">*</span></label>
+                <input asp-for="Tang" type="number" placeholder="Nhập tầng..." min="1" max="100" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="Tang" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="HuongPhong" class="control-label"></label>
-                <input asp-for="HuongPhong" class="form-control" />
-                <span asp-validation-for="HuongPhong" class="text-danger"></span>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="HuongPhong" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Hướng phòng</label>
+                <input asp-for="HuongPhong" placeholder="Hướng biển, Hướng thành phố,..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="HuongPhong" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="TienNghi" class="control-label"></label>
-                <input asp-for="TienNghi" class="form-control" />
-                <span asp-validation-for="TienNghi" class="text-danger"></span>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="DonGia" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Đơn giá ngày (₫) <span style="color:red;">*</span></label>
+                <input asp-for="DonGia" type="number" step="1000" placeholder="Đơn giá lưu trú..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="DonGia" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="DonGia" class="control-label"></label>
-                <input asp-for="DonGia" class="form-control" type="number" step="0.01" />
-                <span asp-validation-for="DonGia" class="text-danger"></span>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="TrangThai" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Trạng thái phòng <span style="color:red;">*</span></label>
+                <select asp-for="TrangThai" asp-items="ViewBag.TrangThai" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;"></select>
+                <span asp-validation-for="TrangThai" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="TrangThai" class="control-label"></label>
-                <select asp-for="TrangThai" class="form-select" asp-items="ViewBag.TrangThai"></select>
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
+
+            <div style="grid-column: span 2; display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="TienNghi" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Tiện nghi trang bị</label>
+                <input asp-for="TienNghi" placeholder="Điều hòa, Smart TV, Bồn tắm, Ban công..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="TienNghi" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="GhiChu" class="control-label"></label>
-                <textarea asp-for="GhiChu" class="form-control"></textarea>
-                <span asp-validation-for="GhiChu" class="text-danger"></span>
+
+            <div style="grid-column: span 2; display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="GhiChu" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Ghi chú chung</label>
+                <textarea asp-for="GhiChu" rows="2" placeholder="Ghi chú về phòng nếu có..." style="padding:10px 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;"></textarea>
+                <span asp-validation-for="GhiChu" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="NgayBaoTri" class="control-label"></label>
-                <input asp-for="NgayBaoTri" class="form-control" type="date" />
-                <span asp-validation-for="NgayBaoTri" class="text-danger"></span>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="NgayBaoTri" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Ngày bảo trì</label>
+                <input asp-for="NgayBaoTri" type="date" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="NgayBaoTri" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="GhiChuBaoTri" class="control-label"></label>
-                <textarea asp-for="GhiChuBaoTri" class="form-control"></textarea>
-                <span asp-validation-for="GhiChuBaoTri" class="text-danger"></span>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="GhiChuBaoTri" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Ghi chú bảo trì</label>
+                <input asp-for="GhiChuBaoTri" placeholder="Nội dung bảo trì..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="GhiChuBaoTri" style="color:#c0392b;font-size:11px;"></span>
             </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Tạo mới" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid #edf0f2;display:flex;gap:12px;">
+            <button type="submit" class="admin-primary">Tạo phòng mới</button>
+            <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">Hủy bỏ</a>
+        </div>
+    </form>
+</article>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

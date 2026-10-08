@@ -1,99 +1,109 @@
 @*
-    Ho va ten: Dau Duc Luu
-    Ma sinh vien: 23103100114
-    Noi dung: CRUD co ban quan ly Phong - Man hinh chi tiet
+    Họ và tên: Đậu Đức Lưu
+    Mã sinh viên: 23103100114
+    Nội dung thực hiện: CRUD cơ bản quản lý Phòng - Màn hình chi tiết (Module 2 Restyle UI)
 *@
 @model QLyDatPhongKhachSan.Models.Phong
 
 @{
-    ViewData["Title"] = "Chi tiết phòng";
+    ViewData["Title"] = "Chi tiết phòng " + Model.SoPhong;
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "rooms";
 
-    // Chỉ Admin và Nhân viên được sửa phòng.
     var vaiTro = Context.Session.GetVaiTro();
     var canQuanLyPhong = vaiTro == "Admin" || vaiTro == "NhanVien";
+
+    var badgeClass = Model.TrangThai switch
+    {
+        "Trống" => "status-badge--success",
+        "Đang sử dụng" or "Đang có khách" => "status-badge--info",
+        "Bảo trì" => "status-badge--warning",
+        _ => "status-badge--muted"
+    };
 }
 
-<h1>Chi tiết phòng</h1>
-
-<div>
-    <h4>Phòng @Model.SoPhong</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.SoPhong)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.SoPhong)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.MaLoaiPhong)
-        </dt>
-        <dd class="col-sm-9">
-            @(Model.LoaiPhong != null ? Model.LoaiPhong.TenLoai : "Không xác định")
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Tang)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Tang)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.HuongPhong)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.HuongPhong)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.TienNghi)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.TienNghi)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.DonGia)
-        </dt>
-        <dd class="col-sm-9">
-            @Model.DonGia.ToString("N0") VNĐ
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.GhiChu)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.GhiChu)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.NgayBaoTri)
-        </dt>
-        <dd class="col-sm-9">
-            @(Model.NgayBaoTri.HasValue ? Model.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "Không có")
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.GhiChuBaoTri)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.GhiChuBaoTri)
-        </dd>
-    </dl>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 2 · Chi tiết phòng</span>
+        <h1>Phòng @Model.SoPhong</h1>
+        <p>Chi tiết thông tin cấu hình, loại phòng, đơn giá và trạng thái vận hành hiện tại.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+        @if (canQuanLyPhong)
+        {
+            <a class="admin-primary" asp-action="Edit" asp-route-id="@Model.MaPhong" style="text-decoration:none;">Sửa thông tin</a>
+        }
+    </div>
 </div>
-<div>
-    @if (canQuanLyPhong)
-{
-    <a asp-action="Edit" asp-route-id="@Model.MaPhong" class="btn btn-warning">Sửa</a>
-}
-    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+
+<div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
+    <article class="dashboard-card" style="padding: 24px;">
+        <div class="card-heading" style="margin-bottom: 20px;">
+            <div>
+                <span>Thông tin tổng quan</span>
+                <h2>Chi tiết cấu hình phòng</h2>
+            </div>
+            <span class="status-badge @badgeClass">
+                <i></i>@Model.TrangThai
+            </span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:16px;border-top:1px solid #edf0f2;">
+            <div>
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Số phòng</small>
+                <strong style="font-size:18px;font-family:'Playfair Display',serif;color:var(--navy-950);">Phòng @Model.SoPhong</strong>
+            </div>
+
+            <div>
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Loại phòng</small>
+                <strong style="font-size:15px;color:#b28c49;">@(Model.LoaiPhong != null ? Model.LoaiPhong.TenLoai : "Chưa xác định")</strong>
+            </div>
+
+            <div>
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tầng &amp; Hướng</small>
+                <span style="font-size:13px;font-weight:500;">Tầng @Model.Tang · @(string.IsNullOrWhiteSpace(Model.HuongPhong) ? "Chưa có thông tin" : Model.HuongPhong)</span>
+            </div>
+
+            <div>
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá lưu trú</small>
+                <strong style="font-size:18px;color:#c9a35d;">@Model.DonGia.ToString("N0")₫ <small style="font-size:10px;color:#8a939d;">/ đêm</small></strong>
+            </div>
+
+            <div style="grid-column: span 2;">
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tiện nghi trang bị</small>
+                <span style="font-size:12px;color:#4a5568;">@(string.IsNullOrWhiteSpace(Model.TienNghi) ? "Chưa cập nhật danh mục tiện nghi." : Model.TienNghi)</span>
+            </div>
+
+            <div style="grid-column: span 2;">
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Ghi chú chung</small>
+                <span style="font-size:12px;color:#4a5568;">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có ghi chú." : Model.GhiChu)</span>
+            </div>
+        </div>
+    </article>
+
+    <article class="dashboard-card" style="padding: 24px;">
+        <div class="card-heading" style="margin-bottom: 20px;">
+            <div>
+                <span>Tình trạng bảo trì</span>
+                <h2>Thông tin bảo trì</h2>
+            </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;padding-top:16px;border-top:1px solid #edf0f2;">
+            <div>
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Ngày bảo trì gần nhất</small>
+                <strong style="font-size:14px;color:var(--navy-950);">
+                    @(Model.NgayBaoTri.HasValue ? Model.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "Chưa có lịch bảo trì")
+                </strong>
+            </div>
+
+            <div>
+                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Nội dung / Ghi chú bảo trì</small>
+                <p style="margin-top:4px;font-size:12px;color:#4a5568;">
+                    @(string.IsNullOrWhiteSpace(Model.GhiChuBaoTri) ? "Không có ghi chú bảo trì." : Model.GhiChuBaoTri)
+                </p>
+            </div>
+        </div>
+    </article>
 </div>

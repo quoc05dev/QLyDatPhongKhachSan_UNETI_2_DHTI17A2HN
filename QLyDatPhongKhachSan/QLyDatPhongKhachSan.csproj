@@ -18,4 +18,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- Tự động tắt instance đang chạy trước khi build để tránh lỗi MSB3027 "file đang bị khoá" -->
+  <Target Name="KillRunningApp" BeforeTargets="Build">
+    <Exec Command="taskkill /F /IM QLyDatPhongKhachSan.exe /T 2&gt;nul &amp; exit 0"
+          IgnoreStandardErrorWarningFormat="true"
+          ContinueOnError="true" />
+  </Target>
+
 </Project>

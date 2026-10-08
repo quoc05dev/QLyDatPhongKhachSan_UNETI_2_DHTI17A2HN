@@ -1,48 +1,56 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Xác nhận xóa TaiKhoan dành cho Admin.
+    Nội dung thực hiện: Giao diện Xóa TaiKhoan dành cho Admin (Module 1 Restyle UI)
 *@
 @model QLyDatPhongKhachSan.Models.TaiKhoan
 
 @{
     ViewData["Title"] = "Xóa tài khoản";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "accounts";
 }
 
-<div class="row justify-content-center mt-4">
-    <div class="col-md-7">
-        <div class="card shadow-lg border-0 rounded-4">
-            <div class="card-header bg-danger text-white py-3 rounded-top-4">
-                <h4 class="mb-0 fw-bold text-center"><i class="bi bi-exclamation-triangle-fill me-2"></i>XÁC NHẬN XÓA TÀI KHOẢN</h4>
-            </div>
-            <div class="card-body p-4 text-center">
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 1 · Thao tác xóa tài khoản</span>
+        <h1>Xóa tài khoản: @Model.TenDangNhap</h1>
+        <p>Xác nhận thao tác xóa hoặc khóa dữ liệu người dùng khỏi hệ thống.</p>
+    </div>
+    <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+</div>
 
-                <div class="alert alert-warning border-warning" role="alert">
-                    <i class="bi bi-exclamation-circle-fill me-2"></i>
-                    Bạn có chắc chắn muốn xóa tài khoản <strong>@Model.TenDangNhap</strong> (#@Model.MaTaiKhoan)? Hành động này không thể hoàn tác!
-                </div>
+<article class="dashboard-card" style="padding: 28px; max-width: 650px;">
+    <div style="padding:14px 18px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;line-height:1.6;">
+        <strong style="display:block;margin-bottom:4px;font-size:13px;">🚨 Báo xác nhận xóa:</strong>
+        Bạn có chắc chắn muốn xóa tài khoản <strong>@Model.TenDangNhap</strong> (#@Model.MaTaiKhoan) không? Thao tác này có thể ảnh hưởng đến lịch sử giao dịch liên quan.
+    </div>
 
-                <div class="card bg-light border-0 p-3 mb-4 text-start rounded-3">
-                    <div class="row g-2">
-                        <div class="col-6">Họ và tên: <strong>@Model.HoTen</strong></div>
-                        <div class="col-6">Email: <strong>@Model.Email</strong></div>
-                        <div class="col-6">Vai trò: <strong>@Model.VaiTro</strong></div>
-                        <div class="col-6">Trạng thái: <strong>@(Model.TrangThai ? "Hoạt động" : "Bị khóa")</strong></div>
-                    </div>
-                </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 0;border-top:1px solid #edf0f2;border-bottom:1px solid #edf0f2;">
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tên đăng nhập</small>
+            <strong style="font-size:15px;color:var(--navy-950);">@Model.TenDangNhap</strong>
+        </div>
 
-                <form asp-action="Delete" method="post">
-                    <input type="hidden" asp-for="MaTaiKhoan" />
-                    <div class="d-flex justify-content-center gap-3">
-                        <a asp-action="Index" class="btn btn-secondary btn-lg rounded-3">
-                            <i class="bi bi-x-circle me-1"></i>Hủy bỏ
-                        </a>
-                        <button type="submit" class="btn btn-danger btn-lg rounded-3 fw-bold">
-                            <i class="bi bi-trash me-1"></i>Xác nhận Xóa
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Vai trò</small>
+            <span style="font-size:14px;color:#b28c49;font-weight:600;">@Model.VaiTro</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Họ và tên</small>
+            <span style="font-size:13px;">@(string.IsNullOrWhiteSpace(Model.HoTen) ? "—" : Model.HoTen)</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Email</small>
+            <span style="font-size:13px;">@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</span>
         </div>
     </div>
-</div>
+
+    <form asp-action="DeleteConfirmed" asp-route-id="@Model.MaTaiKhoan" method="post" style="margin-top:24px;display:flex;gap:12px;">
+        <input type="hidden" asp-for="MaTaiKhoan" />
+        <button type="submit" class="admin-primary" style="background:#e74c3c;color:#fff;">Xác nhận xóa tài khoản</button>
+        <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">Hủy bỏ &amp; Quay lại</a>
+    </form>
+</article>

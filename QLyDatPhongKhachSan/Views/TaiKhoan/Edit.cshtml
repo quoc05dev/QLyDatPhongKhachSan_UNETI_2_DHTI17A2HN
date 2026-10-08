@@ -1,98 +1,80 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Cập nhật TaiKhoan dành cho Admin.
+    Nội dung thực hiện: Giao diện Sửa thông tin TaiKhoan cho Admin (Module 1 Restyle UI)
 *@
 @model QLyDatPhongKhachSan.Models.TaiKhoan
 
 @{
-    ViewData["Title"] = "Cập nhật tài khoản";
+    ViewData["Title"] = "Sửa tài khoản";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "accounts";
 }
 
-<div class="row justify-content-center mt-3">
-    <div class="col-md-8">
-        <div class="card shadow-lg border-0 rounded-4">
-            <div class="card-header bg-warning text-dark py-3 rounded-top-4 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>CẬP NHẬT TÀI KHOẢN #@Model.MaTaiKhoan</h4>
-                <a asp-action="Index" class="btn btn-sm btn-outline-dark rounded-3">
-                    <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
-                </a>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 1 · Cập nhật tài khoản</span>
+        <h1>Sửa tài khoản: @Model.TenDangNhap</h1>
+        <p>Cập nhật vai trò, họ tên, email, số điện thoại hoặc trạng thái khóa/mở khóa.</p>
+    </div>
+    <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+</div>
+
+<article class="dashboard-card" style="padding: 28px; max-width: 800px;">
+    <form asp-action="Edit" method="post">
+        <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size:12px;"></div>
+        <input type="hidden" asp-for="MaTaiKhoan" />
+        <input type="hidden" asp-for="TenDangNhap" />
+        <input type="hidden" asp-for="MatKhau" />
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Tên đăng nhập</label>
+                <input value="@Model.TenDangNhap" disabled style="min-height:42px;padding:0 12px;background:#f5f7f9;border:1px solid #dce0e3;border-radius:2px;font-size:12px;color:#717b85;" />
             </div>
-            <div class="card-body p-4">
 
-                <form asp-action="Edit" method="post">
-                    <input type="hidden" asp-for="MaTaiKhoan" />
-                    <input type="hidden" asp-for="NgayTao" />
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="VaiTro" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Vai trò hệ thống <span style="color:red;">*</span></label>
+                <select asp-for="VaiTro" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;">
+                    <option value="Admin">Admin (Quản trị hệ thống)</option>
+                    <option value="NhanVien">NhanVien (Lễ tân / Vận hành)</option>
+                    <option value="KhachHang">KhachHang (Khách đặt phòng)</option>
+                </select>
+                <span asp-validation-for="VaiTro" style="color:#c0392b;font-size:11px;"></span>
+            </div>
 
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="HoTen" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Họ và tên</label>
+                <input asp-for="HoTen" placeholder="Nhập họ và tên..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="HoTen" style="color:#c0392b;font-size:11px;"></span>
+            </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
-                            <input asp-for="TenDangNhap" class="form-control" />
-                            <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
-                        </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="Email" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Email</label>
+                <input asp-for="Email" type="email" placeholder="example@gmail.com" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="Email" style="color:#c0392b;font-size:11px;"></span>
+            </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="MatKhau" class="form-label fw-semibold"></label>
-                            <input name="MatKhau" id="MatKhau" class="form-control" type="password" autocomplete="new-password" />
-                            <div class="form-text">Để trống nếu không muốn thay đổi mật khẩu.</div>
-                            <span asp-validation-for="MatKhau" class="text-danger small"></span>
-                        </div>
-                    </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="SoDienThoai" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Số điện thoại</label>
+                <input asp-for="SoDienThoai" placeholder="09xxxxxxxx" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="SoDienThoai" style="color:#c0392b;font-size:11px;"></span>
+            </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="HoTen" class="form-label fw-semibold"></label>
-                            <input asp-for="HoTen" class="form-control" />
-                            <span asp-validation-for="HoTen" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Email" class="form-label fw-semibold"></label>
-                            <input asp-for="Email" class="form-control" type="email" />
-                            <span asp-validation-for="Email" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="SoDienThoai" class="form-label fw-semibold"></label>
-                            <input asp-for="SoDienThoai" class="form-control" />
-                            <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="VaiTro" class="form-label fw-semibold"></label>
-                            <select asp-for="VaiTro" class="form-select">
-                                <option value="Admin">Admin (Quản trị hệ thống)</option>
-                                <option value="NhanVien">Nhân viên quản lý</option>
-                                <option value="KhachHang">Khách hàng</option>
-                            </select>
-                            <span asp-validation-for="VaiTro" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" asp-for="TrangThai" id="flexSwitchEditTrangThai">
-                            <label class="form-check-label fw-semibold" for="flexSwitchEditTrangThai">
-                                Trạng thái hoạt động (Mở khóa cho phép đăng nhập)
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
-                        <a asp-action="Index" class="btn btn-secondary rounded-3">Hủy bỏ</a>
-                        <button type="submit" class="btn btn-warning rounded-3 fw-bold">
-                            <i class="bi bi-save me-1"></i>Cập nhật tài khoản
-                        </button>
-                    </div>
-                </form>
+            <div style="display:flex;flex-direction:column;gap:6px;justify-content:center;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--navy-900);cursor:pointer;margin-top:16px;">
+                    <input type="checkbox" asp-for="TrangThai" style="accent-color:var(--gold-500);width:16px;height:16px;" />
+                    <strong>Trạng thái tài khoản (Hoạt động)</strong>
+                </label>
             </div>
         </div>
-    </div>
-</div>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid #edf0f2;display:flex;gap:12px;">
+            <button type="submit" class="admin-primary">Lưu thay đổi</button>
+            <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">Hủy bỏ</a>
+        </div>
+    </form>
+</article>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

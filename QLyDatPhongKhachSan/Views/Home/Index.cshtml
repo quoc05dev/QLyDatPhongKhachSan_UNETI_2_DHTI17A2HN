@@ -1,4 +1,4 @@
-﻿@*
+@*
     Họ và tên: Đặng Minh Quốc
     Mã sinh viên: 23103100069
     Nội dung thực hiện: Trang chủ công khai theo bản thiết kế
@@ -55,7 +55,10 @@
                 }
                 else
                 {
-                    <a class="button button--ghost desktop-action" asp-controller="DangNhap" asp-action="Login">Đăng nhập</a>
+                    <a class="button button--ghost desktop-action" asp-controller="DangNhap" asp-action="Login">
+                        <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Đăng nhập
+                    </a>
                 }
                 <a class="button button--gold desktop-action" href="#booking">Đặt phòng</a>
                 <button aria-label="Mở menu" class="button button--icon menu-button" id="menu-button" type="button">
@@ -69,7 +72,7 @@
         <img class="hero-image"
              src="https://images.unsplash.com/photo-1668277155756-0ebb2801f6b4?auto=format&fit=crop&w=2200&q=90"
              alt="Không gian nghỉ dưỡng nhìn ra biển lúc hoàng hôn" />
-        <div class="hero-overlay" />
+        <div class="hero-overlay"></div>
         <div class="container hero-content">
             <div class="eyebrow light"><span></span> Trải nghiệm nghỉ dưỡng 5 sao</div>
             <h1>Nơi mỗi khoảnh khắc<br />trở thành <em>di sản.</em></h1>
@@ -141,19 +144,18 @@
 
     <section class="section rooms-section" id="rooms">
         <div class="container">
-            @if (activeFilter != null)
-            {
-                <div class="search-status" role="status">
-                    <span>
-                        <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 12 4 4L19 6" /></svg>
-                    </span>
-                    Hiển thị <strong>@Model.Phongs.Count</strong> hạng phòng thuộc loại @activeFilter.
-                    <a class="text-link" href="#rooms" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;">
-                        Xem tất cả
-                        <svg class="icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-                    </a>
-                </div>
-            }
+            <div class="search-status" id="search-status" role="status" style="display:@(activeFilter != null ? "flex" : "none");">
+                <span>
+                    <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 12 4 4L19 6" /></svg>
+                </span>
+                <span id="search-status-text">
+                    Hiển thị <strong>@Model.Phongs.Count</strong> hạng phòng thuộc loại <span id="search-status-loai">@activeFilter</span>.
+                </span>
+                <a class="text-link filter-btn" data-loai="all" href="#rooms" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;margin-left:8px;">
+                    Xem tất cả
+                    <svg class="icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                </a>
+            </div>
 
             <div class="section-header">
                 <div>
@@ -166,12 +168,12 @@
                 </p>
             </div>
 
-            <div class="filters" aria-label="Lọc hạng phòng">
-                <a class="button button--light @(activeFilter == null ? "is-selected" : "")" href="#rooms">Tất cả</a>
+            <div class="filters" id="room-filters" aria-label="Lọc hạng phòng">
+                <button type="button" class="button button--light filter-btn @(activeFilter == null ? "is-selected" : "")" data-loai="all">Tất cả</button>
                 @foreach (var loai in Model.LoaiPhongs)
                 {
                     var selected = activeFilter != null && string.Equals(activeFilter, loai, StringComparison.OrdinalIgnoreCase);
-                    <a class="button button--light @(selected ? "is-selected" : "")" href="?loai=@Uri.EscapeDataString(loai)#rooms">@loai</a>
+                    <button type="button" class="button button--light filter-btn @(selected ? "is-selected" : "")" data-loai="@loai">@loai</button>
                 }
             </div>
 
@@ -180,7 +182,7 @@
                 <div class="room-grid">
                     @foreach (var card in Model.Phongs)
                     {
-                        <article class="room-card">
+                        <article class="room-card" data-loai="@card.TenLoai">
                             <div class="room-media @(string.IsNullOrEmpty(card.HinhAnh) ? "room-media--placeholder" : "")">
                                 @if (!string.IsNullOrEmpty(card.HinhAnh))
                                 {
@@ -254,7 +256,7 @@
             <div class="experience-grid">
                 <article class="experience-card card-1">
                     <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=86" alt="Hồ bơi chân mây" />
-                    <div class="experience-gradient" />
+                    <div class="experience-gradient"></div>
                     <div>
                         <small>01</small>
                         <h3>Hồ bơi chân mây</h3>
@@ -263,7 +265,7 @@
                 </article>
                 <article class="experience-card card-2">
                     <img src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=86" alt="Serene Spa" />
-                    <div class="experience-gradient" />
+                    <div class="experience-gradient"></div>
                     <div>
                         <small>02</small>
                         <h3>Serene Spa</h3>
@@ -464,6 +466,57 @@
                 if (btn) btn.setAttribute("data-img", imgEl.getAttribute("src"));
             }
         });
+
+        // Lọc hạng phòng không reload / không cuộn trang
+        var filterBtns = document.querySelectorAll(".filter-btn");
+        var searchStatus = document.getElementById("search-status");
+        var searchStatusText = document.getElementById("search-status-text");
+
+        function filterRooms(targetLoai) {
+            var visibleCount = 0;
+            filterBtns.forEach(function (btn) {
+                if (btn.getAttribute("data-loai") === targetLoai) {
+                    btn.classList.add("is-selected");
+                } else {
+                    btn.classList.remove("is-selected");
+                }
+            });
+
+            cards.forEach(function (card) {
+                var cardLoai = card.getAttribute("data-loai");
+                if (targetLoai === "all" || cardLoai === targetLoai) {
+                    card.style.display = "";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            if (searchStatus && searchStatusText) {
+                if (targetLoai === "all") {
+                    searchStatus.style.display = "none";
+                } else {
+                    searchStatus.style.display = "flex";
+                    searchStatusText.innerHTML = 'Hiển thị <strong>' + visibleCount + '</strong> hạng phòng thuộc loại ' + targetLoai + '.';
+                }
+            }
+        }
+
+        filterBtns.forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                var targetLoai = btn.getAttribute("data-loai");
+                filterRooms(targetLoai);
+                var newUrl = targetLoai === "all" ? window.location.pathname + "#rooms" : window.location.pathname + "?loai=" + encodeURIComponent(targetLoai) + "#rooms";
+                history.replaceState(null, "", newUrl);
+            });
+        });
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var initialLoai = urlParams.get("loai");
+        if (initialLoai) {
+            filterRooms(initialLoai);
+        }
     })();
 </script>
 <style>

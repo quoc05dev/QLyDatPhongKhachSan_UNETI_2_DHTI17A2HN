@@ -1,93 +1,79 @@
 @*
-    Ho va ten: Dau Duc Luu
-    Ma sinh vien: 23103100114
-    Noi dung: CRUD co ban quan ly Phong - Man hinh xoa
+    Họ và tên: Đậu Đức Lưu
+    Mã sinh viên: 23103100114
+    Nội dung thực hiện: CRUD cơ bản quản lý Phòng - Màn hình xóa (Module 2 Restyle UI)
 *@
 @model QLyDatPhongKhachSan.Models.Phong
 
 @{
-    ViewData["Title"] = "Xóa phòng";
+    ViewData["Title"] = "Xóa phòng " + Model.SoPhong;
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "rooms";
     bool hasHistory = ViewBag.HasHistory ?? false;
 }
 
-<h1>Xóa phòng</h1>
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 2 · Thao tác xóa phòng</span>
+        <h1>Xóa Phòng @Model.SoPhong</h1>
+        <p>Xác nhận thao tác xóa thông tin phòng khỏi danh mục hệ thống khách sạn.</p>
     </div>
-}
+    <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+</div>
 
-@if (hasHistory)
-{
-    <div class="alert alert-warning">
-        <strong>Cảnh báo:</strong> Phòng này đã có lịch sử đặt phòng trong hệ thống. Việc xóa phòng sẽ gây mất toàn vẹn dữ liệu. 
-        Bạn không thể thực hiện thao tác xóa đối với phòng này!
-    </div>
-}
-else
-{
-    <div class="alert alert-danger">
-        <strong>Bạn có chắc chắn muốn xóa phòng này không?</strong> Thao tác này không thể hoàn tác.
-    </div>
-}
+<article class="dashboard-card" style="padding: 28px; max-width: 700px;">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="padding:12px 16px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;">
+            @TempData["ErrorMessage"]
+        </div>
+    }
 
-<div>
-    <h4>Phòng @Model.SoPhong</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.SoPhong)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.SoPhong)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.MaLoaiPhong)
-        </dt>
-        <dd class="col-sm-9">
-            @(Model.LoaiPhong != null ? Model.LoaiPhong.TenLoai : "Không xác định")
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Tang)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Tang)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.DonGia)
-        </dt>
-        <dd class="col-sm-9">
-            @Model.DonGia.ToString("N0") VNĐ
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-        
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.GhiChuBaoTri)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.GhiChuBaoTri)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete" asp-route-id="@Model.MaPhong" method="post">
+    @if (hasHistory)
+    {
+        <div style="padding:14px 18px;background:#fff9eb;border-left:4px solid #f39c12;color:#b27b16;margin-bottom:20px;font-size:12px;border-radius:2px;line-height:1.6;">
+            <strong style="display:block;margin-bottom:4px;font-size:13px;">⚠️ Cảnh báo toàn vẹn dữ liệu:</strong>
+            Phòng này đã phát sinh lịch sử đặt phòng trong hệ thống. Việc xóa phòng bị chặn để bảo đảm toàn vẹn báo cáo &amp; thống kê.
+        </div>
+    }
+    else
+    {
+        <div style="padding:14px 18px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;line-height:1.6;">
+            <strong style="display:block;margin-bottom:4px;font-size:13px;">🚨 Báo xác nhận xóa:</strong>
+            Bạn có chắc chắn muốn xóa <strong>Phòng @Model.SoPhong</strong> không? Thao tác này không thể hoàn tác.
+        </div>
+    }
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 0;border-top:1px solid #edf0f2;border-bottom:1px solid #edf0f2;">
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Số phòng</small>
+            <strong style="font-size:16px;color:var(--navy-950);">Phòng @Model.SoPhong</strong>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Loại phòng</small>
+            <span style="font-size:14px;color:#b28c49;font-weight:600;">@(Model.LoaiPhong != null ? Model.LoaiPhong.TenLoai : "—")</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tầng</small>
+            <span style="font-size:13px;">Tầng @Model.Tang</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá</small>
+            <strong style="font-size:14px;color:#c9a35d;">@Model.DonGia.ToString("N0")₫ / đêm</strong>
+        </div>
+    </div>
+
+    <form asp-action="Delete" asp-route-id="@Model.MaPhong" method="post" style="margin-top:24px;display:flex;gap:12px;">
         <input type="hidden" asp-for="MaPhong" />
-        
+
         @if (!hasHistory)
         {
-            <input type="submit" value="Xác nhận xóa" class="btn btn-danger" />
+            <button type="submit" class="admin-primary" style="background:#e74c3c;color:#fff;">Xác nhận xóa phòng</button>
         }
-        
-        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+
+        <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">Hủy bỏ &amp; Quay lại</a>
     </form>
-</div>
+</article>
