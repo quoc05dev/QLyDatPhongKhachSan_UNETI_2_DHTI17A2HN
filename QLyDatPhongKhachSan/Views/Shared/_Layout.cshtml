@@ -43,6 +43,21 @@
                                 <i class="bi bi-concierge-bell me-1"></i>Dịch vụ
                             </a>
                         </li>
+                        @* Module 3 - Sinh viên 23103100086: menu Đặt phòng của Khách hàng *@
+                        @if (Context.Session.IsLoggedIn() && Context.Session.GetVaiTro() == "KhachHang")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="DatPhong" asp-action="Index">
+                                    <i class="bi bi-calendar2-plus me-1"></i>Đặt phòng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="DatPhong" asp-action="LichSu">
+                                    <i class="bi bi-clock-history me-1"></i>Lịch sử đặt phòng
+                                </a>
+                            </li>
+                        }
+
                         @* Module 4 - Sinh viên 22103100118: menu Tiếp nhận đặt phòng *@
                         @if (Context.Session.IsLoggedIn() &&
                             (Context.Session.GetVaiTro() == "Admin" || Context.Session.GetVaiTro() == "NhanVien"))
@@ -101,6 +116,20 @@
                                 <ul class="dropdown-menu dropdown-menu-end shadow rounded-3" aria-labelledby="userDropdown">
                                     <li class="dropdown-header">Đã đăng nhập làm @Context.Session.GetTenDangNhap()</li>
                                     <li><hr class="dropdown-divider"></li>
+                                    @if (Context.Session.GetVaiTro() == "KhachHang")
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="KhachHang" asp-action="Profile">
+                                                <i class="bi bi-person-vcard me-2"></i>Hồ sơ cá nhân
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="DatPhong" asp-action="LichSu">
+                                                <i class="bi bi-calendar2-check me-2"></i>Lịch sử đặt phòng
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    }
                                     <li>
                                         <a class="dropdown-item" asp-controller="DangNhap" asp-action="DoiMatKhau">
                                             <i class="bi bi-key me-2"></i>Đổi mật khẩu
