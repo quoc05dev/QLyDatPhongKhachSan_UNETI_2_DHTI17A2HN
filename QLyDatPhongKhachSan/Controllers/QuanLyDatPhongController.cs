@@ -139,6 +139,44 @@ namespace QLyDatPhongKhachSan.Controllers
             }
             ViewBag.ThongTinKhaNangDapUng = thongTinKhaNangDapUng;
 
+            // Nghiệp vụ Lễ tân: Lấy danh sách các phòng trống cùng loại có thể đổi (nếu đơn chưa nhận phòng)
+            var phongDoiKhaDung = new Dictionary<int, List<Phong>>();
+            if (datPhong.TrangThai == "ChoXuLy" || datPhong.TrangThai == "DangXuLy" || datPhong.TrangThai == "DaXacNhan")
+            {
+                var phongDaChonTrongDon = datPhong.ChiTietDatPhongs.Select(c => c.MaPhong).ToList();
+                foreach (var ct in datPhong.ChiTietDatPhongs)
+                {
+                    if (ct.Phong != null)
+                    {
+                        int maLoai = ct.Phong.MaLoaiPhong;
+
+                        // Tìm các phòng đã bị đặt trùng lịch trong khoảng thời gian này
+                        var phongBanIds = await _context.ChiTietDatPhongs
+                            .Where(c => c.Phong!.MaLoaiPhong == maLoai
+                                        && c.MaDatPhong != id
+                                        && c.DatPhong!.TrangThai != "DaHuy"
+                                        && c.DatPhong!.TrangThai != "HoanThanh"
+                                        && datPhong.NgayNhan < c.DatPhong!.NgayTraDuKien
+                                        && datPhong.NgayTraDuKien > c.DatPhong!.NgayNhan)
+                            .Select(c => c.MaPhong)
+                            .Distinct()
+                            .ToListAsync();
+
+                        // Lấy các phòng cùng loại, không bảo trì, không bị trùng lịch và khác các phòng đã chọn trong đơn
+                        var phongTrongCungLoai = await _context.Phongs
+                            .Where(p => p.MaLoaiPhong == maLoai
+                                        && p.TrangThai != "BaoTri"
+                                        && !phongDaChonTrongDon.Contains(p.MaPhong)
+                                        && !phongBanIds.Contains(p.MaPhong))
+                            .OrderBy(p => p.SoPhong)
+                            .ToListAsync();
+
+                        phongDoiKhaDung[ct.MaChiTiet] = phongTrongCungLoai;
+                    }
+                }
+            }
+            ViewBag.PhongDoiKhaDung = phongDoiKhaDung;
+
             return View(datPhong);
         }
 
@@ -469,6 +507,99 @@ namespace QLyDatPhongKhachSan.Controllers
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Đã từ chối đơn đặt phòng!";
+            return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+        }
+
+        // 9. ĐỔI PHÒNG CÙNG LOẠI: Hỗ trợ lễ tân đổi phòng trống cùng loại cho khách trước khi check-in
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiPhong(int maDatPhong, int maChiTiet, int maPhongMoi)
+        {
+            var datPhong = await _context.DatPhongs
+                .Include(d => d.ChiTietDatPhongs)
+                    .ThenInclude(ct => ct.Phong)
+                .FirstOrDefaultAsync(d => d.MaDatPhong == maDatPhong);
+
+            if (datPhong == null) return NotFound();
+
+            if (datPhong.TrangThai != "ChoXuLy" && datPhong.TrangThai != "DangXuLy" && datPhong.TrangThai != "DaXacNhan")
+            {
+                TempData["Error"] = "Chỉ có thể đổi phòng khi đơn chưa làm thủ tục nhận phòng!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            var chiTiet = datPhong.ChiTietDatPhongs.FirstOrDefault(c => c.MaChiTiet == maChiTiet);
+            if (chiTiet == null || chiTiet.Phong == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông tin chi tiết phòng cần đổi!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            var phongCu = chiTiet.Phong;
+            var phongMoi = await _context.Phongs
+                .Include(p => p.LoaiPhong)
+                .FirstOrDefaultAsync(p => p.MaPhong == maPhongMoi);
+
+            if (phongMoi == null)
+            {
+                TempData["Error"] = "Phòng mới không tồn tại trên hệ thống!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            if (phongMoi.MaLoaiPhong != phongCu.MaLoaiPhong)
+            {
+                TempData["Error"] = "Chỉ được phép đổi sang phòng cùng Loại phòng!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            if (phongMoi.TrangThai == "BaoTri")
+            {
+                TempData["Error"] = $"Phòng {phongMoi.SoPhong} đang trong trạng thái bảo trì, không thể đổi!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            // Kiểm tra phòng mới có bị trùng lịch trong khoảng ngày này không
+            bool biTrungLich = await _context.ChiTietDatPhongs
+                .Include(c => c.DatPhong)
+                .AnyAsync(c => c.MaPhong == maPhongMoi 
+                               && c.MaDatPhong != maDatPhong
+                               && c.DatPhong!.TrangThai != "DaHuy" 
+                               && c.DatPhong!.TrangThai != "HoanThanh"
+                               && datPhong.NgayNhan < c.DatPhong!.NgayTraDuKien 
+                               && datPhong.NgayTraDuKien > c.DatPhong!.NgayNhan);
+
+            if (biTrungLich)
+            {
+                TempData["Error"] = $"Phòng {phongMoi.SoPhong} đã có khách khác đặt trong thời gian này!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            // Kiểm tra xem phòng mới có bị trùng với phòng nào khác trong cùng đơn đặt này không
+            if (datPhong.ChiTietDatPhongs.Any(c => c.MaChiTiet != maChiTiet && c.MaPhong == maPhongMoi))
+            {
+                TempData["Error"] = $"Phòng {phongMoi.SoPhong} đã được gán cho phòng khác trong chính đơn đặt này!";
+                return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
+            }
+
+            // Giải phóng phòng cũ nếu đơn đã xác nhận
+            if (datPhong.TrangThai == "DaXacNhan")
+            {
+                phongCu.TrangThai = "Trong";
+                phongMoi.TrangThai = "DaDat";
+            }
+
+            string soPhongCu = phongCu.SoPhong;
+            chiTiet.MaPhong = maPhongMoi;
+            chiTiet.Phong = phongMoi;
+            chiTiet.DonGia = phongMoi.DonGia;
+
+            // Ghi nhật ký đổi phòng vào GhiChu
+            var nguoiThucHien = HttpContext.Session.GetString("TenDangNhap") ?? "Lễ tân";
+            string logDoi = $"Đổi từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong} bởi {nguoiThucHien} lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
+            datPhong.GhiChu = string.IsNullOrEmpty(datPhong.GhiChu) ? logDoi : $"{datPhong.GhiChu} | {logDoi}";
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"Đã đổi thành công từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong}!";
             return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
         }
     }
