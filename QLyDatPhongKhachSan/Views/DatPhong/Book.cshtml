@@ -16,7 +16,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Phong" asp-action="Index">Danh sách phòng</a></li>
+            <li class="breadcrumb-item"><a asp-controller="DatPhong" asp-action="Index">Đặt phòng</a></li>
             <li class="breadcrumb-item active" aria-current="page">Đặt phòng @Model.SoPhong</li>
         </ol>
     </nav>
@@ -48,6 +48,42 @@
         <input type="hidden" asp-for="Tang" />
         <input type="hidden" asp-for="HuongPhong" />
         <input type="hidden" asp-for="TienNghi" />
+
+        @if (ViewBag.DanhSachPhongTrong != null)
+        {
+            var danhSachPhong = (IEnumerable<QLyDatPhongKhachSan.Models.Phong>)ViewBag.DanhSachPhongTrong;
+            if (danhSachPhong.Any())
+            {
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border-start border-primary border-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <label for="selectDoiPhong" class="form-label fw-bold text-primary mb-0 fs-5">
+                            <i class="bi bi-door-open-fill me-2"></i>Chọn phòng đặt
+                        </label>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                            <i class="bi bi-check-circle-fill me-1"></i>Đang có @danhSachPhong.Count() phòng trống sẵn sàng
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-3">Bạn có thể chọn phòng bên dưới hoặc giữ nguyên phòng mặc định đã chọn:</p>
+                    <select id="selectDoiPhong" class="form-select form-select-lg fw-semibold" onchange="if(this.value) window.location.href='@Url.Action("Book", "DatPhong")?maPhong=' + this.value;">
+                        @foreach (var p in danhSachPhong)
+                        {
+                            if (p.MaPhong == Model.MaPhong)
+                            {
+                                <option value="@p.MaPhong" selected>
+                                    Phòng @p.SoPhong - @(p.LoaiPhong?.TenLoai ?? "Tiêu chuẩn") - @p.DonGia.ToString("N0") VNĐ/đêm (Tầng @p.Tang, Tối đa @(p.LoaiPhong?.SoNguoiToiDa ?? 2) người)
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@p.MaPhong">
+                                    Phòng @p.SoPhong - @(p.LoaiPhong?.TenLoai ?? "Tiêu chuẩn") - @p.DonGia.ToString("N0") VNĐ/đêm (Tầng @p.Tang, Tối đa @(p.LoaiPhong?.SoNguoiToiDa ?? 2) người)
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+        }
 
         <div class="row g-4">
             <!-- Cột trái: Form nhập thông tin đặt phòng -->
@@ -205,8 +241,8 @@
                     <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm mb-2">
                         ✅ Xác nhận đặt phòng
                     </button>
-                    <a asp-controller="Phong" asp-action="Index" class="btn btn-outline-secondary w-100">
-                        ⬅️ Chọn phòng khác
+                    <a asp-controller="DatPhong" asp-action="Index" class="btn btn-outline-secondary w-100">
+                        ⬅️ Quay lại
                     </a>
                 </div>
             </div>

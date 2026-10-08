@@ -26,7 +26,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // GET: Phong
         // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
         // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
-        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra)
+        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra, string? sortOrder)
         {
             bool isPriceFilterValid = true;
 
@@ -155,6 +155,33 @@ namespace QLyDatPhongKhachSan.Controllers
                         && ct.NgayTra.Date > requestedStart));
             }
 
+            switch (sortOrder)
+            {
+                case "soPhong_desc":
+                    query = query.OrderByDescending(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+                case "donGia_asc":
+                    query = query.OrderBy(p => p.DonGia).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+                case "donGia_desc":
+                    query = query.OrderByDescending(p => p.DonGia).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+                case "tang_asc":
+                    query = query.OrderBy(p => p.Tang).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+                case "tang_desc":
+                    query = query.OrderByDescending(p => p.Tang).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+                case "loaiPhong_asc":
+                    query = query.OrderBy(p => p.LoaiPhong != null ? p.LoaiPhong.TenLoai : "").ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+                case "soPhong_asc":
+                default:
+                    sortOrder = "soPhong_asc";
+                    query = query.OrderBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
+                    break;
+            }
+
             var phongs = await query.ToListAsync();
 
             var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
@@ -178,6 +205,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 GiaMax = giaMax,
                 NgayNhan = ngayNhan,
                 NgayTra = ngayTra,
+                SortOrder = sortOrder,
                 LoaiPhongList = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", maLoaiPhong),
                 TrangThaiList = new SelectList(trangThaiList, "Value", "Text", trangThai)
             };

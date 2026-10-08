@@ -68,7 +68,21 @@
             </div>
         </div>
         <div class="row gx-2">
-            <div class="col-md-12 d-flex justify-content-end align-items-start">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text">Sắp xếp</span>
+                    <select asp-for="SortOrder" class="form-select">
+                        <option value="soPhong_asc">Số phòng: Tăng dần</option>
+                        <option value="soPhong_desc">Số phòng: Giảm dần</option>
+                        <option value="donGia_asc">Đơn giá: Tăng dần</option>
+                        <option value="donGia_desc">Đơn giá: Giảm dần</option>
+                        <option value="tang_asc">Tầng: Tăng dần</option>
+                        <option value="tang_desc">Tầng: Giảm dần</option>
+                        <option value="loaiPhong_asc">Loại phòng: A-Z</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-8 d-flex justify-content-end align-items-start">
                 <button type="submit" class="btn btn-success me-2 px-4">Lọc</button>
                 <a asp-action="Index" class="btn btn-secondary px-4">Xóa bộ lọc</a>
             </div>
