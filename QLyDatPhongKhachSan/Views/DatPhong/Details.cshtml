@@ -16,7 +16,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-controller="DatPhong" asp-action="Index">Lịch sử đặt phòng</a></li>
+            <li class="breadcrumb-item"><a asp-controller="DatPhong" asp-action="LichSu">Lịch sử đặt phòng</a></li>
             <li class="breadcrumb-item active" aria-current="page">Đơn #@Model.DatPhong.MaDatPhong.ToString("D4")</li>
         </ol>
     </nav>
@@ -305,7 +305,7 @@
 
                 <div class="d-grid gap-2">
                     <!-- Nút quay lại danh sách -->
-                    <a asp-action="Index" class="btn btn-outline-secondary">
+                    <a asp-action="LichSu" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-1"></i>Về danh sách lịch sử
                     </a>
 
