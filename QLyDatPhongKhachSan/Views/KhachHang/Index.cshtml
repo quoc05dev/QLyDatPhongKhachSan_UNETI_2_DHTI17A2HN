@@ -1,0 +1,402 @@
+@*
+// ==========================================
+// Họ và tên: Anh Tuấn
+// Mã sinh viên: 23103100086
+// Nội dung thực hiện: Module 3 - Giao diện Quản lý danh sách Khách hàng (CRUD, Tìm kiếm, Lọc, Phân trang LINQ)
+// ==========================================
+*@
+
+@model QLyDatPhongKhachSan.ViewModels.KhachHangListViewModel
+
+@{
+    ViewData["Title"] = "Quản lý Khách hàng";
+}
+
+<div class="container-fluid py-4">
+    <!-- Tiêu đề & Nút Thêm mới -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                <i class="bi bi-person-lines-fill me-2"></i>QUẢN LÝ KHÁCH HÀNG
+            </h2>
+            <p class="text-muted mb-0">Theo dõi danh sách khách hàng, quản lý hồ sơ, tiếp nhận khách vãng lai và lịch sử giao dịch</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm fw-semibold">
+                <i class="bi bi-person-plus-fill me-2"></i>Thêm Khách Hàng Mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông báo kết quả thao tác -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+            <div class="flex-grow-1">
+                <strong>Thành công!</strong> @TempData["SuccessMessage"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
+            <div class="flex-grow-1">
+                <strong>Thông báo:</strong> @TempData["ErrorMessage"]
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thống kê tóm tắt nhanh -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100 bg-white">
+                <div class="text-muted small fw-semibold">Tổng khách hàng</div>
+                <div class="fs-3 fw-bold text-primary">@Model.TongKhachHang</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100 bg-success-subtle border-start border-success border-4">
+                <div class="text-success small fw-semibold">Đang hoạt động</div>
+                <div class="fs-3 fw-bold text-success">@Model.SoKhachHoatDong</div>
+            </div>
+        </div>
+        <div class="col-4 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100 bg-danger-subtle">
+                <div class="text-danger small fw-semibold">Bị khóa / Tạm dừng</div>
+                <div class="fs-3 fw-bold text-danger">@Model.SoKhachBiKhoa</div>
+            </div>
+        </div>
+        <div class="col-4 col-md-6 col-lg">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100 bg-info-subtle">
+                <div class="text-info-emphasis small fw-semibold">Có tài khoản online</div>
+                <div class="fs-3 fw-bold text-info-emphasis">@Model.SoKhachCoTaiKhoan</div>
+            </div>
+        </div>
+        <div class="col-4 col-md-6 col-lg">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100 bg-secondary-subtle">
+                <div class="text-secondary small fw-semibold">Khách vãng lai</div>
+                <div class="fs-3 fw-bold text-secondary">@Model.SoKhachVangLai</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khối Tìm kiếm & Bộ Lọc Nâng Cao -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get" asp-action="Index">
+                <input type="hidden" name="page" value="1" />
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="bi bi-search me-1"></i>Tìm kiếm:
+                        </label>
+                        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control rounded-3" 
+                               placeholder="Họ tên, CCCD, SĐT, Email..." />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="bi bi-gender-ambiguous me-1"></i>Giới tính:
+                        </label>
+                        <select name="gioiTinhFilter" class="form-select rounded-3">
+                            <option value="">-- Tất cả --</option>
+                            <option value="Nam" selected="@(Model.GioiTinhFilter == "Nam" ? "selected" : null)">Nam</option>
+                            <option value="Nữ" selected="@(Model.GioiTinhFilter == "Nữ" ? "selected" : null)">Nữ</option>
+                            <option value="Khác" selected="@(Model.GioiTinhFilter == "Khác" ? "selected" : null)">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="bi bi-shield-check me-1"></i>Trạng thái:
+                        </label>
+                        <select name="statusFilter" class="form-select rounded-3">
+                            <option value="">-- Tất cả --</option>
+                            <option value="true" selected="@(Model.StatusFilter == true ? "selected" : null)">🟢 Hoạt động</option>
+                            <option value="false" selected="@(Model.StatusFilter == false ? "selected" : null)">🔴 Bị khóa</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="bi bi-person-badge me-1"></i>Loại khách:
+                        </label>
+                        <select name="coTaiKhoanFilter" class="form-select rounded-3">
+                            <option value="">-- Tất cả --</option>
+                            <option value="co" selected="@(Model.CoTaiKhoanFilter == "co" ? "selected" : null)">Có tài khoản</option>
+                            <option value="khong" selected="@(Model.CoTaiKhoanFilter == "khong" ? "selected" : null)">Khách vãng lai</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">
+                            <i class="bi bi-sort-down me-1"></i>Sắp xếp:
+                        </label>
+                        <select name="sortOrder" class="form-select rounded-3">
+                            <option value="id_desc" selected="@(Model.SortOrder == "id_desc" ? "selected" : null)">Mới nhất (Mã KH giảm)</option>
+                            <option value="id_asc" selected="@(Model.SortOrder == "id_asc" ? "selected" : null)">Cũ nhất (Mã KH tăng)</option>
+                            <option value="name_asc" selected="@(Model.SortOrder == "name_asc" ? "selected" : null)">Tên khách hàng (A ➔ Z)</option>
+                            <option value="name_desc" selected="@(Model.SortOrder == "name_desc" ? "selected" : null)">Tên khách hàng (Z ➔ A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <span class="text-muted small">
+                        Hiển thị <strong>@Model.Items.Count</strong> / <strong>@Model.TotalItems</strong> khách hàng phù hợp
+                        (Trang <strong>@Model.PageIndex</strong> / <strong>@Model.TotalPages</strong>)
+                    </span>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-funnel me-1"></i>Lọc danh sách
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng Danh Sách Khách Hàng -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-body p-0">
+            @if (Model.Items == null || !Model.Items.Any())
+            {
+                <div class="text-center py-5 px-3">
+                    <div class="mb-3">
+                        <i class="bi bi-person-x text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-secondary mb-2">Không tìm thấy khách hàng nào</h4>
+                    <p class="text-muted mb-4">Thử thay đổi từ khóa tìm kiếm hoặc điều kiện lọc để hiển thị kết quả.</p>
+                    <a asp-action="Index" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Xem tất cả khách hàng
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 text-center" style="width: 70px;">Mã</th>
+                                <th>Khách hàng</th>
+                                <th>CCCD / Hộ chiếu</th>
+                                <th>Thông tin liên hệ</th>
+                                <th>Quốc tịch</th>
+                                <th class="text-center">Loại khách</th>
+                                <th class="text-center">Lịch sử đặt</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-end pe-4" style="min-width: 170px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var kh in Model.Items)
+                            {
+                                string avatarLetter = !string.IsNullOrWhiteSpace(kh.HoTen) ? kh.HoTen.Trim().Substring(0, 1).ToUpper() : "K";
+                                int bookingCount = kh.DatPhongs?.Count ?? 0;
+
+                                <tr>
+                                    <!-- Mã KH -->
+                                    <td class="ps-4 text-center fw-bold text-secondary">
+                                        #@kh.MaKhachHang.ToString("D4")
+                                    </td>
+
+                                    <!-- Khách hàng -->
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center me-3 shadow-sm"
+                                                 style="width: 42px; height: 42px; font-size: 1.1rem; flex-shrink: 0;">
+                                                @avatarLetter
+                                            </div>
+                                            <div>
+                                                <a asp-action="Details" asp-route-id="@kh.MaKhachHang" class="fw-bold text-dark text-decoration-none">
+                                                    @kh.HoTen
+                                                </a>
+                                                <div class="small text-muted">
+                                                    <span>@(kh.GioiTinh ?? "Chưa rõ")</span>
+                                                    @if (kh.NgaySinh.HasValue)
+                                                    {
+                                                        <span> • @kh.NgaySinh.Value.ToString("dd/MM/yyyy")</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- CCCD -->
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-2 py-1 fw-mono">
+                                            <i class="bi bi-card-text me-1 text-muted"></i>@kh.CCCD
+                                        </span>
+                                    </td>
+
+                                    <!-- Liên hệ -->
+                                    <td>
+                                        <div>
+                                            <i class="bi bi-telephone text-primary me-1"></i>
+                                            <a href="tel:@kh.SoDienThoai" class="text-decoration-none text-dark fw-semibold">
+                                                @kh.SoDienThoai
+                                            </a>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(kh.Email))
+                                        {
+                                            <div class="small text-muted text-truncate" style="max-width: 200px;">
+                                                <i class="bi bi-envelope text-muted me-1"></i>@kh.Email
+                                            </div>
+                                        }
+                                    </td>
+
+                                    <!-- Quốc tịch -->
+                                    <td>
+                                        <span class="small">@(string.IsNullOrEmpty(kh.QuocTich) ? "Việt Nam" : kh.QuocTich)</span>
+                                    </td>
+
+                                    <!-- Loại khách (Có TK / Vãng lai) -->
+                                    <td class="text-center">
+                                        @if (kh.TaiKhoan != null)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold" title="Tài khoản: @kh.TaiKhoan.TenDangNhap">
+                                                <i class="bi bi-person-check-fill me-1"></i>Có TK
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-1 fw-semibold">
+                                                <i class="bi bi-person-dash me-1"></i>Vãng lai
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <!-- Số đơn đặt phòng -->
+                                    <td class="text-center">
+                                        @if (bookingCount > 0)
+                                        {
+                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1 rounded-pill">
+                                                <i class="bi bi-journal-bookmark me-1"></i>@bookingCount đơn
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">0 đơn</span>
+                                        }
+                                    </td>
+
+                                    <!-- Trạng thái -->
+                                    <td class="text-center">
+                                        @if (kh.TrangThai)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-semibold">
+                                                <i class="bi bi-lock-fill me-1"></i>Bị khóa
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <!-- Nút Thao tác -->
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm shadow-sm" role="group">
+                                            <!-- Xem chi tiết -->
+                                            <a asp-action="Details" asp-route-id="@kh.MaKhachHang" 
+                                               class="btn btn-outline-primary" title="Xem chi tiết hồ sơ & lịch sử">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+
+                                            <!-- Chỉnh sửa -->
+                                            <a asp-action="Edit" asp-route-id="@kh.MaKhachHang" 
+                                               class="btn btn-outline-secondary" title="Chỉnh sửa thông tin">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <!-- Khóa / Mở khóa nhanh -->
+                                            <form asp-action="ToggleStatus" asp-route-id="@kh.MaKhachHang" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn @(kh.TrangThai ? "btn-outline-warning" : "btn-outline-success")" 
+                                                        title="@(kh.TrangThai ? "Khóa khách hàng này" : "Mở khóa khách hàng")"
+                                                        onclick="return confirm('Bạn có chắc muốn @(kh.TrangThai ? "khóa" : "mở khóa") khách hàng @kh.HoTen?');">
+                                                    <i class="bi @(kh.TrangThai ? "bi-lock" : "bi-unlock")"></i>
+                                                </button>
+                                            </form>
+
+                                            <!-- Xóa -->
+                                            <a asp-action="Delete" asp-route-id="@kh.MaKhachHang" 
+                                               class="btn btn-outline-danger" title="Xóa khách hàng">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Thanh phân trang (LINQ Paging Bar) -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="card-footer bg-white border-0 py-3 d-flex flex-wrap justify-content-between align-items-center">
+                        <div class="small text-muted mb-2 mb-sm-0">
+                            Hiển thị trang <strong>@Model.PageIndex</strong> / <strong>@Model.TotalPages</strong> 
+                            (Tổng cộng <strong>@Model.TotalItems</strong> khách hàng)
+                        </div>
+                        <nav aria-label="Phân trang danh sách khách hàng">
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Nút Trang trước -->
+                                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                                    <a class="page-link rounded-start-pill" asp-action="Index"
+                                       asp-route-page="@(Model.PageIndex - 1)"
+                                       asp-route-searchTerm="@Model.SearchTerm"
+                                       asp-route-gioiTinhFilter="@Model.GioiTinhFilter"
+                                       asp-route-statusFilter="@Model.StatusFilter"
+                                       asp-route-coTaiKhoanFilter="@Model.CoTaiKhoanFilter"
+                                       asp-route-sortOrder="@Model.SortOrder">
+                                        <i class="bi bi-chevron-left me-1"></i>Trước
+                                    </a>
+                                </li>
+
+                                <!-- Các số trang -->
+                                @for (int p = 1; p <= Model.TotalPages; p++)
+                                {
+                                    <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                                        <a class="page-link" asp-action="Index"
+                                           asp-route-page="@p"
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-gioiTinhFilter="@Model.GioiTinhFilter"
+                                           asp-route-statusFilter="@Model.StatusFilter"
+                                           asp-route-coTaiKhoanFilter="@Model.CoTaiKhoanFilter"
+                                           asp-route-sortOrder="@Model.SortOrder">@p</a>
+                                    </li>
+                                }
+
+                                <!-- Nút Trang sau -->
+                                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                                    <a class="page-link rounded-end-pill" asp-action="Index"
+                                       asp-route-page="@(Model.PageIndex + 1)"
+                                       asp-route-searchTerm="@Model.SearchTerm"
+                                       asp-route-gioiTinhFilter="@Model.GioiTinhFilter"
+                                       asp-route-statusFilter="@Model.StatusFilter"
+                                       asp-route-coTaiKhoanFilter="@Model.CoTaiKhoanFilter"
+                                       asp-route-sortOrder="@Model.SortOrder">
+                                        Sau <i class="bi bi-chevron-right ms-1"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
