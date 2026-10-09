@@ -130,6 +130,65 @@
             }
         </tbody>
     </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@(Model.CurrentPage - 1)"
+                       asp-route-keyword="@Model.Keyword"
+                       asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                       asp-route-tang="@Model.Tang"
+                       asp-route-trangThai="@Model.TrangThai"
+                       asp-route-giaMin="@Model.GiaMin"
+                       asp-route-giaMax="@Model.GiaMax"
+                       asp-route-ngayNhan="@(Model.NgayNhan?.ToString("yyyy-MM-dd"))"
+                       asp-route-ngayTra="@(Model.NgayTra?.ToString("yyyy-MM-dd"))"
+                       asp-route-sortOrder="@Model.SortOrder">
+                        Trước
+                    </a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-keyword="@Model.Keyword"
+                           asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                           asp-route-tang="@Model.Tang"
+                           asp-route-trangThai="@Model.TrangThai"
+                           asp-route-giaMin="@Model.GiaMin"
+                           asp-route-giaMax="@Model.GiaMax"
+                           asp-route-ngayNhan="@(Model.NgayNhan?.ToString("yyyy-MM-dd"))"
+                           asp-route-ngayTra="@(Model.NgayTra?.ToString("yyyy-MM-dd"))"
+                           asp-route-sortOrder="@Model.SortOrder">
+                            @i
+                        </a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@(Model.CurrentPage + 1)"
+                       asp-route-keyword="@Model.Keyword"
+                       asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                       asp-route-tang="@Model.Tang"
+                       asp-route-trangThai="@Model.TrangThai"
+                       asp-route-giaMin="@Model.GiaMin"
+                       asp-route-giaMax="@Model.GiaMax"
+                       asp-route-ngayNhan="@(Model.NgayNhan?.ToString("yyyy-MM-dd"))"
+                       asp-route-ngayTra="@(Model.NgayTra?.ToString("yyyy-MM-dd"))"
+                       asp-route-sortOrder="@Model.SortOrder">
+                        Sau
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 }
 else
 {

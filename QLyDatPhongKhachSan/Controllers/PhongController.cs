@@ -26,8 +26,14 @@ namespace QLyDatPhongKhachSan.Controllers
         // GET: Phong
         // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
         // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
-        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra, string? sortOrder)
+        public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra, string? sortOrder, int page = 1)
         {
+            if (ModelState.TryGetValue("page", out var pageEntry) && pageEntry.Errors.Count > 0)
+            {
+                pageEntry.Errors.Clear();
+                page = 1;
+            }
+
             bool isPriceFilterValid = true;
 
             // Lỗi binding (nhập chữ thay vì số) của framework là tiếng Anh,
@@ -155,6 +161,23 @@ namespace QLyDatPhongKhachSan.Controllers
                         && ct.NgayTra.Date > requestedStart));
             }
 
+            int totalItems = await query.CountAsync();
+            int pageSize = new PhongListViewModel().PageSize;
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            if (totalPages == 0)
+            {
+                page = 1;
+            }
+            else if (page > totalPages)
+            {
+                page = totalPages;
+            }
+            else if (page < 1)
+            {
+                page = 1;
+            }
+
             switch (sortOrder)
             {
                 case "soPhong_desc":
@@ -182,7 +205,10 @@ namespace QLyDatPhongKhachSan.Controllers
                     break;
             }
 
-            var phongs = await query.ToListAsync();
+            var phongs = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
             var trangThaiList = new List<SelectListItem>
@@ -197,6 +223,9 @@ namespace QLyDatPhongKhachSan.Controllers
             var viewModel = new PhongListViewModel
             {
                 Phongs = phongs,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
                 Keyword = keyword,
                 MaLoaiPhong = maLoaiPhong,
                 Tang = tang,
