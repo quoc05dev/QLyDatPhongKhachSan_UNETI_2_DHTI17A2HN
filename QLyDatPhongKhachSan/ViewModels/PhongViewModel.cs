@@ -1,3 +1,6 @@
+// Ho va ten: Dau Duc Luu
+// Ma sinh vien: 23103100114
+// Noi dung: ViewModel danh sach Phong - Search, Filter, Sort, Pagination
 using Microsoft.AspNetCore.Mvc.Rendering;
 using QLyDatPhongKhachSan.Models;
 using System.ComponentModel.DataAnnotations;

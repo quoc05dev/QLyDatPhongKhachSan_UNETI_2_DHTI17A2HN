@@ -65,7 +65,15 @@
             @Html.DisplayNameFor(model => model.TrangThai)
         </dt>
         <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.TrangThai)
+            @if (Model.TrangThai == "Trong")
+            {
+                <span class="badge bg-success">Khả dụng</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Không khả dụng</span>
+            }
+            <span class="ms-2 text-muted">(@Html.DisplayFor(model => model.TrangThai))</span>
         </dd>
         
         <dt class="col-sm-3">
