@@ -115,7 +115,18 @@
                     <td>@item.Tang</td>
                     <td>@item.HuongPhong</td>
                     <td>@item.DonGia.ToString("N0") VNĐ</td>
-                    <td>@item.TrangThai</td>
+                    <td>
+                        @if (item.TrangThai == "Trong")
+                        {
+                            <span class="badge bg-success">Khả dụng</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Không khả dụng</span>
+                        }
+                        <br />
+                        <small class="text-muted">(@item.TrangThai)</small>
+                    </td>
                     <td>@(item.NgayBaoTri.HasValue ? item.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "")</td>
                     <td>@item.GhiChuBaoTri</td>
                     <td>
