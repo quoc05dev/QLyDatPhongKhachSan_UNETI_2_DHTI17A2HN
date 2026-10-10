@@ -58,6 +58,17 @@
                             </li>
                         }
 
+                        @* Module 3 - Sinh viên 23103100086: menu Quản lý Khách hàng (Admin & Nhân viên) *@
+                        @if (Context.Session.IsLoggedIn() &&
+                            (Context.Session.GetVaiTro() == "Admin" || Context.Session.GetVaiTro() == "NhanVien"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-semibold" asp-area="" asp-controller="KhachHang" asp-action="Index">
+                                    <i class="bi bi-person-lines-fill me-1"></i>Quản lý Khách hàng
+                                </a>
+                            </li>
+                        }
+
                         @* Module 4 - Sinh viên 22103100118: menu Tiếp nhận đặt phòng *@
                         @if (Context.Session.IsLoggedIn() &&
                             (Context.Session.GetVaiTro() == "Admin" || Context.Session.GetVaiTro() == "NhanVien"))
@@ -92,6 +103,11 @@
                                         <li>
                                             <a class="dropdown-item fw-semibold text-primary" asp-controller="TaiKhoan" asp-action="Index">
                                                 <i class="bi bi-people-fill me-2"></i>Quản lý Tài khoản
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item fw-semibold" asp-controller="KhachHang" asp-action="Index">
+                                                <i class="bi bi-person-lines-fill me-2"></i>Quản lý Khách hàng
                                             </a>
                                         </li>
                                         <li>
