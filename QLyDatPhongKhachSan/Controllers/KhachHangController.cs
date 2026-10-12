@@ -232,12 +232,212 @@ namespace QLyDatPhongKhachSan.Controllers
             var khachHang = await _context.KhachHangs
                 .Include(k => k.TaiKhoan)
                 .Include(k => k.DatPhongs)
+                    .ThenInclude(dp => dp.ChiTietDatPhongs)
+                        .ThenInclude(ct => ct.Phong)
                 .FirstOrDefaultAsync(m => m.MaKhachHang == id);
 
             if (khachHang == null)
             {
                 return NotFound();
             }
+
+            return View(khachHang);
+        }
+
+        // =====================================================================
+        // CRUD KHÁCH HÀNG DÀNH CHO ADMIN VÀ LỄ TÂN (MODULE 3)
+        // =====================================================================
+
+        // GET: KhachHang (Danh sách khách hàng kèm Tìm kiếm, Lọc, Sắp xếp, Phân trang LINQ)
+        public async Task<IActionResult> Index(
+            string? searchTerm, 
+            string? gioiTinhFilter, 
+            bool? statusFilter, 
+            string? coTaiKhoanFilter, 
+            string? sortOrder, 
+            int page = 1)
+        {
+            var vaiTro = GetCurrentUserRole();
+            if (vaiTro == "KhachHang")
+            {
+                return RedirectToAction("AccessDenied", "DangNhap", new
+                {
+                    message = "Khách hàng không có quyền xem danh sách khách hàng của hệ thống!"
+                });
+            }
+
+            if (GetCurrentUserId() == null)
+            {
+                return RedirectToAction("Login", "DangNhap", new { returnUrl = "/KhachHang" });
+            }
+
+            var query = _context.KhachHangs
+                .Include(k => k.TaiKhoan)
+                .Include(k => k.DatPhongs)
+                .AsQueryable();
+
+            // Thống kê nhanh toàn bộ CSDL
+            int tongKhachHang = await _context.KhachHangs.CountAsync();
+            int soKhachHoatDong = await _context.KhachHangs.CountAsync(k => k.TrangThai);
+            int soKhachBiKhoa = await _context.KhachHangs.CountAsync(k => !k.TrangThai);
+            int soKhachCoTaiKhoan = await _context.KhachHangs.CountAsync(k => k.MaTaiKhoan != null);
+            int soKhachVangLai = await _context.KhachHangs.CountAsync(k => k.MaTaiKhoan == null);
+
+            // 1. Tìm kiếm (Họ tên, SĐT, CCCD, Email, Địa chỉ)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim().ToLower();
+                query = query.Where(k => k.HoTen.ToLower().Contains(term) ||
+                                         k.SoDienThoai.Contains(term) ||
+                                         k.CCCD.Contains(term) ||
+                                         (k.Email != null && k.Email.ToLower().Contains(term)) ||
+                                         (k.DiaChi != null && k.DiaChi.ToLower().Contains(term)));
+            }
+
+            // 2. Lọc theo Giới tính
+            if (!string.IsNullOrWhiteSpace(gioiTinhFilter))
+            {
+                query = query.Where(k => k.GioiTinh == gioiTinhFilter);
+            }
+
+            // 3. Lọc theo Trạng thái
+            if (statusFilter.HasValue)
+            {
+                query = query.Where(k => k.TrangThai == statusFilter.Value);
+            }
+
+            // 4. Lọc theo Loại khách (Có tài khoản / Khách vãng lai)
+            if (!string.IsNullOrWhiteSpace(coTaiKhoanFilter))
+            {
+                if (coTaiKhoanFilter == "co")
+                    query = query.Where(k => k.MaTaiKhoan != null);
+                else if (coTaiKhoanFilter == "khong")
+                    query = query.Where(k => k.MaTaiKhoan == null);
+            }
+
+            // 5. Sắp xếp
+            sortOrder = string.IsNullOrEmpty(sortOrder) ? "id_desc" : sortOrder;
+            query = sortOrder switch
+            {
+                "id_asc" => query.OrderBy(k => k.MaKhachHang),
+                "name_asc" => query.OrderBy(k => k.HoTen),
+                "name_desc" => query.OrderByDescending(k => k.HoTen),
+                _ => query.OrderByDescending(k => k.MaKhachHang)
+            };
+
+            // 6. Phân trang bằng Skip/Take
+            int pageSize = 8;
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            var viewModel = new KhachHangListViewModel
+            {
+                Items = items,
+                SearchTerm = searchTerm,
+                GioiTinhFilter = gioiTinhFilter,
+                StatusFilter = statusFilter,
+                CoTaiKhoanFilter = coTaiKhoanFilter,
+                SortOrder = sortOrder,
+                TongKhachHang = tongKhachHang,
+                SoKhachHoatDong = soKhachHoatDong,
+                SoKhachBiKhoa = soKhachBiKhoa,
+                SoKhachCoTaiKhoan = soKhachCoTaiKhoan,
+                SoKhachVangLai = soKhachVangLai,
+                PageIndex = page,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                TotalItems = totalItems
+            };
+
+            return View(viewModel);
+        }
+
+        // GET: KhachHang/Create (Tiếp nhận khách hàng mới / khách vãng lai)
+        public async Task<IActionResult> Create()
+        {
+            var vaiTro = GetCurrentUserRole();
+            if (vaiTro == "KhachHang")
+            {
+                return RedirectToAction("AccessDenied", "DangNhap");
+            }
+
+            // Nạp danh sách tài khoản khách hàng chưa được liên kết với hồ sơ nào
+            ViewBag.TaiKhoans = await _context.TaiKhoans
+                .Where(t => t.VaiTro == "KhachHang" && !_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan))
+                .OrderBy(t => t.TenDangNhap)
+                .ToListAsync();
+
+            var model = new KhachHang
+            {
+                GioiTinh = "Nam",
+                QuocTich = "Việt Nam",
+                TrangThai = true
+            };
+
+            return View(model);
+        }
+
+        // POST: KhachHang/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(KhachHang khachHang)
+        {
+            var vaiTro = GetCurrentUserRole();
+            if (vaiTro == "KhachHang")
+            {
+                return RedirectToAction("AccessDenied", "DangNhap");
+            }
+
+            // Kiểm tra nghiệp vụ
+            if (khachHang.NgaySinh.HasValue && khachHang.NgaySinh.Value.Date > DateTime.Today)
+            {
+                ModelState.AddModelError("NgaySinh", "Ngày sinh không hợp lệ (không được lớn hơn ngày hiện tại).");
+            }
+
+            if (!string.IsNullOrWhiteSpace(khachHang.CCCD))
+            {
+                bool cccdBiTrung = await _context.KhachHangs.AnyAsync(k => k.CCCD == khachHang.CCCD.Trim());
+                if (cccdBiTrung)
+                {
+                    ModelState.AddModelError("CCCD", "Số CCCD/Hộ chiếu này đã được sử dụng bởi khách hàng khác.");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(khachHang.Email))
+            {
+                bool emailBiTrung = await _context.KhachHangs.AnyAsync(k => k.Email == khachHang.Email.Trim());
+                if (emailBiTrung)
+                {
+                    ModelState.AddModelError("Email", "Địa chỉ Email này đã được đăng ký bởi khách hàng khác.");
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                khachHang.HoTen = khachHang.HoTen.Trim();
+                khachHang.CCCD = khachHang.CCCD.Trim();
+                khachHang.SoDienThoai = khachHang.SoDienThoai.Trim();
+                khachHang.Email = khachHang.Email?.Trim();
+                khachHang.DiaChi = khachHang.DiaChi?.Trim();
+                khachHang.QuocTich = string.IsNullOrWhiteSpace(khachHang.QuocTich) ? "Việt Nam" : khachHang.QuocTich.Trim();
+                khachHang.GhiChu = khachHang.GhiChu?.Trim();
+
+                _context.Add(khachHang);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Thêm mới khách hàng '{khachHang.HoTen}' thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.TaiKhoans = await _context.TaiKhoans
+                .Where(t => t.VaiTro == "KhachHang" && !_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan))
+                .OrderBy(t => t.TenDangNhap)
+                .ToListAsync();
 
             return View(khachHang);
         }
@@ -264,7 +464,6 @@ namespace QLyDatPhongKhachSan.Controllers
                 var myKhachHangId = GetCurrentKhachHangId();
                 if (myKhachHangId == null || myKhachHangId.Value != id.Value)
                 {
-                    // Chặn hành vi thay đổi id trên URL để sửa hồ sơ người khác
                     return RedirectToAction("AccessDenied", "DangNhap", new
                     {
                         message = $"Bạn không có quyền chỉnh sửa hồ sơ của khách hàng có mã ID: {id}!"
@@ -275,11 +474,20 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Admin / Nhân viên được sửa thông tin khách hàng
-            var khachHang = await _context.KhachHangs.FindAsync(id);
+            var khachHang = await _context.KhachHangs
+                .Include(k => k.TaiKhoan)
+                .FirstOrDefaultAsync(k => k.MaKhachHang == id);
+
             if (khachHang == null)
             {
                 return NotFound();
             }
+
+            // Nạp danh sách tài khoản có thể liên kết (chưa liên kết hoặc đang thuộc khách hàng này)
+            ViewBag.TaiKhoans = await _context.TaiKhoans
+                .Where(t => t.VaiTro == "KhachHang" && (!_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan) || t.MaTaiKhoan == khachHang.MaTaiKhoan))
+                .OrderBy(t => t.TenDangNhap)
+                .ToListAsync();
 
             return View(khachHang);
         }
@@ -303,13 +511,68 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
+            // Kiểm tra nghiệp vụ
+            if (khachHang.NgaySinh.HasValue && khachHang.NgaySinh.Value.Date > DateTime.Today)
+            {
+                ModelState.AddModelError("NgaySinh", "Ngày sinh không hợp lệ (không được lớn hơn ngày hiện tại).");
+            }
+
+            if (!string.IsNullOrWhiteSpace(khachHang.CCCD))
+            {
+                bool cccdBiTrung = await _context.KhachHangs
+                    .AnyAsync(kh => kh.CCCD == khachHang.CCCD.Trim() && kh.MaKhachHang != id);
+                if (cccdBiTrung)
+                {
+                    ModelState.AddModelError("CCCD", "Số CCCD/Hộ chiếu này đã được sử dụng bởi khách hàng khác.");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(khachHang.Email))
+            {
+                bool emailBiTrung = await _context.KhachHangs
+                    .AnyAsync(kh => kh.Email == khachHang.Email.Trim() && kh.MaKhachHang != id);
+                if (emailBiTrung)
+                {
+                    ModelState.AddModelError("Email", "Địa chỉ Email này đã được đăng ký bởi khách hàng khác.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(khachHang);
+                    var existing = await _context.KhachHangs
+                        .Include(k => k.TaiKhoan)
+                        .FirstOrDefaultAsync(k => k.MaKhachHang == id);
+
+                    if (existing == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existing.HoTen = khachHang.HoTen.Trim();
+                    existing.NgaySinh = khachHang.NgaySinh;
+                    existing.GioiTinh = khachHang.GioiTinh;
+                    existing.CCCD = khachHang.CCCD.Trim();
+                    existing.SoDienThoai = khachHang.SoDienThoai.Trim();
+                    existing.Email = khachHang.Email?.Trim();
+                    existing.DiaChi = khachHang.DiaChi?.Trim();
+                    existing.QuocTich = string.IsNullOrWhiteSpace(khachHang.QuocTich) ? "Việt Nam" : khachHang.QuocTich.Trim();
+                    existing.TrangThai = khachHang.TrangThai;
+                    existing.GhiChu = khachHang.GhiChu?.Trim();
+                    existing.MaTaiKhoan = khachHang.MaTaiKhoan;
+
+                    // Đồng bộ sang thông tin Tài Khoản nếu có liên kết
+                    if (existing.TaiKhoan != null)
+                    {
+                        existing.TaiKhoan.HoTen = existing.HoTen;
+                        existing.TaiKhoan.Email = existing.Email;
+                        existing.TaiKhoan.SoDienThoai = existing.SoDienThoai;
+                    }
+
                     await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Cập nhật khách hàng thành công!";
+                    TempData["SuccessMessage"] = $"Cập nhật thông tin khách hàng '{existing.HoTen}' thành công!";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -317,67 +580,90 @@ namespace QLyDatPhongKhachSan.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.TaiKhoans = await _context.TaiKhoans
+                .Where(t => t.VaiTro == "KhachHang" && (!_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan) || t.MaTaiKhoan == khachHang.MaTaiKhoan))
+                .OrderBy(t => t.TenDangNhap)
+                .ToListAsync();
+
             return View(khachHang);
         }
 
-        // GET: KhachHang (Danh sách khách hàng - Chỉ dành cho Admin và Lễ tân)
-        public async Task<IActionResult> Index()
-        {
-            var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
-            {
-                // Khách hàng không được truy cập danh sách toàn bộ khách hàng
-                return RedirectToAction("AccessDenied", "DangNhap", new
-                {
-                    message = "Khách hàng không có quyền xem danh sách khách hàng của hệ thống!"
-                });
-            }
-
-            if (GetCurrentUserId() == null)
-            {
-                return RedirectToAction("Login", "DangNhap");
-            }
-
-            var list = await _context.KhachHangs.Include(k => k.TaiKhoan).ToListAsync();
-            return View(list);
-        }
-
-        // GET: KhachHang/Create (Dành cho Lễ tân tiếp nhận khách vãng lai)
-        public IActionResult Create()
+        // GET: KhachHang/Delete/5 (Xác nhận xóa hoặc khóa khách hàng)
+        public async Task<IActionResult> Delete(int? id)
         {
             var vaiTro = GetCurrentUserRole();
             if (vaiTro == "KhachHang")
             {
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
-            return View();
+
+            if (id == null) return NotFound();
+
+            var khachHang = await _context.KhachHangs
+                .Include(k => k.TaiKhoan)
+                .Include(k => k.DatPhongs)
+                .FirstOrDefaultAsync(m => m.MaKhachHang == id);
+
+            if (khachHang == null) return NotFound();
+
+            return View(khachHang);
         }
 
-        // POST: KhachHang/Create
+        // POST: KhachHang/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var vaiTro = GetCurrentUserRole();
+            if (vaiTro == "KhachHang")
+            {
+                return RedirectToAction("AccessDenied", "DangNhap");
+            }
+
+            var khachHang = await _context.KhachHangs
+                .Include(k => k.DatPhongs)
+                .FirstOrDefaultAsync(m => m.MaKhachHang == id);
+
+            if (khachHang == null) return NotFound();
+
+            // Nếu khách hàng đã phát sinh đơn đặt phòng -> Khóa thay vì xóa cứng để đảm bảo toàn vẹn dữ liệu
+            if (khachHang.DatPhongs.Any())
+            {
+                khachHang.TrangThai = false;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Khách hàng '{khachHang.HoTen}' đã phát sinh {khachHang.DatPhongs.Count} đơn đặt phòng, hệ thống đã chuyển sang trạng thái Bị khóa / Vô hiệu hóa để bảo tồn lịch sử giao dịch!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.KhachHangs.Remove(khachHang);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Đã xóa khách hàng '{khachHang.HoTen}' thành công!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: KhachHang/ToggleStatus/5 (Chuyển đổi nhanh trạng thái Hoạt động / Khóa)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(KhachHang khachHang)
+        public async Task<IActionResult> ToggleStatus(int id)
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
 
-            if (ModelState.IsValid)
-            {
-                _context.Add(khachHang);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(khachHang);
+            var khachHang = await _context.KhachHangs.FindAsync(id);
+            if (khachHang == null) return NotFound();
+
+            khachHang.TrangThai = !khachHang.TrangThai;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Đã {(khachHang.TrangThai ? "kích hoạt" : "khóa")} khách hàng '{khachHang.HoTen}' thành công!";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -282,7 +282,7 @@
         <div class="book-breadcrumb">
             <a asp-controller="Home" asp-action="Index">Trang chủ</a>
             <span>›</span>
-            <a asp-controller="Phong" asp-action="Index">Danh sách phòng</a>
+            <a asp-controller="DatPhong" asp-action="Index">Đặt phòng</a>
             <span>›</span>
             <span style="color:rgba(255,255,255,0.7);">Đặt phòng @Model.SoPhong</span>
         </div>
@@ -313,6 +313,39 @@
         <div class="book-body">
             <!-- Left: Form -->
             <div>
+                @if (ViewBag.DanhSachPhongTrong != null)
+                {
+                    var danhSachPhong = (IEnumerable<QLyDatPhongKhachSan.Models.Phong>)ViewBag.DanhSachPhongTrong;
+                    if (danhSachPhong.Any())
+                    {
+                        <div class="book-section">
+                            <h2 class="book-section-title">Chọn phòng đặt</h2>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:12px;">
+                                Bạn có thể chọn phòng bên dưới hoặc giữ nguyên phòng mặc định đã chọn (đang có @danhSachPhong.Count() phòng trống sẵn sàng).
+                            </p>
+                            <div class="book-field">
+                                <select id="selectDoiPhong" onchange="if(this.value) window.location.href='@Url.Action("Book", "DatPhong")?maPhong=' + this.value;">
+                                    @foreach (var p in danhSachPhong)
+                                    {
+                                        if (p.MaPhong == Model.MaPhong)
+                                        {
+                                            <option value="@p.MaPhong" selected>
+                                                Phòng @p.SoPhong - @(p.LoaiPhong?.TenLoai ?? "Tiêu chuẩn") - @p.DonGia.ToString("N0") VNĐ/đêm (Tầng @p.Tang, Tối đa @(p.LoaiPhong?.SoNguoiToiDa ?? 2) người)
+                                            </option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@p.MaPhong">
+                                                Phòng @p.SoPhong - @(p.LoaiPhong?.TenLoai ?? "Tiêu chuẩn") - @p.DonGia.ToString("N0") VNĐ/đêm (Tầng @p.Tang, Tối đa @(p.LoaiPhong?.SoNguoiToiDa ?? 2) người)
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    }
+                }
+
                 <!-- 1. Thông tin người đặt -->
                 <div class="book-section">
                     <h2 class="book-section-title">1. Thông tin người đặt phòng</h2>
@@ -415,7 +448,7 @@
                 </div>
 
                 <button type="submit" class="book-submit">Xác nhận đặt phòng</button>
-                <a asp-controller="Phong" asp-action="Index" class="book-back-link">← Chọn phòng khác</a>
+                <a asp-controller="DatPhong" asp-action="Index" class="book-back-link">← Quay lại danh sách đặt phòng</a>
             </div>
         </div>
     </form>

@@ -157,4 +157,38 @@ namespace QLyDatPhongKhachSan.ViewModels
         public decimal ConLaiPhaiThanhToan => DatPhong != null ? Math.Max(0, DatPhong.TongTien - DatPhong.TienCoc) : 0;
         public bool CoTheHuy => DatPhong != null && (DatPhong.TrangThai == "ChoXuLy" || DatPhong.TrangThai == "DangXuLy");
     }
+
+    /// <summary>
+    /// ViewModel cho màn hình Đặt phòng của khách hàng (Module 3)
+    /// Hiển thị danh sách phòng kèm trạng thái để khách hàng chọn đặt
+    /// </summary>
+    public class DatPhongChonPhongViewModel
+    {
+        public List<Phong> DanhSachPhong { get; set; } = new List<Phong>();
+        public List<LoaiPhong> DanhSachLoaiPhong { get; set; } = new List<LoaiPhong>();
+
+        // Bộ lọc & tìm kiếm
+        public int? MaLoaiPhong { get; set; }
+        public int? Tang { get; set; }
+        public string? TrangThai { get; set; }
+        public decimal? GiaMin { get; set; }
+        public decimal? GiaMax { get; set; }
+        public string? SortOrder { get; set; }
+        public string? Keyword { get; set; }
+
+        // Thống kê nhanh
+        public int TongSoPhong { get; set; }
+        public int SoPhongTrong { get; set; }
+        public int SoPhongDangSuDung { get; set; }
+        public int SoPhongDangXuLy { get; set; }
+        public int SoPhongBaoTri { get; set; }
+
+        // Phân trang danh sách phòng (Tối đa 6 phòng / trang)
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; } = 1;
+        public int PageSize { get; set; } = 6;
+        public int TotalItems { get; set; }
+        public bool HasPreviousPage => CurrentPage > 1;
+        public bool HasNextPage => CurrentPage < TotalPages;
+    }
 }

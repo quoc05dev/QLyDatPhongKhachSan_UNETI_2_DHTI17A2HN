@@ -79,12 +79,27 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction("Login", "DangNhap", new { returnUrl = Url.Action("Book", "DatPhong", new { maPhong }) });
             }
 
-            // 2. Kiểm tra mã phòng hợp lệ
+            // 2. Kiểm tra mã phòng: Nếu chưa chọn phòng, chuyển hướng về trang Danh sách phòng đặt phòng (Module 3)
             if (maPhong == null)
             {
-                TempData["ErrorMessage"] = "Vui lòng chọn phòng bạn muốn đặt trước khi tiếp tục.";
-                return RedirectToAction("Index", "Phong");
+                TempData["ErrorMessage"] = "Vui lòng chọn phòng bạn muốn đặt từ danh sách phòng bên dưới.";
+                return RedirectToAction(nameof(Index));
             }
+
+            // Nạp danh sách các phòng còn trống để khách hàng có thể chọn/đổi phòng ngay trên trang đặt
+            var danhSachPhongTrong = await _context.Phongs
+                .Include(p => p.LoaiPhong)
+                .Where(p => p.TrangThai == "Trong")
+                .OrderBy(p => p.SoPhong)
+                .ToListAsync();
+
+            if (!danhSachPhongTrong.Any())
+            {
+                TempData["ErrorMessage"] = "Hiện tại khách sạn đã hết phòng trống. Quý khách vui lòng quay lại sau.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.DanhSachPhongTrong = danhSachPhongTrong;
 
             // 3. Truy vấn thông tin phòng và loại phòng
             var phong = await _context.Phongs
@@ -95,14 +110,14 @@ namespace QLyDatPhongKhachSan.Controllers
             if (phong == null)
             {
                 TempData["ErrorMessage"] = "Phòng yêu cầu không tồn tại trong hệ thống.";
-                return RedirectToAction("Index", "Phong");
+                return RedirectToAction(nameof(Index));
             }
 
             // 4. Kiểm tra trạng thái phòng: chỉ đặt phòng khi phòng ở trạng thái "Trong" (có thể kinh doanh - Đề 7.3)
             if (!string.Equals(phong.TrangThai, "Trong", StringComparison.OrdinalIgnoreCase))
             {
                 TempData["ErrorMessage"] = $"Phòng {phong.SoPhong} hiện không ở trạng thái trống (trạng thái: {phong.TrangThai}), quý khách vui lòng chọn phòng khác.";
-                return RedirectToAction("Index", "Phong");
+                return RedirectToAction(nameof(Index));
             }
 
             // 5. Nạp thông tin khách hàng hiện tại
@@ -149,7 +164,7 @@ namespace QLyDatPhongKhachSan.Controllers
             if (phong == null)
             {
                 TempData["ErrorMessage"] = "Phòng không tồn tại.";
-                return RedirectToAction("Index", "Phong");
+                return RedirectToAction(nameof(Index));
             }
 
             // ==========================================
@@ -200,6 +215,12 @@ namespace QLyDatPhongKhachSan.Controllers
             // Nếu không hợp lệ, điền lại thông tin phòng và trả về View
             if (!ModelState.IsValid)
             {
+                ViewBag.DanhSachPhongTrong = await _context.Phongs
+                    .Include(p => p.LoaiPhong)
+                    .Where(p => p.TrangThai == "Trong")
+                    .OrderBy(p => p.SoPhong)
+                    .ToListAsync();
+
                 model.SoPhong = phong.SoPhong;
                 model.TenLoaiPhong = phong.LoaiPhong?.TenLoai ?? "Tiêu chuẩn";
                 model.DonGia = phong.DonGia;
@@ -271,16 +292,141 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // =====================================================================
-        // 2. THEO DÕI ĐẶT PHÒNG (LỊCH SỬ & CHI TIẾT) — KÈM PHÂN TRANG & SẮP XẾP
+        // 2. MÀN HÌNH ĐẶT PHÒNG — DANH SÁCH PHÒNG & TRẠNG THÁI (MODULE 3)
+        // Khách hàng xem danh sách phòng, kiểm tra trạng thái và nhấn đặt phòng
         // =====================================================================
 
-        // GET: DatPhong (Lịch sử đặt phòng của khách hàng hiện tại kèm phân trang & sắp xếp - Đề 22)
-        public async Task<IActionResult> Index(string? trangThaiFilter, string? sortOrder, int page = 1, int pageSize = 5)
+        // GET: DatPhong (hoặc DatPhong/Index)
+        public async Task<IActionResult> Index(
+            int? maLoaiPhong, 
+            int? tang, 
+            string? trangThai, 
+            decimal? giaMin, 
+            decimal? giaMax, 
+            string? sortOrder, 
+            string? keyword,
+            int page = 1,
+            int pageSize = 6)
         {
             var maTaiKhoan = GetCurrentMaTaiKhoan();
             if (maTaiKhoan == null)
             {
                 return RedirectToAction("Login", "DangNhap", new { returnUrl = Url.Action("Index", "DatPhong") });
+            }
+
+            var query = _context.Phongs
+                .Include(p => p.LoaiPhong)
+                .AsNoTracking();
+
+            // Thống kê nhanh toàn bộ số lượng phòng theo trạng thái
+            var allPhongs = await _context.Phongs.AsNoTracking().ToListAsync();
+            int tongSoPhong = allPhongs.Count;
+            int soPhongTrong = allPhongs.Count(p => p.TrangThai == "Trong");
+            int soPhongDangSuDung = allPhongs.Count(p => p.TrangThai == "DangSuDung");
+            int soPhongDangXuLy = allPhongs.Count(p => p.TrangThai == "DangXuLy");
+            int soPhongBaoTri = allPhongs.Count(p => p.TrangThai == "BaoTri");
+
+            // 1. Tìm kiếm từ khóa (Số phòng, Hướng phòng, Tiện nghi, Tên loại phòng)
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim().ToLower();
+                query = query.Where(p => p.SoPhong.ToLower().Contains(kw) ||
+                                         (p.HuongPhong != null && p.HuongPhong.ToLower().Contains(kw)) ||
+                                         (p.TienNghi != null && p.TienNghi.ToLower().Contains(kw)) ||
+                                         (p.LoaiPhong != null && p.LoaiPhong.TenLoai.ToLower().Contains(kw)));
+            }
+
+            // 2. Lọc theo Loại phòng
+            if (maLoaiPhong.HasValue && maLoaiPhong.Value > 0)
+            {
+                query = query.Where(p => p.MaLoaiPhong == maLoaiPhong.Value);
+            }
+
+            // 3. Lọc theo Tầng
+            if (tang.HasValue && tang.Value > 0)
+            {
+                query = query.Where(p => p.Tang == tang.Value);
+            }
+
+            // 4. Lọc theo Trạng thái (Ví dụ: "Trong", "DangSuDung", "BaoTri"...)
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                query = query.Where(p => p.TrangThai == trangThai);
+            }
+
+            // 5. Lọc theo Khoảng giá
+            if (giaMin.HasValue)
+            {
+                query = query.Where(p => p.DonGia >= giaMin.Value);
+            }
+            if (giaMax.HasValue)
+            {
+                query = query.Where(p => p.DonGia <= giaMax.Value);
+            }
+
+            // 6. Sắp xếp
+            sortOrder = string.IsNullOrEmpty(sortOrder) ? "phong_asc" : sortOrder;
+            query = sortOrder switch
+            {
+                "price_asc" => query.OrderBy(p => p.DonGia),
+                "price_desc" => query.OrderByDescending(p => p.DonGia),
+                "tang_asc" => query.OrderBy(p => p.Tang).ThenBy(p => p.SoPhong),
+                "status_trong" => query.OrderBy(p => p.TrangThai == "Trong" ? 0 : 1).ThenBy(p => p.SoPhong),
+                _ => query.OrderBy(p => p.SoPhong)
+            };
+
+            // 7. Phân trang danh sách phòng (Tối đa 6 phòng / trang)
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 6;
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var danhSachPhong = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var danhSachLoaiPhong = await _context.LoaiPhongs.AsNoTracking().ToListAsync();
+
+            var viewModel = new DatPhongChonPhongViewModel
+            {
+                DanhSachPhong = danhSachPhong,
+                DanhSachLoaiPhong = danhSachLoaiPhong,
+                MaLoaiPhong = maLoaiPhong,
+                Tang = tang,
+                TrangThai = trangThai,
+                GiaMin = giaMin,
+                GiaMax = giaMax,
+                SortOrder = sortOrder,
+                Keyword = keyword,
+                TongSoPhong = tongSoPhong,
+                SoPhongTrong = soPhongTrong,
+                SoPhongDangSuDung = soPhongDangSuDung,
+                SoPhongDangXuLy = soPhongDangXuLy,
+                SoPhongBaoTri = soPhongBaoTri,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            };
+
+            return View(viewModel);
+        }
+
+        // =====================================================================
+        // 3. THEO DÕI ĐẶT PHÒNG (LỊCH SỬ & CHI TIẾT) — KÈM PHÂN TRANG & SẮP XẾP
+        // =====================================================================
+
+        // GET: DatPhong/LichSu (Lịch sử đặt phòng của khách hàng hiện tại kèm phân trang & sắp xếp - Đề 22)
+        public async Task<IActionResult> LichSu(string? trangThaiFilter, string? sortOrder, int page = 1, int pageSize = 5)
+        {
+            var maTaiKhoan = GetCurrentMaTaiKhoan();
+            if (maTaiKhoan == null)
+            {
+                return RedirectToAction("Login", "DangNhap", new { returnUrl = Url.Action("LichSu", "DatPhong") });
             }
 
             var khachHang = await GetOrCreateCurrentKhachHangAsync();
@@ -366,7 +512,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 TotalItems = totalItems
             };
 
-            return View(viewModel);
+            return View("LichSu", viewModel);
         }
 
         // GET: DatPhong/Details/5 (Chi tiết đơn đặt phòng — Lọc MaKhachHang ngay trong query)
@@ -501,7 +647,7 @@ namespace QLyDatPhongKhachSan.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = $"Đã hủy đơn đặt phòng #{datPhong.MaDatPhong:D4} thành công và phòng đã được giải phóng sẵn sàng đón khách.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(LichSu));
         }
     }
 }

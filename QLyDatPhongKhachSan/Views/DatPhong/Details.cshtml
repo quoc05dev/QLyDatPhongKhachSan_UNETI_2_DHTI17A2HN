@@ -365,7 +365,7 @@
         <div class="det-breadcrumb">
             <a asp-controller="Home" asp-action="Index">Trang chủ</a>
             <span>›</span>
-            <a asp-controller="DatPhong" asp-action="Index">Lịch sử đặt phòng</a>
+            <a asp-controller="DatPhong" asp-action="LichSu">Lịch sử đặt phòng</a>
             <span>›</span>
             <span style="color:rgba(255,255,255,0.7);">Đơn #@Model.DatPhong.MaDatPhong.ToString("D4")</span>
         </div>
@@ -528,7 +528,7 @@
                     <span>(Thanh toán khi nhận phòng hoặc trả phòng)</span>
                 </div>
 
-                <a asp-action="Index" class="det-btn-back">← Về danh sách lịch sử</a>
+                <a asp-action="LichSu" class="det-btn-back">← Về danh sách lịch sử</a>
 
                 @if (Model.CoTheHuy)
                 {

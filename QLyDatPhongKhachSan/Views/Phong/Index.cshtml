@@ -50,14 +50,31 @@
             <input asp-for="GiaMin" type="number" placeholder="Giá từ (₫)" min="0" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;width:120px;" />
             <input asp-for="GiaMax" type="number" placeholder="Giá đến (₫)" min="0" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;width:120px;" />
 
+            <input asp-for="NgayNhan" type="date" title="Ngày nhận phòng" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;" />
+            <input asp-for="NgayTra" type="date" title="Ngày trả phòng" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;" />
+
+            <select asp-for="SortOrder" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;">
+                <option value="soPhong_asc">Số phòng: Tăng dần</option>
+                <option value="soPhong_desc">Số phòng: Giảm dần</option>
+                <option value="donGia_asc">Đơn giá: Tăng dần</option>
+                <option value="donGia_desc">Đơn giá: Giảm dần</option>
+                <option value="tang_asc">Tầng: Tăng dần</option>
+                <option value="tang_desc">Tầng: Giảm dần</option>
+                <option value="loaiPhong_asc">Loại phòng: A-Z</option>
+            </select>
+
             <button type="submit" class="admin-primary" style="min-height:42px;padding:0 20px;">Lọc</button>
             <a asp-action="Index" class="admin-secondary" style="min-height:42px;padding:0 16px;text-decoration:none;">Xóa lọc</a>
         </div>
+        <span asp-validation-for="NgayNhan" class="text-danger small"></span>
+        <span asp-validation-for="NgayTra" class="text-danger small"></span>
+        <span asp-validation-for="GiaMin" class="text-danger small"></span>
+        <span asp-validation-for="GiaMax" class="text-danger small"></span>
     </form>
 
     <div class="table-result-row">
         <span>Hiển thị kết quả tìm kiếm phòng</span>
-        <strong>Tổng số: @(Model.Phongs?.Count ?? 0) phòng</strong>
+        <strong>Tổng số: @Model.TotalItems phòng</strong>
     </div>
 
     @if (Model.Phongs != null && Model.Phongs.Any())
@@ -80,9 +97,9 @@
                     {
                         var badgeClass = item.TrangThai switch
                         {
-                            "Trống" => "status-badge--success",
-                            "Đang sử dụng" or "Đang có khách" => "status-badge--info",
-                            "Bảo trì" => "status-badge--warning",
+                            "Trong" => "status-badge--success",
+                            "DangSuDung" => "status-badge--info",
+                            "BaoTri" => "status-badge--warning",
                             _ => "status-badge--muted"
                         };
 
@@ -138,6 +155,29 @@
                 </tbody>
             </table>
         </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination">
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@p"
+                       asp-route-keyword="@Model.Keyword"
+                       asp-route-maLoaiPhong="@Model.MaLoaiPhong"
+                       asp-route-tang="@Model.Tang"
+                       asp-route-trangThai="@Model.TrangThai"
+                       asp-route-giaMin="@Model.GiaMin"
+                       asp-route-giaMax="@Model.GiaMax"
+                       asp-route-ngayNhan="@(Model.NgayNhan?.ToString("yyyy-MM-dd"))"
+                       asp-route-ngayTra="@(Model.NgayTra?.ToString("yyyy-MM-dd"))"
+                       asp-route-sortOrder="@Model.SortOrder"
+                       style="text-decoration:none;">
+                        <button type="button" class="@(p == Model.CurrentPage ? "active" : "")">@p</button>
+                    </a>
+                }
+            </div>
+        }
     }
     else
     {

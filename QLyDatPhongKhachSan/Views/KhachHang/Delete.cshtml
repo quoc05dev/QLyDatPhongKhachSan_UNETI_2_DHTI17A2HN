@@ -1,0 +1,126 @@
+@*
+// ==========================================
+// Họ và tên: Anh Tuấn
+// Mã sinh viên: 23103100086
+// Nội dung thực hiện: Module 3 - Giao diện Xác nhận xóa / Khóa Khách hàng (Bảo toàn toàn vẹn dữ liệu)
+// ==========================================
+*@
+
+@model QLyDatPhongKhachSan.Models.KhachHang
+
+@{
+    ViewData["Title"] = $"Xóa khách hàng #{Model.MaKhachHang:D4}";
+    bool daCoDonDatPhong = Model.DatPhongs != null && Model.DatPhongs.Any();
+    int soDonDatPhong = Model.DatPhongs?.Count ?? 0;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Khách hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Xác nhận xóa #@Model.MaKhachHang.ToString("D4")</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header @(daCoDonDatPhong ? "bg-warning text-dark" : "bg-danger text-white") py-3 px-4 text-center">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @(daCoDonDatPhong ? "XÁC NHẬN KHÓA KHÁCH HÀNG" : "XÁC NHẬN XÓA KHÁCH HÀNG")
+                    </h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5 text-center">
+                    @if (daCoDonDatPhong)
+                    {
+                        <div class="alert alert-warning text-start border-warning mb-4" role="alert">
+                            <h5 class="alert-heading fw-bold">
+                                <i class="bi bi-shield-exclamation me-2"></i>Bảo vệ toàn vẹn dữ liệu giao dịch
+                            </h5>
+                            <p class="mb-1">
+                                Khách hàng <strong>@Model.HoTen</strong> đã phát sinh <strong class="text-danger">@soDonDatPhong đơn đặt phòng</strong> trong hệ thống.
+                            </p>
+                            <hr />
+                            <p class="mb-0 small text-muted">
+                                Theo quy định bảo toàn dữ liệu (Mục 6.2 - De_15), hệ thống sẽ <strong>Khóa / Vô hiệu hóa</strong> hồ sơ này thay vì xóa cứng khỏi cơ sở dữ liệu để bảo tồn lịch sử giao dịch.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger text-start border-danger mb-4" role="alert">
+                            <h5 class="alert-heading fw-bold">
+                                <i class="bi bi-exclamation-octagon-fill me-2"></i>Cảnh báo thao tác xóa
+                            </h5>
+                            <p class="mb-0">
+                                Bạn có chắc chắn muốn xóa vĩnh viễn khách hàng <strong>@Model.HoTen</strong> (#@Model.MaKhachHang.ToString("D4"))?
+                                Hành động này không thể hoàn tác!
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Tóm tắt thông tin khách hàng cần xóa/khóa -->
+                    <div class="card bg-light border-0 p-4 mb-4 text-start rounded-4">
+                        <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">Thông tin khách hàng:</h6>
+                        <div class="row g-2 small">
+                            <div class="col-sm-6">
+                                <span class="text-muted">Mã khách hàng:</span>
+                                <strong class="text-dark">#@Model.MaKhachHang.ToString("D4")</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Họ và tên:</span>
+                                <strong class="text-dark">@Model.HoTen</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Số CCCD:</span>
+                                <strong class="text-dark">@Model.CCCD</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Số điện thoại:</span>
+                                <strong class="text-dark">@Model.SoDienThoai</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Email:</span>
+                                <strong class="text-dark">@(string.IsNullOrEmpty(Model.Email) ? "Chưa có" : Model.Email)</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Quốc tịch:</span>
+                                <strong class="text-dark">@(string.IsNullOrEmpty(Model.QuocTich) ? "Việt Nam" : Model.QuocTich)</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Trạng thái hiện tại:</span>
+                                <strong class="@(Model.TrangThai ? "text-success" : "text-danger")">
+                                    @(Model.TrangThai ? "Đang hoạt động" : "Bị khóa")
+                                </strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Số đơn đặt phòng:</span>
+                                <strong class="text-primary">@soDonDatPhong đơn</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form xác nhận -->
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="MaKhachHang" />
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                <i class="bi bi-x-circle me-1"></i>Hủy bỏ
+                            </a>
+                            <button type="submit" class="btn @(daCoDonDatPhong ? "btn-warning" : "btn-danger") btn-lg rounded-pill px-4 fw-bold shadow-sm">
+                                <i class="bi @(daCoDonDatPhong ? "bi-lock-fill" : "bi-trash") me-1"></i>
+                                @(daCoDonDatPhong ? "Xác nhận Khóa tài khoản" : "Xác nhận Xóa khách hàng")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,3 +1,6 @@
+// Ho va ten: Dau Duc Luu
+// Ma sinh vien: 23103100114
+// Noi dung: Entity Phong - Quan ly thong tin phong
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

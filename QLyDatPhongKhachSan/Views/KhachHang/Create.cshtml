@@ -1,0 +1,185 @@
+@*
+// ==========================================
+// Họ và tên: Anh Tuấn
+// Mã sinh viên: 23103100086
+// Nội dung thực hiện: Module 3 - Giao diện Thêm mới Khách hàng (Tiếp nhận khách vãng lai hoặc liên kết tài khoản)
+// ==========================================
+*@
+
+@model QLyDatPhongKhachSan.Models.KhachHang
+
+@{
+    ViewData["Title"] = "Thêm mới khách hàng";
+    var taiKhoans = ViewBag.TaiKhoans as List<QLyDatPhongKhachSan.Models.TaiKhoan> ?? new List<QLyDatPhongKhachSan.Models.TaiKhoan>();
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Khách hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Thêm mới khách hàng</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white py-3 px-4">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-person-plus-fill me-2"></i>TIẾP NHẬN / THÊM MỚI KHÁCH HÀNG
+                    </h4>
+                    <p class="mb-0 text-white-50 small">Nhập đầy đủ thông tin khách hàng vào hệ thống khách sạn</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create" method="post" id="formCreateKhachHang" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small shadow-sm" role="alert"></div>
+
+                        <!-- Khối 1: Thông tin cơ bản -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-person-vcard me-2"></i>1. Thông tin cá nhân
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Họ và tên -->
+                            <div class="col-md-6">
+                                <label asp-for="HoTen" class="form-label fw-semibold">
+                                    Họ và tên khách hàng <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="HoTen" class="form-control form-control-lg rounded-3" placeholder="VD: Nguyễn Văn A" />
+                                <span asp-validation-for="HoTen" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Giới tính -->
+                            <div class="col-md-3">
+                                <label asp-for="GioiTinh" class="form-label fw-semibold">Giới tính</label>
+                                <select asp-for="GioiTinh" class="form-select form-select-lg rounded-3">
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <span asp-validation-for="GioiTinh" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Ngày sinh -->
+                            <div class="col-md-3">
+                                <label asp-for="NgaySinh" class="form-label fw-semibold">Ngày sinh</label>
+                                <input asp-for="NgaySinh" type="date" class="form-control form-control-lg rounded-3" />
+                                <span asp-validation-for="NgaySinh" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Số CCCD / Hộ chiếu -->
+                            <div class="col-md-6">
+                                <label asp-for="CCCD" class="form-label fw-semibold">
+                                    Số CCCD / Hộ chiếu <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="CCCD" class="form-control form-control-lg rounded-3" placeholder="Nhập 12 số CCCD hoặc số hộ chiếu" />
+                                <span asp-validation-for="CCCD" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Quốc tịch -->
+                            <div class="col-md-6">
+                                <label asp-for="QuocTich" class="form-label fw-semibold">Quốc tịch</label>
+                                <input asp-for="QuocTich" class="form-control form-control-lg rounded-3" value="Việt Nam" />
+                                <span asp-validation-for="QuocTich" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Khối 2: Thông tin liên hệ -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-telephone-inbound me-2"></i>2. Thông tin liên hệ
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Số điện thoại -->
+                            <div class="col-md-6">
+                                <label asp-for="SoDienThoai" class="form-label fw-semibold">
+                                    Số điện thoại liên hệ <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="SoDienThoai" class="form-control form-control-lg rounded-3" placeholder="VD: 0912345678" />
+                                <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-semibold">Địa chỉ Email</label>
+                                <input asp-for="Email" type="email" class="form-control form-control-lg rounded-3" placeholder="VD: khachhang@gmail.com" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Địa chỉ thường trú -->
+                            <div class="col-12">
+                                <label asp-for="DiaChi" class="form-label fw-semibold">Địa chỉ thường trú / Tạm trú</label>
+                                <input asp-for="DiaChi" class="form-control form-control-lg rounded-3" placeholder="VD: 218 Lĩnh Nam, Hoàng Mai, Hà Nội" />
+                                <span asp-validation-for="DiaChi" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Khối 3: Cấu hình hệ thống & Ghi chú -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-gear-wide-connected me-2"></i>3. Cấu hình hệ thống & Tài khoản
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Liên kết tài khoản -->
+                            <div class="col-md-8">
+                                <label asp-for="MaTaiKhoan" class="form-label fw-semibold">
+                                    Liên kết tài khoản người dùng trực tuyến (nếu có)
+                                </label>
+                                <select asp-for="MaTaiKhoan" class="form-select form-select-lg rounded-3">
+                                    <option value="">-- Không liên kết (Khách vãng lai / Đặt tại quầy) --</option>
+                                    @foreach (var tk in taiKhoans)
+                                    {
+                                        <option value="@tk.MaTaiKhoan">
+                                            @tk.TenDangNhap - @tk.HoTen (@(string.IsNullOrEmpty(tk.Email) ? "Chưa có email" : tk.Email))
+                                        </option>
+                                    }
+                                </select>
+                                <div class="form-text small text-muted">
+                                    Chọn tài khoản nếu khách hàng đã đăng ký trước trên hệ thống website nhưng chưa có hồ sơ.
+                                </div>
+                                <span asp-validation-for="MaTaiKhoan" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Trạng thái hoạt động -->
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check form-switch fs-5 mt-4">
+                                    <input asp-for="TrangThai" class="form-check-input" type="checkbox" role="switch" id="switchTrangThai" checked />
+                                    <label class="form-check-label fs-6 fw-semibold" for="switchTrangThai">
+                                        Trạng thái hoạt động
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Ghi chú / Yêu cầu đặc biệt -->
+                            <div class="col-12">
+                                <label asp-for="GhiChu" class="form-label fw-semibold">Ghi chú / Yêu cầu đặc biệt</label>
+                                <textarea asp-for="GhiChu" class="form-control rounded-3" rows="3" placeholder="Ghi chú về thói quen, sở thích phòng, lưu ý phục vụ..."></textarea>
+                                <span asp-validation-for="GhiChu" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Nút thao tác -->
+                        <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i>Lưu Khách Hàng
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
