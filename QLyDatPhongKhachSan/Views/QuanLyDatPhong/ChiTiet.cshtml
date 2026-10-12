@@ -192,4 +192,50 @@
             }
         </div>
     </article>
+    </article>
+
+    @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DangXuLy" || Model.TrangThai == "DaXacNhan")
+    {
+        <article class="dashboard-card" style="padding: 24px;">
+            <div class="card-heading" style="margin-bottom: 20px;">
+                <div>
+                    <span>Thao tác đổi phòng</span>
+                    <h2>Đổi phòng cùng loại</h2>
+                </div>
+            </div>
+
+            @foreach (var ct in Model.ChiTietDatPhongs)
+            {
+                var phongConTrongCungLoai = (ViewBag.PhongConTrongCungLoai as Dictionary<int, List<QLyDatPhongKhachSan.Models.Phong>>)?.GetValueOrDefault(ct.MaChiTiet);
+                if (phongConTrongCungLoai == null || !phongConTrongCungLoai.Any())
+                {
+                    continue;
+                }
+
+                <form asp-action="DoiPhong" method="post" style="margin-bottom: 16px; padding: 16px; border: 1px solid #edf0f2; border-radius: 4px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
+                    <input type="hidden" name="maChiTiet" value="@ct.MaChiTiet" />
+
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div>
+                            <strong>Phòng @ct.Phong?.SoPhong</strong>
+                            <small style="color:#8a939d; display:block;">@(ct.Phong?.LoaiPhong?.TenLoai ?? "-") • Tầng @ct.Phong?.Tang</small>
+                        </div>
+
+                        <select name="maPhongMoi" required style="min-height:42px; padding:0 12px; border:1px solid #dce0e3; border-radius:2px; font-size:11px;">
+                            <option value="">-- Chọn phòng trống cùng loại --</option>
+                            @foreach (var p in phongConTrongCungLoai)
+                            {
+                                <option value="@p.MaPhong">Phòng @p.SoPhong • Tầng @p.Tang • @p.DonGia.ToString("N0")₫/đêm</option>
+                            }
+                        </select>
+
+                        <button type="submit" class="admin-primary" style="align-self:flex-start; min-height:38px; padding:0 16px;">Đổi phòng</button>
+                    </div>
+                </form>
+            }
+        </article>
+    }
+
 </div>
