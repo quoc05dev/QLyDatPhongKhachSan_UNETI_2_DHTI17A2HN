@@ -1,0 +1,70 @@
+@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Giao diện Sửa Dịch vụ (Module 5 Restyle UI)
+*@
+@model QLyDatPhongKhachSan.Models.DichVu
+
+@{
+    ViewData["Title"] = "Sửa dịch vụ";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "reports";
+}
+
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 5 · Cập nhật dịch vụ</span>
+        <h1>Sửa dịch vụ: @Model.TenDichVu</h1>
+        <p>Cập nhật tên dịch vụ, giá niêm yết hoặc trạng thái phục vụ.</p>
+    </div>
+    <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+</div>
+
+<article class="dashboard-card" style="padding: 28px; max-width: 800px;">
+    <form asp-action="Edit" method="post">
+        <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size:12px;"></div>
+        <input type="hidden" asp-for="MaDichVu" />
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div style="grid-column: span 2;display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="TenDichVu" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Tên dịch vụ <span style="color:red;">*</span></label>
+                <input asp-for="TenDichVu" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="TenDichVu" style="color:#c0392b;font-size:11px;"></span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="Gia" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Giá dịch vụ (VNĐ) <span style="color:red;">*</span></label>
+                <input asp-for="Gia" type="number" min="0" step="1000" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="Gia" style="color:#c0392b;font-size:11px;"></span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="HinhAnh" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Hình ảnh minh họa</label>
+                <input asp-for="HinhAnh" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
+                <span asp-validation-for="HinhAnh" style="color:#c0392b;font-size:11px;"></span>
+            </div>
+
+            <div style="grid-column: span 2;display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="MoTa" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Mô tả chi tiết</label>
+                <textarea asp-for="MoTa" rows="3" style="padding:10px 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;font-family:inherit;"></textarea>
+                <span asp-validation-for="MoTa" style="color:#c0392b;font-size:11px;"></span>
+            </div>
+
+            <div style="grid-column: span 2;margin-top:6px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--navy-900);cursor:pointer;">
+                    <input type="checkbox" asp-for="TrangThai" style="accent-color:var(--gold-500);width:16px;height:16px;" />
+                    <strong>Đang phục vụ (hoạt động)</strong>
+                </label>
+            </div>
+        </div>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid #edf0f2;display:flex;gap:12px;">
+            <button type="submit" class="admin-primary">Lưu thay đổi</button>
+            <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">Hủy bỏ</a>
+        </div>
+    </form>
+</article>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

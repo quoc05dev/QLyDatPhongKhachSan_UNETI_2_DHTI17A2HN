@@ -1,0 +1,74 @@
+@*
+    Họ và tên: Sinh viên 1
+    Mã sinh viên: 23103100091
+    Nội dung thực hiện: Giao diện Xóa Loại phòng cho Admin (Module 1 Restyle UI)
+*@
+@model QLyDatPhongKhachSan.Models.LoaiPhong
+
+@{
+    ViewData["Title"] = "Xóa loại phòng";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "accounts";
+    int soPhong = Model.Phongs?.Count ?? 0;
+}
+
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 1 · Thao tác xóa loại phòng</span>
+        <h1>Xóa loại phòng: @Model.TenLoai</h1>
+        <p>Xác nhận xóa loại phòng khỏi hệ thống khi chưa có phòng ràng buộc.</p>
+    </div>
+    <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+</div>
+
+<article class="dashboard-card" style="padding: 28px; max-width: 650px;">
+    @if (soPhong > 0)
+    {
+        <div style="padding:14px 18px;background:#fdf6e3;border-left:4px solid #f39c12;color:#8a6d1f;margin-bottom:20px;font-size:12px;border-radius:2px;line-height:1.6;">
+            <strong style="display:block;margin-bottom:4px;font-size:13px;">⚠️ Không thể xóa:</strong>
+            Loại phòng này đang có <strong>@soPhong phòng</strong> sử dụng nên không thể xóa. Vui lòng chuyển các phòng sang loại khác trước.
+        </div>
+    }
+    else
+    {
+        <div style="padding:14px 18px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;line-height:1.6;">
+            <strong style="display:block;margin-bottom:4px;font-size:13px;">🚨 Báo xác nhận xóa:</strong>
+            Bạn có chắc chắn muốn xóa loại phòng <strong>@Model.TenLoai</strong> (#@Model.MaLoaiPhong) không? Thao tác này không thể hoàn tác.
+        </div>
+    }
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 0;border-top:1px solid #edf0f2;border-bottom:1px solid #edf0f2;">
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tên loại phòng</small>
+            <strong style="font-size:15px;color:var(--navy-950);">@Model.TenLoai</strong>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Số người tối đa</small>
+            <span style="font-size:14px;color:#334155;">@Model.SoNguoiToiDa người</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá theo ngày</small>
+            <span style="font-size:14px;color:#b28c49;font-weight:600;">@Model.DonGiaNgay.ToString("N0")₫</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Số phòng đang áp dụng</small>
+            <span style="font-size:14px;color:#334155;">@soPhong phòng</span>
+        </div>
+    </div>
+
+    <form asp-action="DeleteConfirmed" asp-route-id="@Model.MaLoaiPhong" method="post" style="margin-top:24px;display:flex;gap:12px;">
+        <input type="hidden" asp-for="MaLoaiPhong" />
+        @if (soPhong > 0)
+        {
+            <button type="submit" class="admin-primary" disabled style="background:#bdc3c7;color:#fff;cursor:not-allowed;">Không thể xóa</button>
+        }
+        else
+        {
+            <button type="submit" class="admin-primary" style="background:#e74c3c;color:#fff;">Xác nhận xóa loại phòng</button>
+        }
+        <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">Hủy bỏ &amp; Quay lại</a>
+    </form>
+</article>

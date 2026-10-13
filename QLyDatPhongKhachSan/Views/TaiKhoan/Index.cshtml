@@ -17,10 +17,13 @@
         <h1>Quản lý tài khoản người dùng</h1>
         <p>Phân quyền truy cập, quản lý trạng thái tài khoản Admin, Lễ tân và Khách hàng.</p>
     </div>
-    <a class="admin-primary" asp-action="Create" style="text-decoration:none;">
-        <svg class="admin-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
-        Thêm tài khoản mới
-    </a>
+    <div style="display:flex;gap:10px;">
+        <a class="admin-secondary" asp-controller="LoaiPhong" asp-action="Index" style="text-decoration:none;">Quản lý loại phòng</a>
+        <a class="admin-primary" asp-action="Create" style="text-decoration:none;">
+            <svg class="admin-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+            Thêm tài khoản mới
+        </a>
+    </div>
 </div>
 
 @if (TempData["SuccessMessage"] != null)
@@ -117,7 +120,7 @@
                                 <div style="display:inline-flex;gap:6px;">
                                     <a class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaTaiKhoan">Chi tiết</a>
                                     <a class="admin-primary" style="min-height:30px;padding:0 8px;font-size:9px;text-decoration:none;" asp-action="Edit" asp-route-id="@item.MaTaiKhoan">Sửa</a>
-                                    <form asp-action="ToggleLock" asp-route-id="@item.MaTaiKhoan" method="post" style="display:inline;">
+                                    <form asp-action="ToggleStatus" asp-route-id="@item.MaTaiKhoan" method="post" style="display:inline;">
                                         @if (item.TrangThai)
                                         {
                                             <button type="submit" class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;color:#c0392b;border-color:#f5c6cb;" title="Khóa tài khoản">Khóa</button>

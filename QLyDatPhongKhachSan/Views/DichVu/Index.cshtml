@@ -1,51 +1,110 @@
+@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Giao diện Quản lý danh sách Dịch vụ (Module 5 Restyle UI)
+*@
+@model List<QLyDatPhongKhachSan.Models.DichVu>
+
 @{
-    ViewData["Title"] = "Danh sách dịch vụ";
+    ViewData["Title"] = "Quản lý dịch vụ";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "reports";
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
 }
 
-<h1 class="h3 mb-3">Danh sách dịch vụ</h1>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 5 · Dịch vụ &amp; tiện ích</span>
+        <h1>Quản lý dịch vụ khách sạn</h1>
+        <p>Khai báo dịch vụ, giá niêm yết và trạng thái phục vụ của khách sạn.</p>
+    </div>
+    <a class="admin-primary" asp-action="Create" style="text-decoration:none;">
+        <svg class="admin-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+        Thêm dịch vụ
+    </a>
+</div>
 
-<p>
-    <a class="btn btn-primary" asp-action="Create">Thêm mới</a>
-</p>
-
-<table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th>Mã</th>
-            <th>Tên dịch vụ</th>
-            <th class="text-end">Giá (VNĐ)</th>
-            <th>Mô tả</th>
-            <th>Trạng thái</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var dv in Model)
-        {
-            <tr>
-                <td>@dv.MaDichVu</td>
-                <td>@dv.TenDichVu</td>
-                <td class="text-end">@dv.Gia.ToString("N0")</td>
-                <td>@dv.MoTa</td>
-                <td>
-                    @if (dv.TrangThai)
-                    {
-                        <span class="badge text-bg-success">Đang phục vụ</span>
-                    }
-                    else
-                    {
-                        <span class="badge text-bg-secondary">Ngừng phục vụ</span>
-                    }
-                </td>
-                <td>
-                    <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@dv.MaDichVu">Xem</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (Model.Count == 0)
+@if (TempData["SuccessMessage"] != null)
 {
-    <p class="text-muted">Chưa có dịch vụ nào.</p>
+    <div style="padding:12px 16px;background:#eef6f2;border-left:4px solid #46785e;color:#2e5340;margin-bottom:20px;font-size:12px;border-radius:2px;">
+        ✓ @TempData["SuccessMessage"]
+    </div>
 }
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="padding:12px 16px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;">
+        ⚠️ @TempData["ErrorMessage"]
+    </div>
+}
+
+<article class="dashboard-card data-card">
+    <form method="get" asp-action="Index">
+        <div class="table-toolbar" style="flex-wrap:wrap;gap:12px;">
+            <div class="admin-search" style="min-width:260px;">
+                <svg class="admin-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+                <input type="text" name="searchTerm" value="@searchTerm" placeholder="Tên dịch vụ..." />
+            </div>
+            <button type="submit" class="admin-primary" style="min-height:42px;padding:0 20px;">Tìm</button>
+            <a asp-action="Index" class="admin-secondary" style="min-height:42px;padding:0 16px;text-decoration:none;">Xóa lọc</a>
+        </div>
+    </form>
+
+    <div class="table-result-row">
+        <span>Hiển thị danh sách dịch vụ hệ thống</span>
+        <strong>Tổng số: @Model.Count dịch vụ</strong>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Tên dịch vụ</th>
+                        <th>Giá (VNĐ)</th>
+                        <th>Mô tả</th>
+                        <th>Trạng thái</th>
+                        <th style="text-align:right;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dv in Model)
+                    {
+                        <tr>
+                            <td><strong>#@dv.MaDichVu</strong></td>
+                            <td><strong style="color:var(--navy-900);">@dv.TenDichVu</strong></td>
+                            <td><strong style="color:#b28c49;">@dv.Gia.ToString("N0")₫</strong></td>
+                            <td>@(string.IsNullOrWhiteSpace(dv.MoTa) ? "—" : dv.MoTa)</td>
+                            <td>
+                                @if (dv.TrangThai)
+                                {
+                                    <span class="status-badge status-badge--success"><i></i>Đang phục vụ</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-badge--warning"><i></i>Ngừng phục vụ</span>
+                                }
+                            </td>
+                            <td style="text-align:right;">
+                                <div style="display:inline-flex;gap:6px;">
+                                    <a class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;text-decoration:none;" asp-action="Details" asp-route-id="@dv.MaDichVu">Chi tiết</a>
+                                    <a class="admin-primary" style="min-height:30px;padding:0 8px;font-size:9px;text-decoration:none;" asp-action="Edit" asp-route-id="@dv.MaDichVu">Sửa</a>
+                                    <a class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;color:#c0392b;border-color:#f5c6cb;text-decoration:none;" asp-action="Delete" asp-route-id="@dv.MaDichVu">Xóa</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-table">
+            <strong>Chưa có dịch vụ nào</strong>
+            <span>Nhấn "Thêm dịch vụ" để khai báo dịch vụ đầu tiên.</span>
+        </div>
+    }
+</article>

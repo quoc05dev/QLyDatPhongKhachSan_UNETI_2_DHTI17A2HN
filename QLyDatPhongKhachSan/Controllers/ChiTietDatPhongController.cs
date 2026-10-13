@@ -4,8 +4,10 @@
 // đặt phòng và cập nhật tổng tiền của hóa đơn đặt phòng.
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLyDatPhongKhachSan.Data;
+using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
 
 namespace QLyDatPhongKhachSan.Controllers
@@ -13,6 +15,7 @@ namespace QLyDatPhongKhachSan.Controllers
     // ==========================================
     // MODULE 5 - SINH VIÊN 5: TÍNH TIỀN, CHI TIẾT ĐẶT PHÒNG
     // ==========================================
+    [RoleAuthorize("Admin", "NhanVien")]
     public class ChiTietDatPhongController : Controller
     {
         private readonly AppDbContext _context;
@@ -127,8 +130,30 @@ namespace QLyDatPhongKhachSan.Controllers
         // GET: ChiTietDatPhong/Create?maDatPhong=5
         public IActionResult Create(int? maDatPhong)
         {
-            // TODO: SV5 nạp danh sách phòng còn trống và đơn giá theo loại phòng
-            return View();
+            // Nạp danh sách phòng có thể chọn (loại bỏ phòng đang bảo trì)
+            var phongs = _context.Phongs
+                .Include(p => p.LoaiPhong)
+                .Where(p => p.TrangThai != "BaoTri")
+                .OrderBy(p => p.SoPhong)
+                .ToList();
+
+            ViewBag.DanhSachPhong = new SelectList(phongs, "MaPhong", "SoPhong");
+
+            // Thông tin đặt phòng khi được gọi từ màn hình chi tiết đơn
+            if (maDatPhong.HasValue)
+            {
+                ViewBag.DatPhong = _context.DatPhongs.FirstOrDefault(dp => dp.MaDatPhong == maDatPhong.Value);
+                ViewBag.MaDatPhong = maDatPhong.Value;
+            }
+
+            return View(new ChiTietDatPhong
+            {
+                MaDatPhong = maDatPhong ?? 0,
+                NgayNhan = DateTime.Today,
+                NgayTra = DateTime.Today.AddDays(1),
+                SoNgay = 1,
+                TrangThai = "ChoNhan"
+            });
         }
 
         // POST: ChiTietDatPhong/Create

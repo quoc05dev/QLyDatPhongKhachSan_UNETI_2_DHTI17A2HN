@@ -1,0 +1,75 @@
+@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Giao diện Chi tiết & hóa đơn tính tiền ChiTietDatPhong (Module 5 Restyle UI)
+*@
+@model QLyDatPhongKhachSan.Models.ChiTietDatPhong
+
+@{
+    ViewData["Title"] = "Hóa đơn chi tiết đặt phòng";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "operations";
+}
+
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 5 · Tính tiền phòng</span>
+        <h1>Hóa đơn chi tiết #@Model.MaChiTiet</h1>
+        <p>Chi tiết số ngày ở, đơn giá và thành tiền của phòng trong hóa đơn đặt phòng.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <a class="admin-secondary" asp-controller="QuanLyDatPhong" asp-action="ChiTiet" asp-route-id="@Model.MaDatPhong" style="text-decoration:none;">← Về đơn đặt phòng</a>
+        <a class="admin-secondary" asp-action="Create" asp-route-maDatPhong="@Model.MaDatPhong" style="text-decoration:none;">+ Thêm chi tiết</a>
+    </div>
+</div>
+
+<article class="dashboard-card" style="padding: 28px; max-width: 900px;">
+    <div style="display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid #edf0f2;margin-bottom:20px;">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--navy-900);color:var(--gold-400);display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;">
+            @(Model.Phong?.SoPhong ?? "?")
+        </div>
+        <div>
+            <strong style="font-size:18px;color:var(--navy-950);display:block;">Phòng @Model.Phong?.SoPhong</strong>
+            <span style="font-size:12px;color:#717b85;">Mã đơn đặt phòng: #@Model.MaDatPhong · Loại: <b style="color:#b28c49;">@(Model.Phong?.LoaiPhong?.TenLoai ?? "—")</b></span>
+        </div>
+        <div style="margin-left:auto;">
+            @{
+                var badge = Model.TrangThai switch
+                {
+                    "ChoNhan" => "status-badge--warning",
+                    "DaNhan" => "status-badge--success",
+                    "DaTra" => "status-badge--success",
+                    _ => "status-badge--warning"
+                };
+            }
+            <span class="status-badge @badge"><i></i>@Model.TrangThai</span>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Ngày nhận thực tế</small>
+            <span style="font-size:14px;color:#334155;">@(Model.NgayNhan != default ? Model.NgayNhan.ToString("dd/MM/yyyy") : "—")</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Ngày trả thực tế</small>
+            <span style="font-size:14px;color:#334155;">@(Model.NgayTra != default ? Model.NgayTra.ToString("dd/MM/yyyy") : "—")</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Số ngày ở</small>
+            <span style="font-size:14px;color:#334155;">@Model.SoNgay ngày</span>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá / ngày</small>
+            <span style="font-size:14px;color:#334155;">@Model.DonGia.ToString("N0")₫</span>
+        </div>
+    </div>
+
+    <div style="margin-top:24px;padding:18px;background:#f8fafc;border-radius:4px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:#8a939d;font-weight:600;">Thành tiền (Số ngày × Đơn giá)</span>
+        <strong style="font-family:'Playfair Display',serif;font-size:26px;color:#b28c49;">@Model.ThanhTien.ToString("N0")₫</strong>
+    </div>
+</article>

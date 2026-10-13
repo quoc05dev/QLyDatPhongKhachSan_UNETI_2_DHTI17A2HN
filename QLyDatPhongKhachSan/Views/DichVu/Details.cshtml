@@ -1,0 +1,63 @@
+@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Giao diện Chi tiết Dịch vụ (Module 5 Restyle UI)
+*@
+@model QLyDatPhongKhachSan.Models.DichVu
+
+@{
+    ViewData["Title"] = "Chi tiết dịch vụ";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "reports";
+}
+
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 5 · Hồ sơ dịch vụ</span>
+        <h1>Chi tiết: @Model.TenDichVu</h1>
+        <p>Thông tin giá niêm yết và trạng thái phục vụ của dịch vụ.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Quay lại danh sách</a>
+        <a class="admin-primary" asp-action="Edit" asp-route-id="@Model.MaDichVu" style="text-decoration:none;">Sửa thông tin</a>
+    </div>
+</div>
+
+<article class="dashboard-card" style="padding: 28px; max-width: 800px;">
+    <div style="display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid #edf0f2;margin-bottom:20px;">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--navy-900);color:var(--gold-400);display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;">
+            @Model.TenDichVu.Trim().Substring(0, 1).ToUpperInvariant()
+        </div>
+        <div>
+            <strong style="font-size:18px;color:var(--navy-950);display:block;">@Model.TenDichVu</strong>
+            <span style="font-size:12px;color:#717b85;">Mã dịch vụ: #@Model.MaDichVu · Giá: <b style="color:#b28c49;">@Model.Gia.ToString("N0")₫</b></span>
+        </div>
+        <div style="margin-left:auto;">
+            @if (Model.TrangThai)
+            {
+                <span class="status-badge status-badge--success"><i></i>Đang phục vụ</span>
+            }
+            else
+            {
+                <span class="status-badge status-badge--warning"><i></i>Ngừng phục vụ</span>
+            }
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Giá dịch vụ</small>
+            <strong style="font-size:16px;color:#b28c49;">@Model.Gia.ToString("N0")₫</strong>
+        </div>
+
+        <div>
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Hình ảnh minh họa</small>
+            <span style="font-size:14px;color:#334155;">@(string.IsNullOrWhiteSpace(Model.HinhAnh) ? "—" : Model.HinhAnh)</span>
+        </div>
+
+        <div style="grid-column: span 2;">
+            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Mô tả chi tiết</small>
+            <span style="font-size:14px;color:#334155;">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "—" : Model.MoTa)</span>
+        </div>
+    </div>
+</article>
