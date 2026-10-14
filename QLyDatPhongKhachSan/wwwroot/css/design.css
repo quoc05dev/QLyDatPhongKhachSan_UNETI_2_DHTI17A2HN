@@ -1977,8 +1977,8 @@ footer {
 }
 
 .card-heading > div > span {
-  color: #b28c49;
-  font-size: 8px;
+  color: #9a7538;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2012,8 +2012,8 @@ footer {
   display: flex;
   align-items: flex-end;
   gap: 17px;
-  margin-top: 8px;
-  padding-top: 24px;
+  margin-top: 20px;
+  padding-top: 40px;
   border-bottom: 1px solid #e5e8ea;
   background: repeating-linear-gradient(to bottom, transparent 0, transparent 53px, #eef0f2 54px);
 }
@@ -2037,19 +2037,21 @@ footer {
 
 .bar-column i span {
   position: absolute;
-  top: -17px;
+  top: -19px;
   width: 100%;
-  color: #7f8891;
-  font-size: 7px;
+  color: #3d4853;
+  font-size: 9px;
   font-style: normal;
+  font-weight: 700;
   text-align: center;
 }
 
 .bar-column small {
   position: absolute;
-  transform: translateY(17px);
-  color: #8a939c;
-  font-size: 8px;
+  transform: translateY(19px);
+  color: #4f5a64;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .occupancy-card {
@@ -2347,19 +2349,20 @@ footer {
 .report-highlight span,
 .report-highlight small {
   display: block;
-  color: #858e97;
-  font-size: 9px;
+  color: #55606a;
+  font-size: 11px;
 }
 
 .report-highlight strong {
   display: block;
   margin: 10px 0 7px;
   font-family: "Playfair Display", serif;
-  font-size: 22px;
+  font-size: 25px;
+  color: #16202b;
 }
 
 .report-highlight small {
-  color: #4f8068;
+  color: #3f6b55;
 }
 
 .report-grid {
@@ -2411,19 +2414,22 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 23px;
-  margin-top: 35px;
+  margin-top: 30px;
+  padding: 0 23px 24px;
 }
 
 .report-bars p {
   display: flex;
   justify-content: space-between;
   margin: 0 0 8px;
-  color: #69747f;
-  font-size: 9px;
+  color: #414c57;
+  font-size: 11px;
 }
 
 .report-bars p strong {
-  color: #263442;
+  color: #102943;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .report-bars > div > i {
