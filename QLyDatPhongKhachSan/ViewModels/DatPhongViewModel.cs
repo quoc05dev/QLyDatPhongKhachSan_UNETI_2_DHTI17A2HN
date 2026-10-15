@@ -159,13 +159,38 @@ namespace QLyDatPhongKhachSan.ViewModels
     }
 
     /// <summary>
+    /// Một phòng trong màn hình đặt phòng, kèm ảnh minh họa, mô tả không gian và điểm gợi ý thông minh
+    /// </summary>
+    public class DatPhongPhongItem
+    {
+        public Phong Phong { get; set; } = null!;
+        public string HinhAnh { get; set; } = string.Empty;
+        public string MoTa { get; set; } = string.Empty;
+
+        // Bộ ảnh gallery của phòng (wwwroot/images/phong/phong-{MaPhong}); mặc định chứa ảnh đại diện
+        public List<string> DanhSachAnh { get; set; } = new List<string>();
+
+        // Gợi ý thông minh (thuật toán xếp hạng)
+        public int DiemGoiY { get; set; }
+        public bool LaGoiY { get; set; }
+        public string? LyDoGoiY { get; set; }
+
+        public bool DangTrong => string.Equals(Phong?.TrangThai, "Trong", StringComparison.OrdinalIgnoreCase);
+        public decimal DonGia => Phong?.DonGia ?? 0;
+    }
+
+    /// <summary>
     /// ViewModel cho màn hình Đặt phòng của khách hàng (Module 3)
     /// Hiển thị danh sách phòng kèm trạng thái để khách hàng chọn đặt
     /// </summary>
     public class DatPhongChonPhongViewModel
     {
-        public List<Phong> DanhSachPhong { get; set; } = new List<Phong>();
+        public List<DatPhongPhongItem> DanhSachPhong { get; set; } = new List<DatPhongPhongItem>();
         public List<LoaiPhong> DanhSachLoaiPhong { get; set; } = new List<LoaiPhong>();
+
+        // Tóm tắt gợi ý thông minh
+        public int SoPhongGoiY { get; set; }
+        public string? SoThichLoaiPhong { get; set; }
 
         // Bộ lọc & tìm kiếm
         public int? MaLoaiPhong { get; set; }

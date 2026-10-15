@@ -1,6 +1,96 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+﻿@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung thực hiện: Trang Chính sách bảo mật công khai (Restyle UI theo _HomeLayout).
+*@
+@{
+    ViewData["Title"] = "Chính sách bảo mật";
+    Layout = "_HomeLayout";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<main id="top" class="privacy-page">
+    <header class="site-header">
+        <div class="container nav-wrap">
+            <a class="brand" asp-controller="Home" asp-action="Index" aria-label="UNETI Grand Hotel trang chủ">
+                <span class="brand-mark">U</span>
+                <span>
+                    <strong>UNETI GRAND</strong>
+                    <small>HOTEL &amp; SPA</small>
+                </span>
+            </a>
+            <nav class="main-nav" id="main-nav">
+                <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+                <a asp-controller="Home" asp-action="Index" asp-fragment="rooms">Hạng phòng</a>
+                <a asp-controller="DichVu" asp-action="Index">Dịch vụ</a>
+                <a asp-controller="Home" asp-action="Privacy" class="is-active">Chính sách</a>
+            </nav>
+            <div class="nav-actions">
+                <a class="button button--ghost desktop-action" asp-controller="DangNhap" asp-action="Login">Đăng nhập</a>
+                <a class="button button--gold desktop-action" asp-controller="Home" asp-action="Index">Đặt phòng</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="section privacy-section">
+        <div class="container privacy-wrap">
+            <div class="eyebrow"><span></span> Chính sách &amp; quyền riêng tư</div>
+            <h1 class="privacy-title">Chính sách bảo mật thông tin</h1>
+            <p class="privacy-intro">
+                UNETI Grand Hotel &amp; Spa tôn trọng và cam kết bảo vệ quyền riêng tư của quý khách.
+                Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân
+                khi quý khách sử dụng hệ thống đặt phòng trực tuyến.
+            </p>
+
+            <div class="privacy-grid">
+                <article class="privacy-card">
+                    <small>01</small>
+                    <h2>Thông tin chúng tôi thu thập</h2>
+                    <p>Họ tên, số điện thoại, email, số CCCD/hộ chiếu, ngày sinh và thông tin đặt phòng (phòng, ngày nhận – trả, số khách) khi quý khách đăng ký hoặc đặt phòng.</p>
+                </article>
+                <article class="privacy-card">
+                    <small>02</small>
+                    <h2>Mục đích sử dụng</h2>
+                    <p>Xác nhận và xử lý đơn đặt phòng, xác minh danh tính khi nhận phòng, hỗ trợ chăm sóc khách hàng và nâng cao chất lượng dịch vụ.</p>
+                </article>
+                <article class="privacy-card">
+                    <small>03</small>
+                    <h2>Bảo mật dữ liệu</h2>
+                    <p>Mật khẩu được mã hóa bằng thuật toán băm PBKDF2. Dữ liệu được lưu trữ an toàn và chỉ nhân sự được phân quyền mới có thể truy cập.</p>
+                </article>
+                <article class="privacy-card">
+                    <small>04</small>
+                    <h2>Chia sẻ thông tin</h2>
+                    <p>Chúng tôi không bán hoặc cho thuê dữ liệu cá nhân. Thông tin chỉ được chia sẻ khi có yêu cầu của cơ quan chức năng theo quy định pháp luật.</p>
+                </article>
+                <article class="privacy-card">
+                    <small>05</small>
+                    <h2>Quyền của quý khách</h2>
+                    <p>Quý khách có quyền xem, chỉnh sửa hồ sơ cá nhân trong mục “Hồ sơ cá nhân”, yêu cầu hủy đơn đặt phòng hoặc yêu cầu xóa dữ liệu.</p>
+                </article>
+                <article class="privacy-card">
+                    <small>06</small>
+                    <h2>Liên hệ</h2>
+                    <p>Mọi thắc mắc về quyền riêng tư, vui lòng liên hệ: hello@unetigrand.vn · +84 24 5555 8888 · 353 Trần Hưng Đạo, Hà Nội.</p>
+                </article>
+            </div>
+
+            <div class="privacy-actions">
+                <a class="button button--navy" asp-controller="Home" asp-action="Index">← Về trang chủ</a>
+                <a class="button button--gold" asp-controller="DangNhap" asp-action="Register">Tạo tài khoản đặt phòng</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    .privacy-section { background: #f6f8fa; }
+    .privacy-wrap { max-width: 940px; }
+    .privacy-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 40px); color: var(--navy-950, #0a1a2f); margin: 10px 0 14px; }
+    .privacy-intro { color: #59636d; font-size: 15px; line-height: 1.75; max-width: 760px; margin-bottom: 40px; }
+    .privacy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .privacy-card { background: #fff; border: 1px solid #e8ecef; border-top: 3px solid #c9a35d; padding: 26px 24px; box-shadow: 0 10px 26px rgba(16, 41, 67, 0.05); }
+    .privacy-card small { font-family: 'Playfair Display', serif; font-size: 20px; color: #c9a35d; }
+    .privacy-card h2 { font-size: 15px; color: var(--navy-950, #0a1a2f); margin: 10px 0 8px; }
+    .privacy-card p { color: #59636d; font-size: 13px; line-height: 1.7; margin: 0; }
+    .privacy-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; }
+</style>

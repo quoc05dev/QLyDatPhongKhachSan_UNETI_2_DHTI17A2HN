@@ -2,569 +2,322 @@
 // ==========================================
 // Họ và tên: Anh Tuấn
 // Mã sinh viên: 23103100086
-// Nội dung thực hiện: Module 3 - Giao diện chi tiết đơn đặt phòng (Details) & Hủy đặt phòng an toàn (Restyle UI)
+// Nội dung thực hiện: Module 3 - Giao diện chi tiết đơn đặt phòng (Details) & Hủy đặt phòng an toàn (Restyle UI - nền trắng).
 // ==========================================
 *@
 
 @model QLyDatPhongKhachSan.ViewModels.DatPhongChiTietViewModel
 @{
     ViewData["Title"] = $"Chi tiết đơn #{Model.DatPhong.MaDatPhong:D4}";
-    Layout = "_HomeLayout";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "customers";
 
-    var (statusColor, statusLabel, statusDesc) = Model.DatPhong.TrangThai switch
+    var (statusColor, statusTone, statusLabel, statusDesc) = Model.DatPhong.TrangThai switch
     {
-        "ChoXuLy"    => ("#c9a35d", "Chờ xử lý",        "Đơn đã ghi nhận, đang chờ lễ tân xử lý. Quý khách có thể hủy nếu thay đổi kế hoạch."),
-        "DangXuLy"   => ("#4a9eda", "Đang xử lý",       "Lễ tân đang kiểm tra phòng và chuẩn bị xác nhận."),
-        "DaXacNhan"  => ("#4aeda9", "Đã xác nhận",      "Phòng đã được giữ chỗ. Vui lòng xuất trình CCCD khi đến nhận phòng."),
-        "DangSuDung" => ("#a06ff0", "Đang lưu trú",     "Quý khách hiện đang lưu trú tại khách sạn. Chúc kỳ nghỉ tuyệt vời!"),
-        "HoanThanh"  => ("#82d6a5", "Hoàn thành",       "Đơn đã hoàn tất. Cảm ơn quý khách đã tin tưởng UNETI Hotel!"),
-        "DaHuy"      => ("#e87676", "Đã hủy",           "Đơn đã bị hủy. Phòng đã được trả về danh sách sẵn sàng."),
-        _            => ("#888",    Model.DatPhong.TrangThai, "")
+        "ChoXuLy"    => ("#c9a35d", "warning", "Chờ xử lý",    "Đơn đã ghi nhận, đang chờ lễ tân xử lý. Quý khách có thể hủy nếu thay đổi kế hoạch."),
+        "DangXuLy"   => ("#4a9eda", "info",    "Đang xử lý",   "Lễ tân đang kiểm tra phòng và chuẩn bị xác nhận."),
+        "DaXacNhan"  => ("#4f8068", "success", "Đã xác nhận",  "Phòng đã được giữ chỗ. Vui lòng xuất trình CCCD khi đến nhận phòng."),
+        "DangSuDung" => ("#a06ff0", "info",    "Đang lưu trú", "Quý khách hiện đang lưu trú tại khách sạn. Chúc kỳ nghỉ tuyệt vời!"),
+        "HoanThanh"  => ("#4f8068", "success", "Hoàn thành",   "Đơn đã hoàn tất. Cảm ơn quý khách đã tin tưởng UNETI Hotel!"),
+        "DaHuy"      => ("#c0392b", "muted",   "Đã hủy",       "Đơn đã bị hủy. Phòng đã được trả về danh sách sẵn sàng."),
+        _            => ("#8a939d", "muted",   TrangThaiHelper.HienThi(Model.DatPhong.TrangThai), "")
     };
 }
 
 <style>
-    .det-wrap {
-        min-height: 100vh;
-        background: var(--navy-950);
-        color: var(--white);
-    }
-    .det-topbar {
-        background: rgba(4,15,28,0.95);
-        border-bottom: 1px solid rgba(201,163,93,0.2);
-        padding: 14px 32px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 50;
-    }
-    .det-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        color: var(--white);
-    }
-    .det-brand-emblem {
-        width: 36px;
-        height: 40px;
-        display: grid;
-        place-items: center;
-        border: 1px solid var(--gold-500);
-        color: var(--gold-400);
-        font-family: 'Playfair Display', serif;
-        font-size: 20px;
-        clip-path: polygon(0 0, 100% 0, 100% 77%, 50% 100%, 0 77%);
-    }
-    .det-brand strong {
-        font-family: 'Playfair Display', serif;
-        font-size: 16px;
-        letter-spacing: 0.08em;
-        display: block;
-        line-height: 1;
-    }
-    .det-brand small { color: var(--gold-400); font-size: 7px; letter-spacing: 0.36em; }
-    .det-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 11px;
-        color: rgba(255,255,255,0.45);
-    }
-    .det-breadcrumb a { color: rgba(255,255,255,0.45); text-decoration: none; }
-    .det-breadcrumb a:hover { color: var(--gold-400); }
+    .admin-app { background: #ffffff; }
 
-    .det-body {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 40px 24px 60px;
-    }
-
-    /* Status banner */
-    .det-status-banner {
-        border-radius: 6px;
-        padding: 24px 28px;
+    .bd-banner {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 16px;
-        margin-bottom: 32px;
+        padding: 22px 24px;
+        border: 1px solid #e6eaed;
         border-left: 4px solid;
-    }
-    .det-status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-    .det-status-pill::before {
-        content: '';
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: currentColor;
-    }
-
-    .det-layout {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 24px;
-        align-items: start;
-    }
-    @@media (max-width: 820px) {
-        .det-layout { grid-template-columns: 1fr; }
-    }
-
-    .det-card {
-        background: rgba(11,27,46,0.7);
-        border: 1px solid rgba(201,163,93,0.12);
         border-radius: 6px;
-        padding: 24px;
-        margin-bottom: 20px;
+        background: #fff;
+        box-shadow: 0 10px 26px rgba(16, 41, 67, 0.05);
+        margin-bottom: 22px;
     }
-    .det-card:last-child { margin-bottom: 0; }
-    .det-card-title {
-        font-size: 11px;
-        font-weight: 700;
-        color: rgba(255,255,255,0.4);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 16px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .det-card-heading {
-        font-family: 'Playfair Display', serif;
-        font-size: 15px;
-        color: var(--gold-400);
-        margin: 0 0 14px;
-    }
+    .bd-banner__overline { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a939d; margin-bottom: 4px; }
+    .bd-banner__title { font-family: "Playfair Display", serif; font-size: 21px; color: #172433; margin-bottom: 4px; }
+    .bd-banner__desc { font-size: 12px; color: #737d87; }
 
-    .det-field-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-    }
-    @@media (max-width: 560px) {
-        .det-field-group { grid-template-columns: 1fr; }
-    }
-    .det-field-span { grid-column: span 2; }
-    @@media (max-width: 560px) { .det-field-span { grid-column: span 1; } }
-    .det-field small {
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        color: rgba(255,255,255,0.4);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 3px;
-    }
-    .det-field strong {
-        display: block;
-        font-size: 13px;
-        color: rgba(255,255,255,0.9);
-    }
-    .det-field .det-gold { color: var(--gold-400); }
+    .bd-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+    @@media (max-width: 820px) { .bd-layout { grid-template-columns: 1fr; } }
 
-    /* Timeline check-in/out */
-    .det-timeline {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        gap: 8px;
-        align-items: center;
-        margin: 16px 0;
-        text-align: center;
-    }
-    .det-timeline-box {
-        background: rgba(4,15,28,0.5);
-        border: 1px solid rgba(201,163,93,0.15);
-        border-radius: 4px;
-        padding: 14px;
-    }
-    .det-timeline-box small { font-size: 10px; color: rgba(255,255,255,0.45); display: block; margin-bottom: 4px; }
-    .det-timeline-box strong { font-size: 17px; color: var(--white); display: block; }
-    .det-timeline-box span { font-size: 10px; color: rgba(255,255,255,0.35); }
-    .det-timeline-arrow {
-        font-size: 11px;
-        color: var(--gold-400);
-        white-space: nowrap;
-    }
-
-    /* Right sidebar */
-    .det-sidebar-card {
-        background: rgba(11,27,46,0.85);
-        border: 1px solid rgba(201,163,93,0.2);
+    .bd-card {
+        background: #fff;
+        border: 1px solid #e6eaed;
         border-radius: 6px;
-        padding: 24px;
-        position: sticky;
-        top: 72px;
+        padding: 22px 24px;
+        box-shadow: 0 10px 26px rgba(16, 41, 67, 0.05);
+        margin-bottom: 18px;
     }
-    .det-cost-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        color: rgba(255,255,255,0.6);
-        margin-bottom: 8px;
+    .bd-card:last-child { margin-bottom: 0; }
+    .bd-card-title {
+        font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+        color: #8a939d; padding-bottom: 10px; border-bottom: 1px solid #edf0f2; margin-bottom: 16px;
     }
-    .det-cost-row strong { color: rgba(255,255,255,0.9); }
-    .det-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 12px 0; }
-    .det-total-box {
-        background: rgba(201,163,93,0.08);
-        border: 1px solid rgba(201,163,93,0.2);
-        border-radius: 4px;
-        padding: 14px 16px;
-        margin: 14px 0 20px;
-    }
-    .det-total-box small { font-size: 10px; color: rgba(255,255,255,0.45); display: block; margin-bottom: 4px; }
-    .det-total-box strong { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--gold-400); }
-    .det-total-box span { font-size: 11px; color: rgba(255,255,255,0.4); display: block; margin-top: 6px; }
-    .det-total-box em { color: #f5b7b1; font-style: normal; font-weight: 600; }
 
-    .det-btn-back {
-        display: block;
-        width: 100%;
-        height: 44px;
-        line-height: 44px;
-        text-align: center;
-        background: transparent;
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 3px;
-        color: rgba(255,255,255,0.7);
-        text-decoration: none;
-        font-size: 12px;
-        transition: all 0.2s;
-        margin-bottom: 10px;
-    }
-    .det-btn-back:hover { border-color: var(--gold-400); color: var(--gold-400); }
-    .det-btn-cancel {
-        display: block;
-        width: 100%;
-        height: 44px;
-        line-height: 44px;
-        text-align: center;
-        background: rgba(192,57,43,0.15);
-        border: 1px solid rgba(192,57,43,0.4);
-        border-radius: 3px;
-        color: #f5b7b1;
-        text-decoration: none;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .det-btn-cancel:hover { background: rgba(192,57,43,0.3); }
+    .bd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .bd-span2 { grid-column: span 2; }
+    @@media (max-width: 560px) { .bd-grid { grid-template-columns: 1fr; } .bd-span2 { grid-column: span 1; } }
+    .bd-field small { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8a939d; margin-bottom: 3px; }
+    .bd-field strong { display: block; font-size: 14px; color: #172433; }
+    .bd-gold { color: #b28c49 !important; }
 
-    /* Modal */
-    .det-modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.7);
-        z-index: 200;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    .det-modal-overlay.show { display: flex; }
-    .det-modal {
-        background: var(--navy-900);
-        border: 1px solid rgba(201,163,93,0.2);
-        border-radius: 6px;
-        padding: 28px;
-        max-width: 440px;
-        width: 100%;
-    }
-    .det-modal h4 {
-        font-family: 'Playfair Display', serif;
-        font-size: 18px;
-        color: #f5b7b1;
-        margin: 0 0 12px;
-    }
-    .det-modal p { font-size: 13px; color: rgba(255,255,255,0.7); margin: 0 0 16px; }
-    .det-modal-warn {
-        background: rgba(192,57,43,0.1);
-        border: 1px solid rgba(192,57,43,0.3);
-        border-radius: 4px;
-        padding: 10px 12px;
-        font-size: 12px;
-        color: rgba(255,200,180,0.9);
-        margin-bottom: 20px;
-    }
-    .det-modal-actions { display: flex; gap: 10px; }
-    .det-modal-close-btn {
-        flex: 1;
-        height: 40px;
-        background: transparent;
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 3px;
-        color: rgba(255,255,255,0.6);
-        cursor: pointer;
-        font-size: 12px;
-    }
-    .det-modal-close-btn:hover { border-color: rgba(255,255,255,0.4); }
-    .det-modal-confirm-btn {
-        flex: 1;
-        height: 40px;
-        background: rgba(192,57,43,0.8);
-        border: none;
-        border-radius: 3px;
-        color: #fff;
-        font-weight: 700;
-        font-size: 12px;
-        cursor: pointer;
-    }
-    .det-modal-confirm-btn:hover { background: rgba(192,57,43,1); }
+    .bd-timeline { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; text-align: center; margin-bottom: 16px; }
+    .bd-timeline-box { background: #f7f9fa; border: 1px solid #edf0f2; border-radius: 4px; padding: 14px; }
+    .bd-timeline-box small { display: block; font-size: 10px; color: #8a939d; margin-bottom: 4px; }
+    .bd-timeline-box strong { display: block; font-size: 17px; color: #172433; }
+    .bd-timeline-box span { font-size: 10px; color: #9aa2aa; }
+    .bd-timeline-arrow { font-size: 11px; color: #b28c49; white-space: nowrap; }
 
-    .det-note-box {
-        background: rgba(255,255,255,0.04);
-        border-left: 2px solid rgba(201,163,93,0.3);
-        padding: 10px 14px;
-        border-radius: 0 4px 4px 0;
-        font-size: 12px;
-        color: rgba(255,255,255,0.6);
-        font-style: italic;
-        margin-top: 8px;
+    .bd-note {
+        background: #f7f9fa; border-left: 2px solid #c9a35d; border-radius: 0 4px 4px 0;
+        padding: 10px 14px; font-size: 12px; color: #59636d; font-style: italic;
     }
-    .det-alert-info {
-        padding: 10px 14px;
-        background: rgba(79,128,104,0.15);
-        border: 1px solid rgba(79,128,104,0.3);
-        border-radius: 4px;
-        color: #82d6a5;
-        font-size: 12px;
-        margin-bottom: 20px;
+
+    .bd-summary {
+        background: #fff; border: 1px solid #e6eaed; border-radius: 6px; padding: 22px 24px;
+        box-shadow: 0 10px 26px rgba(16, 41, 67, 0.05);
+        position: sticky; top: 20px;
     }
-    .det-alert-err {
-        padding: 10px 14px;
-        background: rgba(192,57,43,0.15);
-        border: 1px solid rgba(192,57,43,0.3);
-        border-radius: 4px;
-        color: #f5b7b1;
-        font-size: 12px;
-        margin-bottom: 20px;
+    .bd-cost-row { display: flex; justify-content: space-between; font-size: 12px; color: #59636d; margin-bottom: 8px; }
+    .bd-cost-row strong { color: #172433; }
+    .bd-divider { border: none; border-top: 1px solid #edf0f2; margin: 12px 0; }
+    .bd-total { background: #fbf7ef; border: 1px solid #efe3cb; border-radius: 4px; padding: 14px 16px; margin: 14px 0 18px; }
+    .bd-total small { display: block; font-size: 10px; color: #8a939d; margin-bottom: 4px; }
+    .bd-total strong { font-family: "Playfair Display", serif; font-size: 24px; color: #b28c49; }
+    .bd-total span { display: block; font-size: 11px; color: #9aa2aa; margin-top: 6px; }
+
+    .bd-btn-back, .bd-btn-cancel {
+        display: block; width: 100%; height: 44px; line-height: 44px; text-align: center;
+        border-radius: 3px; font-size: 12px; text-decoration: none; transition: all 0.2s;
     }
+    .bd-btn-back { border: 1px solid #dce0e3; color: #59636d; background: #fff; margin-bottom: 10px; }
+    .bd-btn-back:hover { border-color: #c9a35d; color: #b28c49; }
+    .bd-btn-cancel {
+        border: 1px solid #f0c2bc; background: #fdecea; color: #c0392b; cursor: pointer;
+    }
+    .bd-btn-cancel:hover { background: #f9d7d3; }
+
+    .bd-modal-overlay {
+        display: none; position: fixed; inset: 0; z-index: 200;
+        background: rgba(16, 41, 67, 0.5); align-items: center; justify-content: center; padding: 20px;
+    }
+    .bd-modal-overlay.show { display: flex; }
+    .bd-modal { background: #fff; border-radius: 6px; padding: 26px; max-width: 440px; width: 100%; box-shadow: 0 30px 60px rgba(16, 41, 67, 0.2); }
+    .bd-modal h4 { font-family: "Playfair Display", serif; font-size: 18px; color: #c0392b; margin: 0 0 12px; }
+    .bd-modal p { font-size: 13px; color: #59636d; margin: 0 0 16px; line-height: 1.6; }
+    .bd-modal-warn { background: #fdecea; border: 1px solid #f0c2bc; border-radius: 4px; padding: 10px 12px; font-size: 12px; color: #a93226; margin-bottom: 20px; }
+    .bd-modal-actions { display: flex; gap: 10px; }
+    .bd-modal-close-btn { flex: 1; height: 40px; background: #fff; border: 1px solid #dce0e3; border-radius: 3px; color: #59636d; cursor: pointer; font-size: 12px; }
+    .bd-modal-close-btn:hover { border-color: #adb5bd; }
+    .bd-modal-confirm-btn { flex: 1; height: 40px; background: #c0392b; border: none; border-radius: 3px; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; }
+    .bd-modal-confirm-btn:hover { background: #a93226; }
 </style>
 
-<div class="det-wrap">
-    <!-- Top bar -->
-    <nav class="det-topbar">
-        <a href="/" class="det-brand">
-            <span class="det-brand-emblem">U</span>
-            <span>
-                <strong>UNETI GRAND</strong>
-                <small>HOTEL &amp; SPA</small>
-            </span>
-        </a>
-        <div class="det-breadcrumb">
-            <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-            <span>›</span>
-            <a asp-controller="DatPhong" asp-action="LichSu">Lịch sử đặt phòng</a>
-            <span>›</span>
-            <span style="color:rgba(255,255,255,0.7);">Đơn #@Model.DatPhong.MaDatPhong.ToString("D4")</span>
-        </div>
-    </nav>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 3 · Chi tiết đặt phòng</span>
+        <h1>Đơn đặt phòng #@Model.DatPhong.MaDatPhong.ToString("D4")</h1>
+        <p>Thông tin phòng, lịch trình lưu trú và chi phí của đơn đặt phòng.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <a class="admin-secondary" asp-action="LichSu" style="text-decoration:none;">← Lịch sử đặt phòng</a>
+        <a class="admin-primary" asp-action="Index" style="text-decoration:none;">Đặt phòng mới</a>
+    </div>
+</div>
 
-    <div class="det-body">
-        @if (TempData["SuccessMessage"] != null)
+@if (TempData["SuccessMessage"] != null)
+{
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size:12px;">✓ @TempData["SuccessMessage"]</p>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size:12px;">⚠ @TempData["ErrorMessage"]</p>
+}
+
+<div class="bd-banner" style="border-left-color:@statusColor;">
+    <div>
+        <div class="bd-banner__overline">Trạng thái đơn hàng</div>
+        <div class="bd-banner__title">@statusLabel</div>
+        @if (!string.IsNullOrEmpty(statusDesc))
         {
-            <div class="det-alert-info">✓ @TempData["SuccessMessage"]</div>
+            <div class="bd-banner__desc">@statusDesc</div>
         }
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="det-alert-err">⚠️ @TempData["ErrorMessage"]</div>
-        }
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span class="status-badge status-badge--@statusTone"><i></i>@statusLabel</span>
+        <span style="font-size:11px;color:#8a939d;">Mã đơn: <strong style="color:#b28c49;">#@Model.DatPhong.MaDatPhong.ToString("D4")</strong></span>
+    </div>
+</div>
 
-        <!-- Status banner -->
-        <div class="det-status-banner" style="background: rgba(11,27,46,0.7); border-left-color: @statusColor;">
-            <div>
-                <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Trạng thái đơn hàng</div>
-                <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--white);margin-bottom:4px;">
-                    @statusLabel
-                </div>
-                <div style="font-size:12px;color:rgba(255,255,255,0.5);">@statusDesc</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                <span class="det-status-pill" style="background:rgba(11,27,46,0.6);border:1px solid @statusColor;color:@statusColor;">
-                    @statusLabel
-                </span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.4);">Mã đơn: <strong style="color:var(--gold-400);">#@Model.DatPhong.MaDatPhong.ToString("D4")</strong></span>
-            </div>
-        </div>
-
-        <div class="det-layout">
-            <!-- Left: Details -->
-            <div>
-                <!-- Thông tin phòng -->
-                <div class="det-card">
-                    <div class="det-card-title">Thông tin phòng đã đặt</div>
-                    @if (Model.Phong != null)
+<div class="bd-layout">
+    <!-- Cột trái: thông tin chi tiết -->
+    <div>
+        <section class="bd-card">
+            <div class="bd-card-title">Thông tin phòng đã đặt</div>
+            @if (Model.Phong != null)
+            {
+                <div class="bd-grid">
+                    <div class="bd-field">
+                        <small>Số phòng</small>
+                        <strong class="bd-gold" style="font-family:'Playfair Display',serif;font-size:22px;">Phòng @Model.Phong.SoPhong</strong>
+                    </div>
+                    <div class="bd-field">
+                        <small>Loại phòng</small>
+                        <strong class="bd-gold">@(Model.Phong.LoaiPhong?.TenLoai ?? "Tiêu chuẩn")</strong>
+                    </div>
+                    <div class="bd-field">
+                        <small>Đơn giá / đêm</small>
+                        <strong class="bd-gold">@Model.Phong.DonGia.ToString("N0")₫</strong>
+                    </div>
+                    <div class="bd-field">
+                        <small>Vị trí &amp; Hướng</small>
+                        <strong>Tầng @Model.Phong.Tang @(!string.IsNullOrEmpty(Model.Phong.HuongPhong) ? $"· Hướng {Model.Phong.HuongPhong}" : "")</strong>
+                    </div>
+                    <div class="bd-field">
+                        <small>Sức chứa</small>
+                        <strong>@(Model.Phong.LoaiPhong?.SoNguoiToiDa ?? 2) người tối đa</strong>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Phong.TienNghi))
                     {
-                        <div class="det-field-group">
-                            <div class="det-field">
-                                <small>Số phòng</small>
-                                <strong style="font-family:'Playfair Display',serif;font-size:22px;" class="det-gold">Phòng @Model.Phong.SoPhong</strong>
-                            </div>
-                            <div class="det-field">
-                                <small>Loại phòng</small>
-                                <strong class="det-gold">@(Model.Phong.LoaiPhong?.TenLoai ?? "Tiêu chuẩn")</strong>
-                            </div>
-                            <div class="det-field">
-                                <small>Đơn giá / đêm</small>
-                                <strong class="det-gold">@Model.Phong.DonGia.ToString("N0")₫</strong>
-                            </div>
-                            <div class="det-field">
-                                <small>Vị trí &amp; Hướng</small>
-                                <strong>Tầng @Model.Phong.Tang @(!string.IsNullOrEmpty(Model.Phong.HuongPhong) ? $"· Hướng {Model.Phong.HuongPhong}" : "")</strong>
-                            </div>
-                            <div class="det-field">
-                                <small>Sức chứa</small>
-                                <strong>@(Model.Phong.LoaiPhong?.SoNguoiToiDa ?? 2) người tối đa</strong>
-                            </div>
-                            @if (!string.IsNullOrEmpty(Model.Phong.TienNghi))
-                            {
-                                <div class="det-field det-field-span">
-                                    <small>Tiện nghi</small>
-                                    <strong>@Model.Phong.TienNghi</strong>
-                                </div>
-                            }
+                        <div class="bd-field bd-span2">
+                            <small>Tiện nghi</small>
+                            <strong style="font-weight:500;color:#4a5568;">@Model.Phong.TienNghi</strong>
                         </div>
                     }
-                    else
-                    {
-                        <p style="font-size:13px;color:rgba(255,255,255,0.4);">Thông tin phòng đang được cập nhật.</p>
-                    }
                 </div>
+            }
+            else
+            {
+                <p style="font-size:13px;color:#8a939d;">Thông tin phòng đang được cập nhật.</p>
+            }
+        </section>
 
-                <!-- Lịch trình lưu trú -->
-                <div class="det-card">
-                    <div class="det-card-title">Lịch trình lưu trú</div>
-                    <div class="det-timeline">
-                        <div class="det-timeline-box">
-                            <small>📅 Ngày nhận phòng</small>
-                            <strong>@Model.DatPhong.NgayNhan.ToString("dd/MM/yyyy")</strong>
-                            <span>Từ 14:00</span>
-                        </div>
-                        <div class="det-timeline-arrow">➔ @Model.SoNgayO đêm</div>
-                        <div class="det-timeline-box">
-                            <small>📅 Ngày trả phòng</small>
-                            <strong>@Model.DatPhong.NgayTraDuKien.ToString("dd/MM/yyyy")</strong>
-                            <span>Trước 12:00</span>
-                        </div>
-                    </div>
-                    <div class="det-field-group" style="margin-top:16px;">
-                        <div class="det-field">
-                            <small>Số lượng khách</small>
-                            <strong>@Model.DatPhong.SoNguoi người</strong>
-                        </div>
-                        <div class="det-field">
-                            <small>Thời gian đặt</small>
-                            <strong>@Model.DatPhong.NgayDat.ToString("dd/MM/yyyy HH:mm")</strong>
-                        </div>
-                        @if (!string.IsNullOrEmpty(Model.DatPhong.GhiChu))
-                        {
-                            <div class="det-field det-field-span">
-                                <small>Ghi chú / Yêu cầu đặc biệt</small>
-                                <div class="det-note-box">@Model.DatPhong.GhiChu</div>
-                            </div>
-                        }
-                    </div>
+        <section class="bd-card">
+            <div class="bd-card-title">Lịch trình lưu trú</div>
+            <div class="bd-timeline">
+                <div class="bd-timeline-box">
+                    <small>Ngày nhận phòng</small>
+                    <strong>@Model.DatPhong.NgayNhan.ToString("dd/MM/yyyy")</strong>
+                    <span>Từ 14:00</span>
                 </div>
-
-                <!-- Thông tin khách hàng -->
-                <div class="det-card">
-                    <div class="det-card-title">Thông tin khách hàng</div>
-                    <div class="det-field-group">
-                        <div class="det-field">
-                            <small>Họ và tên</small>
-                            <strong>@(Model.KhachHang?.HoTen ?? "Chưa rõ")</strong>
-                        </div>
-                        <div class="det-field">
-                            <small>Số điện thoại</small>
-                            <strong>@(Model.KhachHang?.SoDienThoai ?? "Chưa rõ")</strong>
-                        </div>
-                        <div class="det-field">
-                            <small>CCCD / Hộ chiếu</small>
-                            <strong>@(string.IsNullOrEmpty(Model.KhachHang?.CCCD) ? "Chưa cập nhật" : Model.KhachHang.CCCD)</strong>
-                        </div>
-                        <div class="det-field">
-                            <small>Email</small>
-                            <strong>@(string.IsNullOrEmpty(Model.KhachHang?.Email) ? "Chưa cập nhật" : Model.KhachHang.Email)</strong>
-                        </div>
-                    </div>
+                <div class="bd-timeline-arrow">➔ @Model.SoNgayO đêm</div>
+                <div class="bd-timeline-box">
+                    <small>Ngày trả phòng</small>
+                    <strong>@Model.DatPhong.NgayTraDuKien.ToString("dd/MM/yyyy")</strong>
+                    <span>Trước 12:00</span>
                 </div>
             </div>
-
-            <!-- Right: Cost + Actions -->
-            <div class="det-sidebar-card">
-                <div class="det-card-title">Tóm tắt chi phí</div>
-                <div class="det-cost-row">
-                    <span>Đơn giá / đêm</span>
-                    <strong>@(Model.Phong != null ? Model.Phong.DonGia.ToString("N0") : "0")₫</strong>
+            <div class="bd-grid">
+                <div class="bd-field">
+                    <small>Số lượng khách</small>
+                    <strong>@Model.DatPhong.SoNguoi người</strong>
                 </div>
-                <div class="det-cost-row">
-                    <span>Số đêm lưu trú</span>
-                    <strong>@Model.SoNgayO đêm</strong>
+                <div class="bd-field">
+                    <small>Thời gian đặt</small>
+                    <strong>@Model.DatPhong.NgayDat.ToString("dd/MM/yyyy HH:mm")</strong>
                 </div>
-                <hr class="det-divider" />
-                <div class="det-cost-row">
-                    <span>Tổng tiền phòng</span>
-                    <strong style="color:var(--gold-400);font-size:15px;">@Model.DatPhong.TongTien.ToString("N0")₫</strong>
-                </div>
-                <div class="det-cost-row">
-                    <span>Đã đặt cọc</span>
-                    <strong style="color:#82d6a5;">@Model.DatPhong.TienCoc.ToString("N0")₫</strong>
-                </div>
-
-                <div class="det-total-box">
-                    <small>Còn lại cần thanh toán</small>
-                    <strong>@Model.ConLaiPhaiThanhToan.ToString("N0")₫</strong>
-                    <span>(Thanh toán khi nhận phòng hoặc trả phòng)</span>
-                </div>
-
-                <a asp-action="LichSu" class="det-btn-back">← Về danh sách lịch sử</a>
-
-                @if (Model.CoTheHuy)
+                @if (!string.IsNullOrEmpty(Model.DatPhong.GhiChu))
                 {
-                    <button type="button" class="det-btn-cancel" onclick="document.getElementById('modalHuyDon').classList.add('show')">
-                        ✕ Hủy đơn đặt phòng này
-                    </button>
-                }
-                else
-                {
-                    <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:3px;font-size:11px;color:rgba(255,255,255,0.4);text-align:center;">
-                        Đơn không hỗ trợ hủy trực tuyến.<br>Liên hệ lễ tân để được hỗ trợ.
+                    <div class="bd-field bd-span2">
+                        <small>Ghi chú / Yêu cầu đặc biệt</small>
+                        <div class="bd-note">@Model.DatPhong.GhiChu</div>
                     </div>
                 }
+            </div>
+        </section>
+
+        <section class="bd-card">
+            <div class="bd-card-title">Thông tin khách hàng</div>
+            <div class="bd-grid">
+                <div class="bd-field">
+                    <small>Họ và tên</small>
+                    <strong>@(Model.KhachHang?.HoTen ?? "Chưa rõ")</strong>
+                </div>
+                <div class="bd-field">
+                    <small>Số điện thoại</small>
+                    <strong>@(Model.KhachHang?.SoDienThoai ?? "Chưa rõ")</strong>
+                </div>
+                <div class="bd-field">
+                    <small>CCCD / Hộ chiếu</small>
+                    <strong>@(string.IsNullOrEmpty(Model.KhachHang?.CCCD) ? "Chưa cập nhật" : Model.KhachHang.CCCD)</strong>
+                </div>
+                <div class="bd-field">
+                    <small>Email</small>
+                    <strong>@(string.IsNullOrEmpty(Model.KhachHang?.Email) ? "Chưa cập nhật" : Model.KhachHang.Email)</strong>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Cột phải: chi phí & thao tác -->
+    <aside class="bd-summary">
+        <div class="bd-card-title">Tóm tắt chi phí</div>
+        <div class="bd-cost-row">
+            <span>Đơn giá / đêm</span>
+            <strong>@(Model.Phong != null ? Model.Phong.DonGia.ToString("N0") : "0")₫</strong>
+        </div>
+        <div class="bd-cost-row">
+            <span>Số đêm lưu trú</span>
+            <strong>@Model.SoNgayO đêm</strong>
+        </div>
+        <hr class="bd-divider" />
+        <div class="bd-cost-row">
+            <span>Tổng tiền phòng</span>
+            <strong style="color:#b28c49;font-size:15px;">@Model.DatPhong.TongTien.ToString("N0")₫</strong>
+        </div>
+        <div class="bd-cost-row">
+            <span>Đã đặt cọc</span>
+            <strong style="color:#4f8068;">@Model.DatPhong.TienCoc.ToString("N0")₫</strong>
+        </div>
+
+        <div class="bd-total">
+            <small>Còn lại cần thanh toán</small>
+            <strong>@Model.ConLaiPhaiThanhToan.ToString("N0")₫</strong>
+            <span>(Thanh toán khi nhận phòng hoặc trả phòng)</span>
+        </div>
+
+        <a asp-action="LichSu" class="bd-btn-back">← Về danh sách lịch sử</a>
+
+        @if (Model.CoTheHuy)
+        {
+            <button type="button" class="bd-btn-cancel" onclick="document.getElementById('modalHuyDon').classList.add('show')">
+                ✕ Hủy đơn đặt phòng này
+            </button>
+        }
+        else
+        {
+            <div style="padding:10px 12px;background:#f7f9fa;border:1px solid #edf0f2;border-radius:3px;font-size:11px;color:#8a939d;text-align:center;">
+                Đơn không hỗ trợ hủy trực tuyến.<br>Liên hệ lễ tân để được hỗ trợ.
+            </div>
+        }
+    </aside>
+</div>
+
+@if (Model.CoTheHuy)
+{
+    <div class="bd-modal-overlay" id="modalHuyDon" onclick="if(event.target===this)this.classList.remove('show')">
+        <div class="bd-modal">
+            <h4>⚠ Xác nhận hủy đặt phòng</h4>
+            <p>Quý khách có chắc chắn muốn hủy đơn đặt phòng <strong style="color:#b28c49">#@Model.DatPhong.MaDatPhong.ToString("D4")</strong>
+                @(Model.Phong != null ? $"(Phòng {Model.Phong.SoPhong})" : "") không?</p>
+            <div class="bd-modal-warn">
+                Thao tác này sẽ hủy yêu cầu đặt phòng và phòng sẽ được giải phóng sẵn sàng đón khách khác.
+            </div>
+            <div class="bd-modal-actions">
+                <button class="bd-modal-close-btn" onclick="document.getElementById('modalHuyDon').classList.remove('show')">Đóng</button>
+                <form asp-action="Cancel" asp-route-id="@Model.DatPhong.MaDatPhong" method="post" style="flex:1;display:flex;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="bd-modal-confirm-btn" style="width:100%;">Xác nhận hủy</button>
+                </form>
             </div>
         </div>
     </div>
-
-    <!-- Modal xác nhận hủy -->
-    @if (Model.CoTheHuy)
-    {
-        <div class="det-modal-overlay" id="modalHuyDon" onclick="if(event.target===this)this.classList.remove('show')">
-            <div class="det-modal">
-                <h4>⚠ Xác nhận hủy đặt phòng</h4>
-                <p>Quý khách có chắc chắn muốn hủy đơn đặt phòng <strong style="color:var(--gold-400)">#@Model.DatPhong.MaDatPhong.ToString("D4")</strong>
-                    @(Model.Phong != null ? $"(Phòng {Model.Phong.SoPhong})" : "") không?</p>
-                <div class="det-modal-warn">
-                    Thao tác này sẽ hủy yêu cầu đặt phòng và phòng sẽ được giải phóng sẵn sàng đón khách khác.
-                </div>
-                <div class="det-modal-actions">
-                    <button class="det-modal-close-btn" onclick="document.getElementById('modalHuyDon').classList.remove('show')">Đóng</button>
-                    <form asp-action="Cancel" asp-route-id="@Model.DatPhong.MaDatPhong" method="post" style="flex:1;display:flex;">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="det-modal-confirm-btn" style="width:100%;">Xác nhận hủy</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    }
-</div>
+}

@@ -1,79 +1,85 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Giao diện Đổi mật khẩu cho tài khoản đang đăng nhập (Module 1 Restyle UI).
+    Nội dung thực hiện: Giao diện Đổi mật khẩu cho tài khoản đang đăng nhập (Restyle UI theo _AdminLayout).
 *@
 @model QLyDatPhongKhachSan.ViewModels.DoiMatKhauViewModel
 @using QLyDatPhongKhachSan.Helpers
 
 @{
     ViewData["Title"] = "Đổi mật khẩu";
-    Layout = "_HomeLayout";
+    Layout = "_AdminLayout";
+    var labelStyle = "font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;";
+    var inputStyle = "min-height:44px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:13px;";
+    var errorStyle = "color:#c0392b;font-size:11px;";
 }
 
-<div style="min-height: 100vh; background: var(--navy-950); display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: var(--white); position: relative; overflow: hidden;">
-    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(4,15,28,0.95), rgba(11,27,46,0.85)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat; opacity: 0.4;"></div>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Tài khoản · Bảo mật</span>
+        <h1>Đổi mật khẩu</h1>
+        <p>Tài khoản: <strong>@ViewContext.HttpContext.Session.GetTenDangNhap()</strong> — cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p>
+    </div>
+    <a class="admin-secondary" asp-controller="Home" asp-action="Index" style="text-decoration:none;">← Về trang chủ</a>
+</div>
 
-    <div style="position: relative; z-index: 2; width: 100%; max-width: 440px; background: rgba(11, 27, 46, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(201, 163, 93, 0.25); border-radius: 6px; padding: 36px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);">
-        <div style="text-align: center; margin-bottom: 28px;">
-            <a href="/" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--white);">
-                <span style="width: 40px; height: 44px; display: grid; place-items: center; border: 1px solid var(--gold-500); color: var(--gold-400); font-family: 'Playfair Display', serif; font-size: 24px; clip-path: polygon(0 0, 100% 0, 100% 77%, 50% 100%, 0 77%);">U</span>
-                <span style="display: flex; flex-direction: column; align-items: flex-start;">
-                    <strong style="font-family: 'Playfair Display', serif; font-size: 18px; letter-spacing: 0.08em; line-height: 1;">UNETI GRAND</strong>
-                    <small style="color: var(--gold-400); font-size: 8px; letter-spacing: 0.36em; margin-top: 2px;">HOTEL &amp; SPA</small>
-                </span>
-            </a>
-            <h2 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; margin: 20px 0 6px;">Đổi mật khẩu</h2>
-            <p style="color: rgba(255,255,255,0.6); font-size: 13px; margin: 0;">Tài khoản: <strong style="color: var(--gold-400);">@ViewContext.HttpContext.Session.GetTenDangNhap()</strong></p>
+<div class="dashboard-grid report-grid">
+    <article class="dashboard-card" style="padding:28px;max-width:560px;">
+        <div class="card-heading" style="margin-bottom:6px;">
+            <div><span>Thiết lập</span><h2>Thông tin mật khẩu</h2></div>
         </div>
+        <div style="height:1px;background:#edf0f2;margin:16px 0 20px;"></div>
 
         @if (TempData["SuccessMessage"] != null)
         {
-            <div style="padding: 12px 14px; background: rgba(79, 128, 104, 0.2); border: 1px solid rgba(79, 128, 104, 0.5); border-radius: 4px; color: #82d6a5; font-size: 13px; margin-bottom: 20px; text-align: center;">
-                ✓ @TempData["SuccessMessage"]
-            </div>
+            <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size:12px;">✓ @TempData["SuccessMessage"]</p>
         }
 
         @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
         {
-            <div style="padding: 12px 14px; background: rgba(192, 57, 43, 0.2); border: 1px solid rgba(192, 57, 43, 0.5); border-radius: 4px; color: #f5b7b1; font-size: 13px; margin-bottom: 20px;">
+            <div style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size:12px;">
                 @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
                 {
-                    <div>⚠️ @error.ErrorMessage</div>
+                    <div>⚠ @error.ErrorMessage</div>
                 }
             </div>
         }
 
-        <form asp-action="DoiMatKhau" method="post">
-            <div style="margin-bottom: 18px;">
-                <label asp-for="MatKhauHienTai" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;"></label>
-                <input asp-for="MatKhauHienTai" type="password" placeholder="Nhập mật khẩu hiện tại..." autofocus style="width: 100%; height: 44px; padding: 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
-                <span asp-validation-for="MatKhauHienTai" style="color: #e74c3c; font-size: 11px; margin-top: 4px; display: block;"></span>
+        <form asp-action="DoiMatKhau" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;">
+                <label asp-for="MatKhauHienTai" style="@labelStyle"></label>
+                <input asp-for="MatKhauHienTai" type="password" placeholder="Nhập mật khẩu hiện tại..." autofocus style="@inputStyle" />
+                <span asp-validation-for="MatKhauHienTai" style="@errorStyle"></span>
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label asp-for="MatKhauMoi" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;"></label>
-                <input asp-for="MatKhauMoi" type="password" placeholder="Mật khẩu mới (ít nhất 6 ký tự)..." style="width: 100%; height: 44px; padding: 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
-                <span asp-validation-for="MatKhauMoi" style="color: #e74c3c; font-size: 11px; margin-top: 4px; display: block;"></span>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;">
+                <label asp-for="MatKhauMoi" style="@labelStyle"></label>
+                <input asp-for="MatKhauMoi" type="password" placeholder="Mật khẩu mới (ít nhất 6 ký tự)..." style="@inputStyle" />
+                <span asp-validation-for="MatKhauMoi" style="@errorStyle"></span>
             </div>
 
-            <div style="margin-bottom: 28px;">
-                <label asp-for="XacNhanMatKhau" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;"></label>
-                <input asp-for="XacNhanMatKhau" type="password" placeholder="Nhập lại mật khẩu mới..." style="width: 100%; height: 44px; padding: 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
-                <span asp-validation-for="XacNhanMatKhau" style="color: #e74c3c; font-size: 11px; margin-top: 4px; display: block;"></span>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:26px;">
+                <label asp-for="XacNhanMatKhau" style="@labelStyle"></label>
+                <input asp-for="XacNhanMatKhau" type="password" placeholder="Nhập lại mật khẩu mới..." style="@inputStyle" />
+                <span asp-validation-for="XacNhanMatKhau" style="@errorStyle"></span>
             </div>
 
-            <button type="submit" class="button button--gold" style="width: 100%; height: 46px; justify-content: center; font-size: 13px; letter-spacing: 0.1em;">
-                Xác nhận đổi mật khẩu
-            </button>
+            <button type="submit" class="admin-primary" style="width:100%;">Xác nhận đổi mật khẩu</button>
         </form>
+    </article>
 
-        <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; color: rgba(255,255,255,0.6);">
-            <a asp-action="Login" style="color: var(--gold-400); font-weight: 700; text-decoration: none;">← Quay lại đăng nhập</a>
-            &nbsp;·&nbsp;
-            <a href="/" style="color: rgba(255,255,255,0.5); text-decoration: none;">Về trang chủ</a>
+    <article class="dashboard-card revenue-card">
+        <div class="card-heading">
+            <div><span>Gợi ý</span><h2>Mật khẩu an toàn</h2></div>
         </div>
-    </div>
+        <div style="margin-top:18px;font-size:12px;color:#59636d;line-height:1.9;">
+            <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #edf0f2;"><span style="color:#c9a35d;">✓</span> Dài tối thiểu 6 ký tự, nên kết hợp chữ hoa, chữ thường và số.</div>
+            <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #edf0f2;"><span style="color:#c9a35d;">✓</span> Không trùng với mật khẩu đang sử dụng.</div>
+            <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #edf0f2;"><span style="color:#c9a35d;">✓</span> Không chia sẻ mật khẩu cho người khác.</div>
+            <div style="display:flex;gap:10px;padding:9px 0;"><span style="color:#c9a35d;">✓</span> Sau khi đổi, hệ thống yêu cầu đăng nhập lại.</div>
+        </div>
+    </article>
 </div>
 
 @section Scripts {

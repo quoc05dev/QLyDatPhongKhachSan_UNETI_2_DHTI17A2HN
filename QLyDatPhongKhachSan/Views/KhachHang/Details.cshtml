@@ -2,7 +2,7 @@
 // ==========================================
 // Họ và tên: Anh Tuấn
 // Mã sinh viên: 23103100086
-// Nội dung thực hiện: Module 3 - Giao diện Xem chi tiết Khách hàng & Lịch sử đặt phòng (Admin & Lễ tân)
+// Nội dung thực hiện: Module 3 - Chi tiết Khách hàng & Lịch sử đặt phòng (Restyle UI)
 // ==========================================
 *@
 
@@ -10,316 +10,177 @@
 
 @{
     ViewData["Title"] = $"Chi tiết khách hàng - {Model.HoTen}";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "customers";
     string avatarLetter = !string.IsNullOrWhiteSpace(Model.HoTen) ? Model.HoTen.Trim().Substring(0, 1).ToUpper() : "K";
     var danhSachDatPhong = Model.DatPhongs?.OrderByDescending(dp => dp.NgayDat).ToList() ?? new List<QLyDatPhongKhachSan.Models.DatPhong>();
     decimal tongChiTieu = danhSachDatPhong.Where(dp => dp.TrangThai != "DaHuy").Sum(dp => dp.TongTien);
+    string rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf0f2;font-size:12px;";
+    string rowLabelText = "color:#737d87;";
+    string rowValueText = "color:#172433;font-weight:600;text-align:right;";
 }
 
-<div class="container-fluid py-4">
-    <!-- Breadcrumb điều hướng -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Khách hàng</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.HoTen (#@Model.MaKhachHang.ToString("D4"))</li>
-        </ol>
-    </nav>
-
-    <!-- Header & Thao tác nhanh -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h2 class="fw-bold text-primary mb-1">
-                <i class="bi bi-person-badge-fill me-2"></i>HỒ SƠ KHÁCH HÀNG: @Model.HoTen.ToUpper()
-            </h2>
-            <p class="text-muted mb-0">Xem chi tiết thông tin nhân thân, liên hệ và toàn bộ lịch sử giao dịch đặt phòng</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.MaKhachHang" class="btn btn-warning rounded-pill px-3 shadow-sm fw-semibold">
-                <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa hồ sơ
-            </a>
-            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">
-                <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
-            </a>
-        </div>
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 3 · Hồ sơ khách hàng #@Model.MaKhachHang.ToString("D4")</span>
+        <h1>@Model.HoTen</h1>
+        <p>Thông tin nhân thân, liên hệ và toàn bộ lịch sử giao dịch đặt phòng của khách hàng.</p>
     </div>
-
-    <div class="row g-4">
-        <!-- Cột trái: Thông tin nhân thân & liên hệ -->
-        <div class="col-lg-4">
-            <!-- Card tóm tắt đại diện -->
-            <div class="card border-0 shadow-sm rounded-4 text-center p-4 mb-4 bg-white">
-                <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center mx-auto mb-3 shadow"
-                     style="width: 80px; height: 80px; font-size: 2.2rem;">
-                    @avatarLetter
-                </div>
-                <h4 class="fw-bold mb-1">@Model.HoTen</h4>
-                <div class="text-muted small mb-2">Mã khách hàng: <strong>#@Model.MaKhachHang.ToString("D4")</strong></div>
-
-                <div class="d-flex justify-content-center gap-2 mb-3">
-                    @if (Model.TrangThai)
-                    {
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold">
-                            <i class="bi bi-check-circle-fill me-1"></i>Đang hoạt động
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-semibold">
-                            <i class="bi bi-lock-fill me-1"></i>Bị khóa
-                        </span>
-                    }
-
-                    @if (Model.TaiKhoan != null)
-                    {
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
-                            <i class="bi bi-globe me-1"></i>Online
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-semibold">
-                            <i class="bi bi-person-dash me-1"></i>Vãng lai
-                        </span>
-                    }
-                </div>
-
-                <hr class="my-3 opacity-25" />
-
-                <!-- Thống kê nhanh chi tiêu -->
-                <div class="row g-2 text-start">
-                    <div class="col-6">
-                        <div class="p-2 bg-light rounded-3 text-center">
-                            <div class="small text-muted">Số lần đặt phòng</div>
-                            <div class="fs-5 fw-bold text-primary">@danhSachDatPhong.Count</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2 bg-light rounded-3 text-center">
-                            <div class="small text-muted">Tổng chi tiêu</div>
-                            <div class="fs-6 fw-bold text-success text-truncate" title="@tongChiTieu.ToString("N0") VNĐ">
-                                @tongChiTieu.ToString("N0") đ
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card chi tiết các trường dữ liệu -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
-                    <i class="bi bi-info-circle-fill me-2"></i>Thông tin chi tiết
-                </h5>
-
-                <div class="list-group list-group-flush small">
-                    <div class="list-group-item px-0 d-flex justify-content-between">
-                        <span class="text-muted"><i class="bi bi-card-text me-2"></i>Số CCCD / Hộ chiếu:</span>
-                        <strong class="text-dark font-monospace">@Model.CCCD</strong>
-                    </div>
-
-                    <div class="list-group-item px-0 d-flex justify-content-between">
-                        <span class="text-muted"><i class="bi bi-gender-ambiguous me-2"></i>Giới tính:</span>
-                        <strong class="text-dark">@(Model.GioiTinh ?? "Chưa rõ")</strong>
-                    </div>
-
-                    <div class="list-group-item px-0 d-flex justify-content-between">
-                        <span class="text-muted"><i class="bi bi-calendar-event me-2"></i>Ngày sinh:</span>
-                        <strong class="text-dark">@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")</strong>
-                    </div>
-
-                    <div class="list-group-item px-0 d-flex justify-content-between">
-                        <span class="text-muted"><i class="bi bi-flag me-2"></i>Quốc tịch:</span>
-                        <strong class="text-dark">@(string.IsNullOrEmpty(Model.QuocTich) ? "Việt Nam" : Model.QuocTich)</strong>
-                    </div>
-
-                    <div class="list-group-item px-0 d-flex justify-content-between">
-                        <span class="text-muted"><i class="bi bi-telephone me-2"></i>Số điện thoại:</span>
-                        <a href="tel:@Model.SoDienThoai" class="text-primary fw-bold text-decoration-none">
-                            @Model.SoDienThoai
-                        </a>
-                    </div>
-
-                    <div class="list-group-item px-0 d-flex justify-content-between">
-                        <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email:</span>
-                        <span class="text-dark fw-semibold text-truncate" style="max-width: 170px;">
-                            @(string.IsNullOrEmpty(Model.Email) ? "Chưa cập nhật" : Model.Email)
-                        </span>
-                    </div>
-
-                    <div class="list-group-item px-0">
-                        <div class="text-muted mb-1"><i class="bi bi-geo-alt me-2"></i>Địa chỉ liên hệ:</div>
-                        <div class="text-dark fw-semibold">
-                            @(string.IsNullOrEmpty(Model.DiaChi) ? "Chưa cập nhật địa chỉ" : Model.DiaChi)
-                        </div>
-                    </div>
-
-                    @if (Model.TaiKhoan != null)
-                    {
-                        <div class="list-group-item px-0">
-                            <div class="text-muted mb-1"><i class="bi bi-person-check me-2"></i>Tài khoản hệ thống:</div>
-                            <div class="p-2 bg-light rounded-3">
-                                <div>Tên đăng nhập: <strong class="text-primary">@Model.TaiKhoan.TenDangNhap</strong></div>
-                                <div>Vai trò: <span class="badge bg-secondary">@Model.TaiKhoan.VaiTro</span></div>
-                                <div class="small text-muted">Ngày tạo: @Model.TaiKhoan.NgayTao.ToString("dd/MM/yyyy HH:mm")</div>
-                            </div>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Model.GhiChu))
-                    {
-                        <div class="list-group-item px-0">
-                            <div class="text-muted mb-1"><i class="bi bi-sticky me-2"></i>Ghi chú nội bộ:</div>
-                            <div class="alert alert-light border small mb-0">
-                                @Model.GhiChu
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- Cột phải: Lịch sử đặt phòng của khách hàng -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold text-primary mb-0">
-                        <i class="bi bi-clock-history me-2"></i>LỊCH SỬ ĐẶT PHÒNG (@danhSachDatPhong.Count đơn)
-                    </h5>
-                    <a asp-controller="DatPhong" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                        <i class="bi bi-calendar2-plus me-1"></i>Đặt phòng mới
-                    </a>
-                </div>
-
-                <div class="card-body p-0">
-                    @if (!danhSachDatPhong.Any())
-                    {
-                        <div class="text-center py-5 px-3">
-                            <i class="bi bi-journal-x text-muted" style="font-size: 3.5rem;"></i>
-                            <h5 class="fw-bold text-secondary mt-3 mb-1">Chưa có lịch sử đặt phòng</h5>
-                            <p class="text-muted small mb-0">Khách hàng này hiện chưa thực hiện đơn đặt phòng nào trong hệ thống.</p>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-4" style="width: 80px;">Mã đơn</th>
-                                        <th>Thời gian lưu trú</th>
-                                        <th>Phòng đã đặt</th>
-                                        <th class="text-center">Số khách</th>
-                                        <th class="text-end">Tổng tiền</th>
-                                        <th class="text-center">Trạng thái</th>
-                                        <th class="text-end pe-4">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var dp in danhSachDatPhong)
-                                    {
-                                        int soDem = (dp.NgayTraDuKien.Date - dp.NgayNhan.Date).Days;
-                                        if (soDem < 1) soDem = 1;
-
-                                        <tr>
-                                            <!-- Mã đơn -->
-                                            <td class="ps-4 fw-bold text-primary">
-                                                #@dp.MaDatPhong.ToString("D4")
-                                                <div class="small text-muted fw-normal">@dp.NgayDat.ToString("dd/MM/yyyy")</div>
-                                            </td>
-
-                                            <!-- Thời gian lưu trú -->
-                                            <td>
-                                                <div class="fw-semibold">
-                                                    @dp.NgayNhan.ToString("dd/MM/yyyy") ➔ @dp.NgayTraDuKien.ToString("dd/MM/yyyy")
-                                                </div>
-                                                <span class="badge bg-light text-muted border">@soDem đêm</span>
-                                            </td>
-
-                                            <!-- Phòng đã đặt -->
-                                            <td>
-                                                @if (dp.ChiTietDatPhongs != null && dp.ChiTietDatPhongs.Any())
-                                                {
-                                                    foreach (var ct in dp.ChiTietDatPhongs)
-                                                    {
-                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-1">
-                                                            Phòng @(ct.Phong?.SoPhong ?? ct.MaPhong.ToString())
-                                                        </span>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted small">Chưa xếp phòng</span>
-                                                }
-                                            </td>
-
-                                            <!-- Số khách -->
-                                            <td class="text-center">
-                                                <i class="bi bi-people text-muted me-1"></i>@dp.SoNguoi
-                                            </td>
-
-                                            <!-- Tổng tiền -->
-                                            <td class="text-end fw-bold text-success">
-                                                @dp.TongTien.ToString("N0") đ
-                                                @if (dp.TienCoc > 0)
-                                                {
-                                                    <div class="small text-muted fw-normal">Cọc: @dp.TienCoc.ToString("N0") đ</div>
-                                                }
-                                            </td>
-
-                                            <!-- Trạng thái -->
-                                            <td class="text-center">
-                                                @switch (dp.TrangThai)
-                                                {
-                                                    case "ChoXuLy":
-                                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill">
-                                                            <i class="bi bi-hourglass-split me-1"></i>Chờ xử lý
-                                                        </span>
-                                                        break;
-                                                    case "DangXuLy":
-                                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1 rounded-pill">
-                                                            <i class="bi bi-arrow-repeat me-1"></i>Đang xử lý
-                                                        </span>
-                                                        break;
-                                                    case "DaXacNhan":
-                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill">
-                                                            <i class="bi bi-check-circle me-1"></i>Đã xác nhận
-                                                        </span>
-                                                        break;
-                                                    case "DangSuDung":
-                                                        <span class="badge text-white px-2 py-1 rounded-pill" style="background-color: #6f42c1;">
-                                                            <i class="bi bi-door-open me-1"></i>Đang ở
-                                                        </span>
-                                                        break;
-                                                    case "HoanThanh":
-                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
-                                                            <i class="bi bi-check2-all me-1"></i>Hoàn thành
-                                                        </span>
-                                                        break;
-                                                    case "DaHuy":
-                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 rounded-pill">
-                                                            <i class="bi bi-x-circle me-1"></i>Đã hủy
-                                                        </span>
-                                                        break;
-                                                    default:
-                                                        <span class="badge bg-secondary">@dp.TrangThai</span>
-                                                        break;
-                                                }
-                                            </td>
-
-                                            <!-- Thao tác -->
-                                            <td class="text-end pe-4">
-                                                <a asp-controller="DatPhong" asp-action="Details" asp-route-id="@dp.MaDatPhong" 
-                                                   class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Xem chi tiết phiếu đặt">
-                                                    <i class="bi bi-eye me-1"></i>Chi tiết
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
+    <div style="display:flex;gap:10px;">
+        <a class="admin-primary" asp-action="Edit" asp-route-id="@Model.MaKhachHang" style="text-decoration:none;">Chỉnh sửa hồ sơ</a>
+        <a class="admin-secondary" asp-action="Index" style="text-decoration:none;">← Danh sách</a>
     </div>
 </div>
+
+<div class="report-highlight" style="grid-template-columns:repeat(3,1fr);">
+    <div>
+        <span>Số lần đặt phòng</span>
+        <strong>@danhSachDatPhong.Count</strong>
+        <small>Tổng số đơn đã phát sinh</small>
+    </div>
+    <div>
+        <span>Tổng chi tiêu (không tính đơn hủy)</span>
+        <strong>@tongChiTieu.ToString("N0")₫</strong>
+        <small>Doanh thu tích lũy từ khách hàng</small>
+    </div>
+    <div>
+        <span>Trạng thái hồ sơ</span>
+        <strong style="font-size:19px;">@(Model.TrangThai ? "Đang hoạt động" : "Bị khóa")</strong>
+        <small>@(Model.TaiKhoan != null ? "Có tài khoản trực tuyến" : "Khách vãng lai")</small>
+    </div>
+</div>
+
+<div class="dashboard-grid report-grid">
+    <article class="dashboard-card revenue-card">
+        <div class="card-heading">
+            <div><span>Hồ sơ</span><h2>Thông tin chi tiết</h2></div>
+            <span class="status-badge @(Model.TrangThai ? "status-badge--success" : "status-badge--muted")"><i></i>@(Model.TrangThai ? "Hoạt động" : "Bị khóa")</span>
+        </div>
+
+        <div style="margin-top:18px;">
+            <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid #edf0f2;">
+                <div style="width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#102943;color:#e2c894;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;">@avatarLetter</div>
+                <div>
+                    <div style="font-weight:700;color:#172433;font-size:14px;">@Model.HoTen</div>
+                    <div style="color:#737d87;font-size:11px;">Mã khách hàng: #@Model.MaKhachHang.ToString("D4")</div>
+                </div>
+            </div>
+
+            <div style="@rowLabel"><span style="@rowLabelText">Số CCCD / Hộ chiếu</span><span style="@rowValueText">@Model.CCCD</span></div>
+            <div style="@rowLabel"><span style="@rowLabelText">Giới tính</span><span style="@rowValueText">@(Model.GioiTinh ?? "Chưa rõ")</span></div>
+            <div style="@rowLabel"><span style="@rowLabelText">Ngày sinh</span><span style="@rowValueText">@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")</span></div>
+            <div style="@rowLabel"><span style="@rowLabelText">Quốc tịch</span><span style="@rowValueText">@(string.IsNullOrEmpty(Model.QuocTich) ? "Việt Nam" : Model.QuocTich)</span></div>
+            <div style="@rowLabel"><span style="@rowLabelText">Số điện thoại</span><span style="@rowValueText">@Model.SoDienThoai</span></div>
+            <div style="@rowLabel"><span style="@rowLabelText">Email</span><span style="@rowValueText">@(string.IsNullOrEmpty(Model.Email) ? "Chưa cập nhật" : Model.Email)</span></div>
+            <div style="@rowLabel"><span style="@rowLabelText">Địa chỉ</span><span style="@rowValueText">@(string.IsNullOrEmpty(Model.DiaChi) ? "Chưa cập nhật" : Model.DiaChi)</span></div>
+
+            @if (Model.TaiKhoan != null)
+            {
+                <div style="@rowLabel"><span style="@rowLabelText">Tài khoản hệ thống</span><span style="@rowValueText">@Model.TaiKhoan.TenDangNhap · @Model.TaiKhoan.VaiTro</span></div>
+                <div style="@rowLabel;border-bottom:0;"><span style="@rowLabelText">Ngày tạo tài khoản</span><span style="@rowValueText">@Model.TaiKhoan.NgayTao.ToString("dd/MM/yyyy HH:mm")</span></div>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.GhiChu))
+        {
+            <div style="margin-top:16px;padding:12px 14px;border-left:3px solid #c9a35d;background:#fbf7ef;color:#6b5a36;font-size:12px;">
+                <strong style="display:block;margin-bottom:3px;">Ghi chú nội bộ</strong>@Model.GhiChu
+            </div>
+        }
+    </article>
+
+    <article class="dashboard-card" style="display:flex;flex-direction:column;">
+        <div class="card-heading" style="padding:23px 23px 0;">
+            <div><span>Phân hạng</span><h2>Tóm tắt giao dịch</h2></div>
+        </div>
+        <div style="padding:18px 23px 24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f7f9fa;border:1px solid #edf0f2;">
+                <span style="font-size:11px;color:#737d87;">Số đơn hợp lệ</span>
+                <strong style="font-family:'Playfair Display',serif;font-size:22px;color:#102943;">@danhSachDatPhong.Count(dp => dp.TrangThai != "DaHuy")</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f7f9fa;border:1px solid #edf0f2;border-top:0;">
+                <span style="font-size:11px;color:#737d87;">Đơn đã hủy</span>
+                <strong style="font-family:'Playfair Display',serif;font-size:22px;color:#a17732;">@danhSachDatPhong.Count(dp => dp.TrangThai == "DaHuy")</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#eef6f2;border:1px solid #d9ebe1;border-top:0;">
+                <span style="font-size:11px;color:#37614b;">Tổng chi tiêu</span>
+                <strong style="font-family:'Playfair Display',serif;font-size:20px;color:#37614b;">@tongChiTieu.ToString("N0")₫</strong>
+            </div>
+            <a class="admin-secondary" asp-controller="DatPhong" asp-action="Index" style="display:block;text-align:center;margin-top:16px;text-decoration:none;">Đặt phòng mới cho khách →</a>
+        </div>
+    </article>
+</div>
+
+<article class="dashboard-card data-card" style="margin-top:18px;">
+    <div class="card-heading" style="padding:22px 24px;border-bottom:1px solid #e4e7e9;">
+        <div><span>Lịch sử đặt phòng</span><h2>Danh sách đơn đặt phòng (@danhSachDatPhong.Count)</h2></div>
+    </div>
+
+    @if (danhSachDatPhong.Any())
+    {
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Thời gian lưu trú</th>
+                        <th>Phòng đã đặt</th>
+                        <th>Số khách</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th style="text-align:right;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dp in danhSachDatPhong)
+                    {
+                        var soDem = (dp.NgayTraDuKien.Date - dp.NgayNhan.Date).Days;
+                        if (soDem < 1) { soDem = 1; }
+                        <tr>
+                            <td>
+                                <strong>#@dp.MaDatPhong.ToString("D4")</strong>
+                                <small>Đặt: @dp.NgayDat.ToString("dd/MM/yyyy")</small>
+                            </td>
+                            <td>
+                                <span>@dp.NgayNhan.ToString("dd/MM/yyyy") → @dp.NgayTraDuKien.ToString("dd/MM/yyyy")</span>
+                                <small>@soDem đêm</small>
+                            </td>
+                            <td>
+                                @if (dp.ChiTietDatPhongs != null && dp.ChiTietDatPhongs.Any())
+                                {
+                                    foreach (var ct in dp.ChiTietDatPhongs)
+                                    {
+                                        <span class="status-badge status-badge--info" style="margin-right:4px;"><i></i>Phòng @(ct.Phong?.SoPhong ?? ct.MaPhong.ToString())</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td>@dp.SoNguoi</td>
+                            <td>
+                                <strong>@dp.TongTien.ToString("N0")₫</strong>
+                                @if (dp.TienCoc > 0)
+                                {
+                                    <small>Cọc: @dp.TienCoc.ToString("N0")₫</small>
+                                }
+                            </td>
+                            <td><partial name="_TrangThaiBadge" model="@dp.TrangThai" /></td>
+                            <td style="text-align:right;">
+                                <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-controller="DatPhong" asp-action="Details" asp-route-id="@dp.MaDatPhong">Chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-table">
+            <strong>Chưa có lịch sử đặt phòng</strong>
+            <span>Khách hàng này chưa thực hiện đơn đặt phòng nào trong hệ thống.</span>
+        </div>
+    }
+</article>

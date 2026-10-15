@@ -31,25 +31,34 @@
             </a>
             <div class="sidebar-section-label">Không gian làm việc</div>
             <nav>
-                <a class="@(active == "overview" ? "is-active" : "")" asp-controller="ThongKe" asp-action="Dashboard"><i>⌂</i><span>Tổng quan</span></a>
-                @if (isAdmin)
-                {
-                    <a class="@(active == "accounts" ? "is-active" : "")" asp-controller="TaiKhoan" asp-action="Index"><i>A</i><span>Tài khoản &amp; loại phòng</span><small>SV 1</small></a>
-                }
-                <a class="@(active == "rooms" ? "is-active" : "")" asp-controller="Phong" asp-action="Index"><i>P</i><span>Quản lý phòng</span><small>SV 2</small></a>
                 @if (isKhachHang)
                 {
-                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="DatPhong" asp-action="Index"><i>K</i><span>Khách hàng &amp; đặt phòng</span><small>SV 3</small></a>
+                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="DatPhong" asp-action="Index"><i>K</i><span>Đặt phòng</span><small>SV 3</small></a>
+                    <a class="@(active == "profile" ? "is-active" : "")" asp-controller="KhachHang" asp-action="Profile"><i>H</i><span>Hồ sơ cá nhân</span></a>
                 }
-                @if (!isKhachHang)
+                else
                 {
+                    <a class="@(active == "overview" ? "is-active" : "")" asp-controller="ThongKe" asp-action="Dashboard"><i>⌂</i><span>Tổng quan</span></a>
+                    @if (isAdmin)
+                    {
+                        <a class="@(active == "accounts" ? "is-active" : "")" asp-controller="TaiKhoan" asp-action="Index"><i>A</i><span>Tài khoản &amp; loại phòng</span><small>SV 1</small></a>
+                    }
+                    <a class="@(active == "rooms" ? "is-active" : "")" asp-controller="Phong" asp-action="Index"><i>P</i><span>Quản lý phòng</span><small>SV 2</small></a>
+                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="KhachHang" asp-action="Index"><i>K</i><span>Khách hàng &amp; đặt phòng</span><small>SV 3</small></a>
                     <a class="@(active == "operations" ? "is-active" : "")" asp-controller="QuanLyDatPhong" asp-action="Index"><i>N</i><span>Tiếp nhận &amp; trạng thái</span><small>SV 4</small></a>
+                    <a class="@(active == "reports" ? "is-active" : "")" asp-controller="ThongKe" asp-action="DoanhThu"><i>B</i><span>Doanh thu &amp; báo cáo</span><small>SV 5</small></a>
                 }
-                <a class="@(active == "reports" ? "is-active" : "")" asp-controller="ThongKe" asp-action="DoanhThu"><i>B</i><span>Doanh thu &amp; báo cáo</span><small>SV 5</small></a>
             </nav>
             <div class="sidebar-help">
                 <span>?</span>
-                <div><strong>Module 5 · SV5</strong><small>Dashboard &amp; thống kê doanh thu</small></div>
+                @if (isKhachHang)
+                {
+                    <div><strong>Đặt phòng · SV3</strong><small>Chọn phòng &amp; theo dõi lịch sử</small></div>
+                }
+                else
+                {
+                    <div><strong>Module 5 · SV5</strong><small>Dashboard &amp; thống kê doanh thu</small></div>
+                }
             </div>
             <a class="back-to-site" asp-controller="Home" asp-action="Index">← Về trang khách sạn</a>
         </aside>
@@ -59,13 +68,13 @@
                 <button class="admin-menu" id="admin-menu-btn" aria-label="Mở menu" type="button">
                     <svg class="admin-icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                 </button>
-                <form class="global-search" method="get" asp-controller="Phong" asp-action="Index">
+                <form class="global-search" method="get" asp-controller="@(isKhachHang ? "DatPhong" : "Phong")" asp-action="Index">
                     <svg class="admin-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
-                    <input name="keyword" placeholder="Tìm nhanh phòng (số phòng, loại, trạng thái)..." />
+                    <input name="keyword" placeholder="@(isKhachHang ? "Tìm phòng theo số phòng, tiện nghi..." : "Tìm nhanh phòng (số phòng, loại, trạng thái)...")" />
                     <kbd>tìm</kbd>
                 </form>
                 <div class="admin-header-actions">
-                    <a class="notification" asp-controller="QuanLyDatPhong" asp-action="Index" title="Việc tiếp nhận">
+                    <a class="notification" asp-controller="@(isKhachHang ? "DatPhong" : "QuanLyDatPhong")" asp-action="@(isKhachHang ? "LichSu" : "Index")" title="@(isKhachHang ? "Lịch sử đặt phòng" : "Việc tiếp nhận")">
                         <svg class="admin-icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>
                         <i></i>
                     </a>

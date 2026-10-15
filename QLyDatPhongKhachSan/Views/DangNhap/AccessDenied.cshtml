@@ -1,32 +1,37 @@
 @*
     Họ và tên: Sinh viên 1
     Mã sinh viên: 23103100091
-    Nội dung thực hiện: Trang thông báo không đủ quyền truy cập (Access Denied).
+    Nội dung thực hiện: Trang thông báo không đủ quyền truy cập (Access Denied) - Restyle UI theo _AdminLayout.
 *@
 @{
     ViewData["Title"] = "Từ chối truy cập";
+    Layout = "_AdminLayout";
+    var thongBao = Context.Request.Query["message"].ToString();
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6 text-center">
-        <div class="card shadow border-0 rounded-4 p-5">
-            <div class="card-body">
-                <div class="text-danger mb-4">
-                    <i class="bi bi-shield-lock-fill display-1"></i>
-                </div>
-                <h2 class="fw-bold text-danger mb-3">403 - TỪ CHỐI TRUY CẬP</h2>
-                <p class="lead text-secondary mb-4">
-                    Bạn không có quyền truy cập vào chức năng hoặc trang quản trị này. Vui lòng liên hệ Quản trị viên nếu đây là sự nhầm lẫn.
-                </p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg rounded-3">
-                        <i class="bi bi-house-door me-2"></i>Về Trang Chủ
-                    </a>
-                    <a asp-controller="DangNhap" asp-action="Login" class="btn btn-primary btn-lg rounded-3">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập tài khoản khác
-                    </a>
-                </div>
-            </div>
+<div style="min-height:60vh;display:grid;place-items:center;">
+    <article class="dashboard-card" style="max-width:620px;width:100%;padding:44px 40px;text-align:center;border-top:3px solid #c0392b;">
+        <div style="width:76px;height:76px;margin:0 auto 22px;border-radius:50%;display:grid;place-items:center;background:#fdecea;color:#c0392b;font-size:34px;border:1px solid #f5c6cb;">
+            <svg class="admin-icon" style="width:34px;height:34px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1-.5 1.5-1 2s-1 .8-1 1.5" /><path d="M12 17h.01" /></svg>
         </div>
-    </div>
+
+        <span class="admin-overline" style="color:#c0392b;">Mã lỗi 403</span>
+        <h1 style="font-family:'Playfair Display',serif;font-size:26px;color:#172433;margin:6px 0 12px;">Từ chối truy cập</h1>
+
+        <p style="font-size:13px;color:#59636d;line-height:1.65;margin:0 auto 20px;max-width:460px;">
+            Bạn không có quyền truy cập vào chức năng hoặc trang quản trị này. Vui lòng liên hệ Quản trị viên nếu đây là sự nhầm lẫn.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(thongBao))
+        {
+            <div style="margin:0 auto 24px;padding:14px 16px;border-left:3px solid #c9a35d;background:#fbf7ef;color:#6b5a36;font-size:12.5px;line-height:1.6;text-align:left;max-width:480px;">
+                @thongBao
+            </div>
+        }
+
+        <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+            <a class="admin-secondary" asp-controller="Home" asp-action="Index" style="text-decoration:none;">Về trang chủ</a>
+            <a class="admin-primary" asp-controller="DangNhap" asp-action="Login" style="text-decoration:none;">Đăng nhập tài khoản khác</a>
+        </div>
+    </article>
 </div>

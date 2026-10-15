@@ -84,7 +84,7 @@
                                 <td>Tầng @p.Tang</td>
                                 <td>@(string.IsNullOrWhiteSpace(p.HuongPhong) ? "—" : p.HuongPhong)</td>
                                 <td>@p.DonGia.ToString("N0")₫</td>
-                                <td>@p.TrangThai</td>
+                                <td>@TrangThaiHelper.HienThi(p.TrangThai)</td>
                             </tr>
                         }
                     </tbody>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
+using QLyDatPhongKhachSan.Helpers;
 using QLyDatPhongKhachSan.Models;
 using QLyDatPhongKhachSan.ViewModels;
 using System.Collections.Generic;
@@ -24,8 +25,8 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong
-        // Tạm thời để khách vãng lai xem danh sách phòng (xem công khai).
-        // Phần ghi vẫn chỉ Admin và Nhân viên, xem Index/Create/Edit/Delete.
+        // Màn hình quản lý phòng chỉ dành cho Admin và Nhân viên (khách hàng không được truy cập).
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Index(string? keyword, int? maLoaiPhong, int? tang, string? trangThai, decimal? giaMin, decimal? giaMax, DateTime? ngayNhan, DateTime? ngayTra, string? sortOrder, int page = 1)
         {
             if (ModelState.TryGetValue("page", out var pageEntry) && pageEntry.Errors.Count > 0)
@@ -213,11 +214,11 @@ namespace QLyDatPhongKhachSan.Controllers
             var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
             var trangThaiList = new List<SelectListItem>
             {
-                new SelectListItem { Value = "Trong", Text = "Trong" },
-                new SelectListItem { Value = "DangXuLy", Text = "DangXuLy" },
-                new SelectListItem { Value = "DaDat", Text = "DaDat" },
-                new SelectListItem { Value = "DangSuDung", Text = "DangSuDung" },
-                new SelectListItem { Value = "BaoTri", Text = "BaoTri" }
+                new SelectListItem { Value = "Trong", Text = TrangThaiHelper.HienThi("Trong") },
+                new SelectListItem { Value = "DangXuLy", Text = TrangThaiHelper.HienThi("DangXuLy") },
+                new SelectListItem { Value = "DaDat", Text = TrangThaiHelper.HienThi("DaDat") },
+                new SelectListItem { Value = "DangSuDung", Text = TrangThaiHelper.HienThi("DangSuDung") },
+                new SelectListItem { Value = "BaoTri", Text = TrangThaiHelper.HienThi("BaoTri") }
             };
 
             var viewModel = new PhongListViewModel
@@ -242,7 +243,8 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: Phong/Details/5
-        // Tạm thời cho phép xem công khai, giống Index. Xem Create/Edit/Delete.
+        // Chi tiết phòng quản lý chỉ dành cho Admin và Nhân viên.
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -269,11 +271,11 @@ namespace QLyDatPhongKhachSan.Controllers
             
             var trangThaiList = new List<SelectListItem>
             {
-                new SelectListItem { Value = "Trong", Text = "Trong" },
-                new SelectListItem { Value = "DangXuLy", Text = "DangXuLy" },
-                new SelectListItem { Value = "DaDat", Text = "DaDat" },
-                new SelectListItem { Value = "DangSuDung", Text = "DangSuDung" },
-                new SelectListItem { Value = "BaoTri", Text = "BaoTri" }
+                new SelectListItem { Value = "Trong", Text = TrangThaiHelper.HienThi("Trong") },
+                new SelectListItem { Value = "DangXuLy", Text = TrangThaiHelper.HienThi("DangXuLy") },
+                new SelectListItem { Value = "DaDat", Text = TrangThaiHelper.HienThi("DaDat") },
+                new SelectListItem { Value = "DangSuDung", Text = TrangThaiHelper.HienThi("DangSuDung") },
+                new SelectListItem { Value = "BaoTri", Text = TrangThaiHelper.HienThi("BaoTri") }
             };
             ViewBag.TrangThai = new SelectList(trangThaiList, "Value", "Text", selectedTrangThai);
         }
