@@ -25,5 +25,9 @@ namespace QLyDatPhongKhachSan.ViewModels
         public decimal DonGia { get; set; }
         public string HinhAnh { get; set; } = string.Empty;
         public string Label { get; set; } = string.Empty;
+
+        // Gallery ảnh thật của phòng (wwwroot/images/phong/phong-{MaPhong}) để
+        // xem chi tiết từ trang chủ. Rỗng thì dùng HinhAnh.
+        public List<string> DanhSachAnh { get; set; } = new List<string>();
     }
 }

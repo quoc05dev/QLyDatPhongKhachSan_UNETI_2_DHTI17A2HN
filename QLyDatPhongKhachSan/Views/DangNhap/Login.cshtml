@@ -52,7 +52,14 @@
 
             <div style="margin-bottom: 18px;">
                 <label asp-for="MatKhau" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;"></label>
-                <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu..." style="width: 100%; height: 44px; padding: 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                <div style="position: relative;">
+                    <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu..." style="width: 100%; height: 44px; padding: 0 46px 0 14px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <button type="button" id="btn-toggle-mat-khau" aria-label="Hiện mật khẩu" title="Hiện / ẩn mật khẩu"
+                            style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; display: grid; place-items: center; background: none; border: 0; border-radius: 3px; color: rgba(255,255,255,0.6); cursor: pointer;">
+                        <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+                        <svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.9 5.2A9.8 9.8 0 0 1 12 5c6.4 0 10 7 10 7a17.7 17.7 0 0 1-3.1 4.1M6.3 6.4A17.6 17.6 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5-1.3" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /><path d="M3 3l18 18" /></svg>
+                    </button>
+                </div>
                 <span asp-validation-for="MatKhau" style="color: #e74c3c; font-size: 11px; margin-top: 4px; display: block;"></span>
             </div>
 
@@ -75,14 +82,69 @@
         </div>
 
         <div style="margin-top: 20px; padding: 12px 14px; background: rgba(4, 15, 28, 0.5); border: 1px dashed rgba(201, 163, 93, 0.3); border-radius: 4px; font-size: 11px; line-height: 1.6; color: rgba(255,255,255,0.6);">
-            <strong style="color: var(--gold-400); display: block; margin-bottom: 2px;">Tài khoản demo kiểm thử:</strong>
-            Admin: <code style="color:#d9ba7c;">admin</code> / <code style="color:#d9ba7c;">123456</code> ·
-            Lễ tân: <code style="color:#d9ba7c;">nhanvien</code> / <code style="color:#d9ba7c;">123456</code> ·
-            Khách: <code style="color:#d9ba7c;">khachhang</code> / <code style="color:#d9ba7c;">123456</code>
+            <strong style="color: var(--gold-400); display: block; margin-bottom: 9px;">Tài khoản demo kiểm thử — bấm để tự điền:</strong>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 11px;">
+                <button type="button" class="demo-fill" data-user="admin" data-pass="123456">Admin</button>
+                <button type="button" class="demo-fill" data-user="nhanvien" data-pass="123456">Lễ tân</button>
+                <button type="button" class="demo-fill" data-user="khachhang" data-pass="123456">Khách hàng</button>
+            </div>
+
+            Mật khẩu chung: <code style="color:#d9ba7c;">123456</code>
         </div>
     </div>
 </div>
 
+<style>
+    .demo-fill {
+        background: rgba(201, 163, 93, 0.14);
+        border: 1px solid rgba(201, 163, 93, 0.45);
+        color: var(--gold-400);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 7px 13px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+    .demo-fill:hover { background: rgba(201, 163, 93, 0.3); color: #fff; border-color: rgba(201, 163, 93, 0.8); }
+    #btn-toggle-mat-khau:hover { color: var(--gold-400); }
+</style>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        (function () {
+            var inputTen = document.querySelector('[name="TenDangNhap"]');
+            var inputMk = document.querySelector('[name="MatKhau"]');
+
+            // Tự điền tài khoản demo (phục vụ kiểm thử, không ảnh hưởng logic đăng nhập).
+            document.querySelectorAll(".demo-fill").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    if (inputTen) { inputTen.value = btn.getAttribute("data-user") || ""; }
+                    if (inputMk) { inputMk.value = btn.getAttribute("data-pass") || ""; }
+                    if (inputTen) { inputTen.focus(); }
+                });
+            });
+
+            // Chế độ nhìn mật khẩu (hiện / ẩn).
+            var btnToggle = document.getElementById("btn-toggle-mat-khau");
+            var iconEye = document.getElementById("icon-eye");
+            var iconEyeOff = document.getElementById("icon-eye-off");
+            if (btnToggle && inputMk) {
+                btnToggle.addEventListener("click", function () {
+                    var dangAn = inputMk.type === "password";
+                    inputMk.type = dangAn ? "text" : "password";
+                    btnToggle.setAttribute("aria-label", dangAn ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    btnToggle.title = dangAn ? "Ẩn mật khẩu" : "Hiện mật khẩu";
+                    if (iconEye) { iconEye.style.display = dangAn ? "none" : "block"; }
+                    if (iconEyeOff) { iconEyeOff.style.display = dangAn ? "block" : "none"; }
+                    inputMk.focus();
+                });
+            }
+        })();
+    </script>
 }

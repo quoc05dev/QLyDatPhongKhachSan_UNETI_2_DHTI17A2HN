@@ -15,10 +15,12 @@ namespace QLyDatPhongKhachSan.Controllers;
 public class HomeController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly IWebHostEnvironment _env;
 
-    public HomeController(AppDbContext context)
+    public HomeController(AppDbContext context, IWebHostEnvironment env)
     {
         _context = context;
+        _env = env;
     }
 
     // Hình minh họa mẫu dự phòng theo loại phòng khi cột LoaiPhong.HinhAnh chưa có dữ liệu
@@ -76,6 +78,9 @@ public class HomeController : Controller
                     : loaiPhong.HinhAnh!,
                 Label = labels[index % labels.Length]
             });
+
+            // Gallery ảnh thật của phòng để người dùng xem chi tiết ngay từ trang chủ.
+            cards[^1].DanhSachAnh = AnhPhongHelper.LayDanhSachAnh(daiDien, _env.WebRootPath);
 
             index++;
         }

@@ -214,17 +214,30 @@
                                         <strong>@card.DonGia.ToString("N0", gD)₫</strong>
                                         <span>/ đêm</span>
                                     </div>
-                                    <a class="button button--navy open-booking"
-                                       href="javascript:void(0);"
-                                       data-ma-phong="@card.MaPhong"
-                                       data-ten-loai="@card.TenLoai"
-                                       data-so-phong="@card.SoPhong"
-                                       data-meta="@card.Meta"
-                                       data-gia="@card.DonGia.ToString(CultureInfo.InvariantCulture)"
-                                       data-don-vi="đêm">
-                                        Chọn phòng
-                                        <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
-                                    </a>
+                                    <div class="room-actions">
+                                        <button type="button" class="room-detail-link open-detail"
+                                                data-ma-phong="@card.MaPhong"
+                                                data-ten-loai="@card.TenLoai"
+                                                data-so-phong="@card.SoPhong"
+                                                data-meta="@card.Meta"
+                                                data-mota="@card.MoTa"
+                                                data-gia="@card.DonGia.ToString(CultureInfo.InvariantCulture)"
+                                                data-img="@card.HinhAnh"
+                                                data-images="@string.Join("|", card.DanhSachAnh)">
+                                            Xem chi tiết phòng
+                                        </button>
+                                        <a class="button button--navy open-booking"
+                                           href="javascript:void(0);"
+                                           data-ma-phong="@card.MaPhong"
+                                           data-ten-loai="@card.TenLoai"
+                                           data-so-phong="@card.SoPhong"
+                                           data-meta="@card.Meta"
+                                           data-gia="@card.DonGia.ToString(CultureInfo.InvariantCulture)"
+                                           data-don-vi="đêm">
+                                            Chọn phòng
+                                            <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -365,6 +378,36 @@
             </div>
         </div>
     </div>
+
+    @* Modal xem chi tiết phòng (gallery + mô tả, không bắt buộc đăng nhập) *@
+    <div class="modal-backdrop" id="detail-modal" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+            <button aria-label="Đóng" class="button button--icon modal-close" id="detail-close" type="button">
+                <svg class="icon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+
+            <div class="detail-gallery">
+                <img id="detail-main-img" src="" alt="" />
+                <div class="detail-thumbs" id="detail-thumbs"></div>
+            </div>
+
+            <div class="modal-content">
+                <div class="eyebrow"><span></span> Chi tiết hạng phòng</div>
+                <h2 id="detail-modal-title">Phòng</h2>
+                <p id="detail-meta"></p>
+                <p id="detail-desc"></p>
+                <div class="modal-summary">
+                    <span id="detail-price-label">Giá mỗi đêm</span>
+                    <strong id="detail-price"></strong>
+                </div>
+                <a id="detail-cta" class="button button--gold modal-submit" href="#">
+                    Đặt phòng ngay
+                    <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></svg>
+                </a>
+                <small class="modal-note">Chọn ngày nhận / trả phòng ở bước tiếp theo. Chưa cần thanh toán ngay.</small>
+            </div>
+        </div>
+    </div>
 </main>
 
 <script>
@@ -467,6 +510,85 @@
             }
         });
 
+        // Xem chi tiết phòng: gallery ảnh + mô tả, không bắt buộc đăng nhập
+        var detailModal = document.getElementById("detail-modal");
+        var detailClose = document.getElementById("detail-close");
+        var detailMain = document.getElementById("detail-main-img");
+        var detailThumbs = document.getElementById("detail-thumbs");
+
+        function closeDetail() { if (detailModal) detailModal.hidden = true; }
+        if (detailClose) detailClose.addEventListener("click", closeDetail);
+        if (detailModal) {
+            detailModal.addEventListener("mousedown", function (e) { if (e.target === detailModal) closeDetail(); });
+            document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDetail(); });
+        }
+
+        function renderThumbs(images) {
+            if (!detailThumbs) return;
+            detailThumbs.innerHTML = "";
+            images.forEach(function (src, i) {
+                var img = document.createElement("img");
+                img.src = src;
+                img.alt = "Ảnh phòng " + (i + 1);
+                if (i === 0) img.classList.add("is-active");
+                img.addEventListener("click", function () {
+                    if (detailMain) detailMain.src = src;
+                    Array.prototype.forEach.call(detailThumbs.querySelectorAll("img"), function (el) { el.classList.remove("is-active"); });
+                    img.classList.add("is-active");
+                });
+                detailThumbs.appendChild(img);
+            });
+        }
+
+        function openDetail(btn) {
+            if (!detailModal) return;
+            var maPhong = btn.getAttribute("data-ma-phong");
+            var tenLoai = btn.getAttribute("data-ten-loai");
+            var soPhong = btn.getAttribute("data-so-phong");
+            var meta = btn.getAttribute("data-meta");
+            var mota = btn.getAttribute("data-mota");
+            var gia = parseFloat(btn.getAttribute("data-gia") || "0");
+
+            var raw = btn.getAttribute("data-images") || "";
+            var images = raw ? raw.split("|").filter(function (s) { return s; }) : [];
+            var fallback = btn.getAttribute("data-img");
+            if (!images.length && fallback) { images = [fallback]; }
+
+            document.getElementById("detail-modal-title").textContent = tenLoai + " · Phòng " + soPhong;
+            document.getElementById("detail-meta").textContent = meta;
+            document.getElementById("detail-desc").textContent = mota;
+            document.getElementById("detail-price-label").textContent = "Chỉ từ";
+            document.getElementById("detail-price").textContent = fmt(gia) + " / đêm";
+
+            if (detailMain && images.length) {
+                detailMain.src = images[0];
+                detailMain.alt = "Phòng " + soPhong;
+            }
+            renderThumbs(images);
+
+            var cta = document.getElementById("detail-cta");
+            if (cta) cta.setAttribute("data-ma-phong", maPhong);
+
+            detailModal.hidden = false;
+        }
+
+        var detailOpeners = document.querySelectorAll(".open-detail");
+        Array.prototype.forEach.call(detailOpeners, function (btn) {
+            btn.addEventListener("click", function () { openDetail(btn); });
+        });
+
+        // Chuyển từ "Xem chi tiết" sang bước đặt phòng của cùng phòng.
+        var detailCta = document.getElementById("detail-cta");
+        if (detailCta) {
+            detailCta.addEventListener("click", function (e) {
+                e.preventDefault();
+                var maPhong = detailCta.getAttribute("data-ma-phong");
+                closeDetail();
+                var opener = document.querySelector('.open-booking[data-ma-phong="' + maPhong + '"]');
+                if (opener) openModal(opener);
+            });
+        }
+
         // Lọc hạng phòng không reload / không cuộn trang
         var filterBtns = document.querySelectorAll(".filter-btn");
         var searchStatus = document.getElementById("search-status");
@@ -523,4 +645,35 @@
     .guest-btn { cursor: pointer; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: var(--gold-500); }
     .guest-btn:hover { background: rgba(201, 163, 93, 0.12); }
     .guest-value { display: inline-flex !important; }
+
+    /* Khu nút của thẻ phòng: "Xem chi tiết phòng" cạnh "Chọn phòng" */
+    .room-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; }
+    .room-detail-link {
+        background: none; border: 0; padding: 0; cursor: pointer; font: inherit;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+        color: #1f3a5f; border-bottom: 1px solid var(--gold-500); line-height: 1.7; white-space: nowrap;
+    }
+    .room-detail-link:hover { color: var(--gold-500); }
+
+    /* Modal xem chi tiết phòng */
+    .detail-gallery { display: flex; flex-direction: column; background: var(--navy-950); }
+    .detail-gallery > img { display: block; width: 100%; height: 380px; object-fit: cover; }
+    .detail-thumbs { display: flex; gap: 8px; padding: 12px; overflow-x: auto; }
+    .detail-thumbs img {
+        flex: 0 0 auto; width: 74px; height: 54px; object-fit: cover; cursor: pointer;
+        opacity: 0.5; border: 2px solid transparent; transition: opacity 0.2s ease, border-color 0.2s ease;
+    }
+    .detail-thumbs img:hover, .detail-thumbs img.is-active { opacity: 1; border-color: var(--gold-500); }
+    #detail-meta { margin-top: 14px; }
+    #detail-desc { margin-top: 12px; line-height: 1.7; }
+
+    /* Đúng các breakpoint của .modal trong design.css (modal xếp dọc trên mobile) */
+    @@media (max-width: 820px) {
+        .detail-gallery > img { height: 250px; }
+        .room-actions { justify-content: flex-start; }
+    }
+    @@media (max-width: 620px) {
+        .detail-gallery > img { height: 180px; }
+        .detail-thumbs img { width: 62px; height: 46px; }
+    }
 </style>
