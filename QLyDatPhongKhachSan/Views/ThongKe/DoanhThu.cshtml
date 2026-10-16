@@ -50,37 +50,73 @@
     string TenThang(int t) => t == 10 ? "Tháng 10" : $"Tháng {t}";
 }
 
+<style>
+    .title-actions { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .export-dropdown { position: relative; }
+    .export-menu {
+        position: absolute; right: 0; top: calc(100% + 8px); min-width: 200px;
+        background: #fff; border: 1px solid #e4e7e9; border-radius: 10px;
+        box-shadow: 0 14px 34px rgba(23, 36, 51, .14); padding: 6px; display: none; z-index: 40;
+    }
+    .export-menu.open { display: block; }
+    .export-menu a {
+        display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+        border-radius: 8px; color: #26333f; font-size: 12px; font-weight: 600; text-decoration: none;
+    }
+    .export-menu a:hover { background: #f2f5f7; }
+    .export-menu a small { display: block; color: #8a939c; font-size: 9px; font-weight: 500; margin-top: 2px; }
+</style>
+
 <div class="admin-title-row">
     <div>
         <span class="admin-overline">Sinh viên 5 · Tài chính</span>
         <h1>Doanh thu &amp; báo cáo</h1>
         <p>Thống kê doanh thu theo kỳ, hạng phòng và hiệu suất kinh doanh.</p>
     </div>
-    <form class="filter-row" method="get" asp-controller="ThongKe" asp-action="DoanhThu">
-        <label class="field">
-            <span style="display:block;margin-bottom:8px;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;">Năm</span>
-            <select name="nam">
-                @foreach (var y in danhSachNam)
-                {
-                    <option value="@y" selected="@(y == namChon)">@y</option>
-                }
-            </select>
-        </label>
-        <label class="field">
-            <span style="display:block;margin-bottom:8px;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;">Tháng</span>
-            <select name="thang">
-                @for (var m = 1; m <= 12; m++)
-                {
-                    <option value="@m" selected="@(m == thangChon)">@TenThang(m)</option>
-                }
-            </select>
-        </label>
-        <button class="admin-primary" type="submit">
-            <svg class="admin-icon" viewBox="0 0 24 24"><path d="M6 3v7M18 3v7M3 10h18" /><path d="M4 10v11h16V10" /></svg>
-            Xem báo cáo
-        </button>
-        <a class="admin-secondary" asp-controller="ThongKe" asp-action="Dashboard">← Dashboard</a>
-    </form>
+    <div class="title-actions">
+        <form class="filter-row" method="get" asp-controller="ThongKe" asp-action="DoanhThu">
+            <label class="field">
+                <span style="display:block;margin-bottom:8px;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;">Năm</span>
+                <select name="nam">
+                    @foreach (var y in danhSachNam)
+                    {
+                        <option value="@y" selected="@(y == namChon)">@y</option>
+                    }
+                </select>
+            </label>
+            <label class="field">
+                <span style="display:block;margin-bottom:8px;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;">Tháng</span>
+                <select name="thang">
+                    @for (var m = 1; m <= 12; m++)
+                    {
+                        <option value="@m" selected="@(m == thangChon)">@TenThang(m)</option>
+                    }
+                </select>
+            </label>
+            <button class="admin-primary" type="submit">
+                <svg class="admin-icon" viewBox="0 0 24 24"><path d="M6 3v7M18 3v7M3 10h18" /><path d="M4 10v11h16V10" /></svg>
+                Xem báo cáo
+            </button>
+            <a class="admin-secondary" asp-controller="ThongKe" asp-action="Dashboard">← Dashboard</a>
+        </form>
+
+        <div class="export-dropdown">
+            <button type="button" class="admin-primary" id="btnXuatBaoCao" aria-haspopup="true" aria-expanded="false">
+                <svg class="admin-icon" viewBox="0 0 24 24"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M4 21h16" /></svg>
+                Xuất báo cáo
+            </button>
+            <div class="export-menu" id="menuXuatBaoCao" role="menu">
+                <a role="menuitem" asp-controller="ThongKe" asp-action="ExportPdf" asp-route-nam="@namChon" asp-route-thang="@thangChon">
+                    <svg class="admin-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                    <span>Xuất PDF<small>Tệp .pdf</small></span>
+                </a>
+                <a role="menuitem" asp-controller="ThongKe" asp-action="ExportExcel" asp-route-nam="@namChon" asp-route-thang="@thangChon">
+                    <svg class="admin-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="m9 13 6 6m0-6-6 6" /></svg>
+                    <span>Xuất Excel<small>Tệp .xlsx</small></span>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 @if (!coDuLieu)
@@ -274,3 +310,33 @@
     <code>OrderByDescending()</code>, <code>Any()</code> theo mục 9.4 của De_15.docx.
     Doanh thu chỉ tính các chi tiết chưa bị hủy.
 </p>
+
+@section Scripts {
+    <script>
+        (function () {
+            var btn = document.getElementById('btnXuatBaoCao');
+            var menu = document.getElementById('menuXuatBaoCao');
+            if (!btn || !menu) { return; }
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = menu.classList.toggle('open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', function () {
+                if (menu.classList.contains('open')) {
+                    menu.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && menu.classList.contains('open')) {
+                    menu.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        })();
+    </script>
+}

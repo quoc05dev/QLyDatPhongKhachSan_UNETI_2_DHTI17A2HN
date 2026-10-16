@@ -114,4 +114,31 @@ namespace QLyDatPhongKhachSan.ViewModels
         // Chỉ dùng ở báo cáo doanh thu theo loại phòng (mục 9.4).
         public decimal DoanhThu { get; set; }
     }
+
+    /// <summary>
+    /// Dữ liệu đầy đủ cho trang DoanhThu (mục 9.4). Dùng chung cho cả màn hình
+    /// xem báo cáo và hai chức năng xuất PDF / Excel để tránh lệch số liệu.
+    /// </summary>
+    public class DoanhThuBaoCaoViewModel
+    {
+        public int Nam { get; set; }
+        public int Thang { get; set; }
+
+        // Tổng quan kỳ đang chọn
+        public bool CoDuLieu { get; set; }
+        public decimal DoanhThuKy { get; set; }
+        public int SoLuotDat { get; set; }
+        public int SoLuotHuy { get; set; }
+
+        public decimal DoanhThuBinhQuan => SoLuotDat == 0 ? 0 : Math.Round(DoanhThuKy / SoLuotDat, 0);
+
+        public List<int> DanhSachNam { get; set; } = new List<int>();
+
+        public List<DoanhThuThangItem> DoanhThuTheoThang { get; set; } = new List<DoanhThuThangItem>();
+        public List<DoanhThuThangItem> LuotDatTheoThang { get; set; } = new List<DoanhThuThangItem>();
+        public List<LoaiPhongThongKeItem> SoPhongTheoLoai { get; set; } = new List<LoaiPhongThongKeItem>();
+        public List<LoaiPhongThongKeItem> DoanhThuTheoLoai { get; set; } = new List<LoaiPhongThongKeItem>();
+        public List<PhongThongKeItem> PhongDatNhieuNhat { get; set; } = new List<PhongThongKeItem>();
+        public List<DatPhong> ChiTietKy { get; set; } = new List<DatPhong>();
+    }
 }

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -16,13 +17,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="QuestPDF" Version="2026.7.2" />
+    <!-- Ghim bản vá cho 2 gói bắc cầu (transitive) có cảnh báo bảo mật NU1902/NU1903:
+         System.IO.Packaging do ClosedXML kéo vào và System.Security.Cryptography.Pkcs
+         do Microsoft.Data.SqlClient (EF Core SqlServer) kéo vào. -->
+    <PackageReference Include="System.IO.Packaging" Version="10.0.12" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
   <!-- Tự động tắt instance đang chạy trước khi build để tránh lỗi MSB3027 "file đang bị khoá" -->
   <Target Name="KillRunningApp" BeforeTargets="Build">
-    <Exec Command="taskkill /F /IM QLyDatPhongKhachSan.exe /T 2&gt;nul &amp; exit 0"
-          IgnoreStandardErrorWarningFormat="true"
-          ContinueOnError="true" />
+    <Exec Command="taskkill /F /IM QLyDatPhongKhachSan.exe /T 2&gt;nul &amp; exit 0" IgnoreStandardErrorWarningFormat="true" ContinueOnError="true" />
   </Target>
 
 </Project>

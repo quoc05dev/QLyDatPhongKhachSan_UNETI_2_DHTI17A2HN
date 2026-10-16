@@ -107,14 +107,6 @@
     .booking-room__cta { margin-top: 2px; }
     .booking-room__cta .admin-primary,
     .booking-room__cta .admin-secondary { width: 100%; }
-
-    .booking-hint {
-        display: flex; align-items: center; gap: 12px;
-        margin-bottom: 20px; padding: 14px 18px;
-        border-left: 3px solid #c9a35d; background: #fbf7ef;
-        font-size: 12px; color: #6b5a36; line-height: 1.6;
-    }
-    .booking-hint b { color: #8a6a2f; }
 </style>
 
 <div class="admin-title-row">
@@ -137,52 +129,6 @@
 {
     <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size:12px;">⚠ @TempData["ErrorMessage"]</p>
 }
-
-@if (Model.SoPhongGoiY > 0 || !string.IsNullOrEmpty(Model.SoThichLoaiPhong))
-{
-    <div class="booking-hint">
-        <span style="font-size:16px;color:#c9a35d;">✦</span>
-        <span>
-            @if (!string.IsNullOrEmpty(Model.SoThichLoaiPhong))
-            {
-                <b>Gợi ý thông minh:</b> @:dựa trên lịch sử của bạn, hệ thống ưu tiên loại <b>@Model.SoThichLoaiPhong</b> và các phòng đang trống.
-            }
-            else
-            {
-                <b>Gợi ý thông minh:</b> @:các phòng còn trống, sẵn sàng đặt ngay được đưa lên trước.
-            }
-            Có <b>@Model.SoPhongGoiY</b> phòng được đề xuất cho bạn.
-        </span>
-    </div>
-}
-
-<div class="stat-grid">
-    <article class="stat-card stat-card--navy">
-        <div class="stat-top"><span>Tổng số phòng</span></div>
-        <b>@Model.TongSoPhong</b>
-        <small>Toàn bộ phòng của khách sạn</small>
-    </article>
-    <article class="stat-card stat-card--green">
-        <div class="stat-top"><span>Phòng trống</span></div>
-        <b>@Model.SoPhongTrong</b>
-        <small>Sẵn sàng để đặt ngay</small>
-    </article>
-    <article class="stat-card stat-card--gold">
-        <div class="stat-top"><span>Đang sử dụng</span></div>
-        <b>@Model.SoPhongDangSuDung</b>
-        <small>Khách đang lưu trú</small>
-    </article>
-    <article class="stat-card stat-card--blue">
-        <div class="stat-top"><span>Đang xử lý</span></div>
-        <b>@Model.SoPhongDangXuLy</b>
-        <small>Đang chờ xác nhận</small>
-    </article>
-    <article class="stat-card stat-card--navy">
-        <div class="stat-top"><span>Đang bảo trì</span></div>
-        <b>@Model.SoPhongBaoTri</b>
-        <small>Tạm ngưng phục vụ</small>
-    </article>
-</div>
 
 <article class="dashboard-card data-card">
     <form method="get" asp-action="Index">
