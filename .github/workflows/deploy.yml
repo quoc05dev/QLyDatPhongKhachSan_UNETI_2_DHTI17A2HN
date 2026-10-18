@@ -11,11 +11,14 @@ name: CD (Auto Deploy)
 #   DEPLOY_PORT    = 22 (tuy chon)
 #
 # Variables:
-#   DEPLOY_ENABLED = true      (bat auto deploy)
-#   DEPLOY_PATH    = /srv/qldpkh  (thu muc repo tren server)
+#   DEPLOY_ENABLED = true        (bat auto deploy)
+#   DEPLOY_PATH    = /srv/qldpkh (thu muc repo tren server)
+#   NGINX_DOMAIN   = uhotel.click (domain tro ve VPS; de trong = bo qua nginx)
 #
 # Package GHCR: Public -> khong can them secret nao.
 # Tren server can co: Docker, Docker Compose, repo da clone, file .env.
+# Deploy dong tao cau hinh nginx reverse proxy.
+# HTTPS: khong cai SSL tai origin - nginx chi listen 80, Cloudflare lo phia truoc.
 # =============================================================================
 
 on:
@@ -107,18 +110,22 @@ jobs:
       - name: SSH → pull image → up → healthcheck → rollback neu loi
         uses: appleboy/ssh-action@v1
         env:
-          WORKDIR:   ${{ vars.DEPLOY_PATH }}
-          REF:       ${{ github.ref_name }}
-          WEB_IMAGE: ${{ needs.publish-image.outputs.image }}:${{ github.ref_name }}
+          WORKDIR:      ${{ vars.DEPLOY_PATH }}
+          REF:          ${{ github.ref_name }}
+          WEB_IMAGE:    ${{ needs.publish-image.outputs.image }}:${{ github.ref_name }}
+          NGINX_DOMAIN: ${{ vars.NGINX_DOMAIN }}
         with:
           host:            ${{ secrets.DEPLOY_HOST }}
           username:        ${{ secrets.DEPLOY_USER }}
           key:             ${{ secrets.DEPLOY_SSH_KEY }}
           port:            ${{ secrets.DEPLOY_PORT || 22 }}
-          envs:            WORKDIR,REF,WEB_IMAGE
+          envs:            WORKDIR,REF,WEB_IMAGE,NGINX_DOMAIN
           command_timeout: 10m
           script: |
             set -euo pipefail
+            # DEPLOY_PATH co the duoc dat la "~/..." -> mo rong thanh duong day du
+            # (vi `cd "$WORKDIR"` co ngoac kep nen khong tu mo rong dau ~)
+            WORKDIR="${WORKDIR/#\~/$HOME}"
             cd "$WORKDIR"
 
             # Luu image dang chay de rollback
@@ -151,6 +158,11 @@ jobs:
               [ -n "$PREV_IMAGE" ] && WEB_IMAGE="$PREV_IMAGE" docker compose up -d --remove-orphans
               exit 1
             fi
+
+            # Cau hinh nginx + Let's Encrypt. App da healthy roi nen loi nginx
+            # chi canh bao, khong keo theo rollback (rollback cung khong sua duoc nginx).
+            bash "$WORKDIR/deploy/setup-nginx.sh" \
+              || echo "CANH BAO: cau hinh nginx that bai - app van dang chay, xem log o tren."
 
             docker image prune -f
             echo "Deploy thanh cong!"

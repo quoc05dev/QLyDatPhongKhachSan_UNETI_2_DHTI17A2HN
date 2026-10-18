@@ -1,0 +1,8 @@
+# =============================================================================
+# Ep ky tu moi truong cho file van ban/nguon.
+# Bo qua se bi loi tren server Linux (nhat la file shell bi CRLF ->
+# "bad interpreter: no such file or directory").
+# =============================================================================
+*.sh   text eol=lf
+*.yml  text eol=lf
+Dockerfile text eol=lf
