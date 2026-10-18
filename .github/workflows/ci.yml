@@ -11,7 +11,10 @@ on:
   workflow_call:   # cho phep deploy.yml goi lai workflow nay
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # Ghep ten workflow dang goi: khien run CI doc lap ("CI") va run CI gate
+  # duoc goi tu CD ("CD (Auto Deploy)") nam o hai group khac nhau, tranh viec
+  # cancel-in-progress huy lan nhau khi ca hai cung chay tren mot nhanh.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
