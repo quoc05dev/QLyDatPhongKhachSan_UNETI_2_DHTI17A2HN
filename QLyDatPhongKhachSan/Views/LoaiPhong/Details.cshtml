@@ -13,7 +13,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 1 · Hồ sơ loại phòng</span>
+        <span class="admin-overline">Hồ sơ loại phòng</span>
         <h1>Chi tiết: @Model.TenLoai</h1>
         <p>Thông tin niêm yết loại phòng và danh sách phòng đang áp dụng.</p>
     </div>
@@ -30,7 +30,7 @@
         </div>
         <div>
             <strong style="font-size:18px;color:var(--navy-950);display:block;">@Model.TenLoai</strong>
-            <span style="font-size:12px;color:#717b85;">Mã loại phòng: #@Model.MaLoaiPhong · Sức chứa tối đa: <b style="color:#b28c49;">@Model.SoNguoiToiDa người</b></span>
+            <span style="font-size: 13px;color:#5d666f;">Mã loại phòng: #@Model.MaLoaiPhong · Sức chứa tối đa: <b style="color:#b28c49;">@Model.SoNguoiToiDa người</b></span>
         </div>
         <div style="margin-left:auto;">
             @if (Model.TrangThai)
@@ -46,17 +46,17 @@
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
         <div>
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá theo ngày</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá theo ngày</small>
             <strong style="font-size:16px;color:#b28c49;">@Model.DonGiaNgay.ToString("N0")₫</strong>
         </div>
 
         <div>
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Hình ảnh đại diện</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Hình ảnh đại diện</small>
             <span style="font-size:14px;color:#334155;">@(string.IsNullOrWhiteSpace(Model.HinhAnh) ? "—" : Model.HinhAnh)</span>
         </div>
 
         <div style="grid-column: span 2;">
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Mô tả</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Mô tả</small>
             <span style="font-size:14px;color:#334155;">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "—" : Model.MoTa)</span>
         </div>
     </div>

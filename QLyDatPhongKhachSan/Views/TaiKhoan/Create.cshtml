@@ -13,7 +13,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 1 · Khởi tạo tài khoản</span>
+        <span class="admin-overline">Khởi tạo tài khoản</span>
         <h1>Thêm mới tài khoản hệ thống</h1>
         <p>Khai báo thông tin tài khoản, phân quyền vai trò và khởi tạo trạng thái.</p>
     </div>
@@ -22,51 +22,51 @@
 
 <article class="dashboard-card" style="padding: 28px; max-width: 800px;">
     <form asp-action="Create" method="post">
-        <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size:12px;"></div>
+        <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size: 13px;"></div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label asp-for="TenDangNhap" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Tên đăng nhập <span style="color:red;">*</span></label>
-                <input asp-for="TenDangNhap" placeholder="Nhập tên đăng nhập..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
-                <span asp-validation-for="TenDangNhap" style="color:#c0392b;font-size:11px;"></span>
+                <label asp-for="TenDangNhap" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Tên đăng nhập <span style="color:red;">*</span></label>
+                <input asp-for="TenDangNhap" placeholder="Nhập tên đăng nhập..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                <span asp-validation-for="TenDangNhap" style="color:#c0392b;font-size: 12px;"></span>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label asp-for="MatKhau" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Mật khẩu <span style="color:red;">*</span></label>
-                <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
-                <span asp-validation-for="MatKhau" style="color:#c0392b;font-size:11px;"></span>
+                <label asp-for="MatKhau" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Mật khẩu <span style="color:red;">*</span></label>
+                <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                <span asp-validation-for="MatKhau" style="color:#c0392b;font-size: 12px;"></span>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label asp-for="HoTen" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Họ và tên</label>
-                <input asp-for="HoTen" placeholder="Nhập họ và tên đầy đủ..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
-                <span asp-validation-for="HoTen" style="color:#c0392b;font-size:11px;"></span>
+                <label asp-for="HoTen" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Họ và tên</label>
+                <input asp-for="HoTen" placeholder="Nhập họ và tên đầy đủ..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                <span asp-validation-for="HoTen" style="color:#c0392b;font-size: 12px;"></span>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label asp-for="Email" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Email</label>
-                <input asp-for="Email" type="email" placeholder="example@gmail.com" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
-                <span asp-validation-for="Email" style="color:#c0392b;font-size:11px;"></span>
+                <label asp-for="Email" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Email</label>
+                <input asp-for="Email" type="email" placeholder="example@gmail.com" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                <span asp-validation-for="Email" style="color:#c0392b;font-size: 12px;"></span>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label asp-for="SoDienThoai" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Số điện thoại</label>
-                <input asp-for="SoDienThoai" placeholder="09xxxxxxxx" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;" />
-                <span asp-validation-for="SoDienThoai" style="color:#c0392b;font-size:11px;"></span>
+                <label asp-for="SoDienThoai" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Số điện thoại</label>
+                <input asp-for="SoDienThoai" placeholder="09xxxxxxxx" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                <span asp-validation-for="SoDienThoai" style="color:#c0392b;font-size: 12px;"></span>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label asp-for="VaiTro" style="font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Vai trò hệ thống <span style="color:red;">*</span></label>
-                <select asp-for="VaiTro" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;">
+                <label asp-for="VaiTro" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Vai trò hệ thống <span style="color:red;">*</span></label>
+                <select asp-for="VaiTro" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;">
                     <option value="Admin">Admin (Quản trị hệ thống)</option>
                     <option value="NhanVien">NhanVien (Lễ tân / Vận hành)</option>
                     <option value="KhachHang" selected>KhachHang (Khách đặt phòng)</option>
                 </select>
-                <span asp-validation-for="VaiTro" style="color:#c0392b;font-size:11px;"></span>
+                <span asp-validation-for="VaiTro" style="color:#c0392b;font-size: 12px;"></span>
             </div>
 
             <div style="grid-column: span 2; margin-top:6px;">
-                <label style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--navy-900);cursor:pointer;">
+                <label style="display:flex;align-items:center;gap:10px;font-size: 13px;color:var(--navy-900);cursor:pointer;">
                     <input type="checkbox" asp-for="TrangThai" checked style="accent-color:var(--gold-500);width:16px;height:16px;" />
                     <strong>Kích hoạt tài khoản (Cho phép đăng nhập ngay)</strong>
                 </label>

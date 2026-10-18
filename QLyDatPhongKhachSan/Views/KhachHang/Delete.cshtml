@@ -14,12 +14,12 @@
     ViewData["AdminActive"] = "customers";
     bool daCoDonDatPhong = Model.DatPhongs != null && Model.DatPhongs.Any();
     int soDonDatPhong = Model.DatPhongs?.Count ?? 0;
-    string rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf0f2;font-size:12px;";
+    string rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf0f2;font-size: 13px;";
 }
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 3 · Xác nhận #@Model.MaKhachHang.ToString("D4")</span>
+        <span class="admin-overline">Xác nhận #@Model.MaKhachHang.ToString("D4")</span>
         <h1>@(daCoDonDatPhong ? "Xác nhận khóa khách hàng" : "Xác nhận xóa khách hàng")</h1>
         <p>Vui lòng kiểm tra kỹ thông tin trước khi thực hiện thao tác không thể hoàn tác.</p>
     </div>
@@ -44,14 +44,14 @@
     }
 
     <div style="border:1px solid #edf0f2;padding:6px 18px;">
-        <div style="@rowLabel"><span style="color:#737d87;">Mã khách hàng</span><span style="color:#172433;font-weight:600;">#@Model.MaKhachHang.ToString("D4")</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Họ và tên</span><span style="color:#172433;font-weight:600;">@Model.HoTen</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Số CCCD</span><span style="color:#172433;font-weight:600;">@Model.CCCD</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Số điện thoại</span><span style="color:#172433;font-weight:600;">@Model.SoDienThoai</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Email</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.Email) ? "Chưa có" : Model.Email)</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Quốc tịch</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.QuocTich) ? "Việt Nam" : Model.QuocTich)</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Trạng thái hiện tại</span><span style="color:#172433;font-weight:600;">@(Model.TrangThai ? "Đang hoạt động" : "Bị khóa")</span></div>
-        <div style="@rowLabel;border-bottom:0;"><span style="color:#737d87;">Số đơn đặt phòng</span><span style="color:#172433;font-weight:600;">@soDonDatPhong đơn</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Mã khách hàng</span><span style="color:#172433;font-weight:600;">#@Model.MaKhachHang.ToString("D4")</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Họ và tên</span><span style="color:#172433;font-weight:600;">@Model.HoTen</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Số CCCD</span><span style="color:#172433;font-weight:600;">@Model.CCCD</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Số điện thoại</span><span style="color:#172433;font-weight:600;">@Model.SoDienThoai</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Email</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.Email) ? "Chưa có" : Model.Email)</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Quốc tịch</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.QuocTich) ? "Việt Nam" : Model.QuocTich)</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Trạng thái hiện tại</span><span style="color:#172433;font-weight:600;">@(Model.TrangThai ? "Đang hoạt động" : "Bị khóa")</span></div>
+        <div style="@rowLabel;border-bottom:0;"><span style="color:#5d666f;">Số đơn đặt phòng</span><span style="color:#172433;font-weight:600;">@soDonDatPhong đơn</span></div>
     </div>
 
     <form asp-action="Delete" method="post" style="margin-top:24px;padding-top:20px;border-top:1px solid #edf0f2;display:flex;gap:12px;">

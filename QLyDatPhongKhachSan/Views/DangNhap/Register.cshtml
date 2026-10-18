@@ -19,7 +19,7 @@
                 <span style="width: 40px; height: 44px; display: grid; place-items: center; border: 1px solid var(--gold-500); color: var(--gold-400); font-family: 'Playfair Display', serif; font-size: 24px; clip-path: polygon(0 0, 100% 0, 100% 77%, 50% 100%, 0 77%);">U</span>
                 <span style="display: flex; flex-direction: column; align-items: flex-start;">
                     <strong style="font-family: 'Playfair Display', serif; font-size: 18px; letter-spacing: 0.08em; line-height: 1;">UNETI GRAND</strong>
-                    <small style="color: var(--gold-400); font-size: 8px; letter-spacing: 0.36em; margin-top: 2px;">HOTEL &amp; SPA</small>
+                    <small style="color: var(--gold-400); font-size: 9px; letter-spacing: 0.36em; margin-top: 2px;">HOTEL &amp; SPA</small>
                 </span>
             </a>
             <h2 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; margin: 18px 0 6px;">Đăng ký tài khoản</h2>
@@ -27,53 +27,53 @@
         </div>
 
         <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" style="padding: 10px; background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.5); border-radius: 4px; color: #f5b7b1; font-size: 12px; margin-bottom: 16px;"></div>
+            <div asp-validation-summary="ModelOnly" style="padding: 10px; background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.5); border-radius: 4px; color: #f5b7b1; font-size: 13px; margin-bottom: 16px;"></div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                 <div>
-                    <label asp-for="TenDangNhap" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                    <input asp-for="TenDangNhap" placeholder="Tên đăng nhập..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                    <span asp-validation-for="TenDangNhap" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                    <label asp-for="TenDangNhap" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                    <input asp-for="TenDangNhap" placeholder="Tên đăng nhập..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <span asp-validation-for="TenDangNhap" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
                 </div>
 
                 <div>
-                    <label asp-for="HoTen" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                    <input asp-for="HoTen" placeholder="Họ và tên đầy đủ..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                    <span asp-validation-for="HoTen" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                    <label asp-for="HoTen" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                    <input asp-for="HoTen" placeholder="Họ và tên đầy đủ..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <span asp-validation-for="HoTen" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
                 </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                 <div>
-                    <label asp-for="Email" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                    <input asp-for="Email" type="email" placeholder="example@gmail.com" style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                    <span asp-validation-for="Email" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                    <label asp-for="Email" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                    <input asp-for="Email" type="email" placeholder="example@gmail.com" style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <span asp-validation-for="Email" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
                 </div>
 
                 <div>
-                    <label asp-for="SoDienThoai" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                    <input asp-for="SoDienThoai" placeholder="09xxxxxxxx" style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                    <span asp-validation-for="SoDienThoai" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                    <label asp-for="SoDienThoai" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                    <input asp-for="SoDienThoai" placeholder="09xxxxxxxx" style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <span asp-validation-for="SoDienThoai" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
                 </div>
             </div>
 
             <div style="margin-bottom: 16px;">
-                <label asp-for="CCCD" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                <input asp-for="CCCD" placeholder="Số CCCD / CMND / Hộ chiếu..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                <span asp-validation-for="CCCD" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                <label asp-for="CCCD" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                <input asp-for="CCCD" placeholder="Số CCCD / CMND / Hộ chiếu..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                <span asp-validation-for="CCCD" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                 <div>
-                    <label asp-for="MatKhau" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                    <input asp-for="MatKhau" type="password" placeholder="Mật khẩu..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                    <span asp-validation-for="MatKhau" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                    <label asp-for="MatKhau" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                    <input asp-for="MatKhau" type="password" placeholder="Mật khẩu..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <span asp-validation-for="MatKhau" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
                 </div>
 
                 <div>
-                    <label asp-for="XacNhanMatKhau" style="display: block; font-size: 10px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
-                    <input asp-for="XacNhanMatKhau" type="password" placeholder="Nhập lại mật khẩu..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 12px; box-sizing: border-box;" />
-                    <span asp-validation-for="XacNhanMatKhau" style="color: #e74c3c; font-size: 11px; margin-top: 3px; display: block;"></span>
+                    <label asp-for="XacNhanMatKhau" style="display: block; font-size: 11px; font-weight: 700; color: var(--gold-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px;"></label>
+                    <input asp-for="XacNhanMatKhau" type="password" placeholder="Nhập lại mật khẩu..." style="width: 100%; height: 42px; padding: 0 12px; background: rgba(4, 15, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 3px; color: var(--white); font-size: 13px; box-sizing: border-box;" />
+                    <span asp-validation-for="XacNhanMatKhau" style="color: #e74c3c; font-size: 12px; margin-top: 3px; display: block;"></span>
                 </div>
             </div>
 

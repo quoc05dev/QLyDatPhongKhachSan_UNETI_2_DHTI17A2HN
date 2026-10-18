@@ -78,7 +78,7 @@ img {
   border-radius: 3px;
   padding: 0 22px;
   color: var(--white);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -203,7 +203,7 @@ input:focus-visible {
 
 .brand small {
   color: var(--gold-400);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.36em;
 }
 
@@ -302,7 +302,7 @@ input:focus-visible {
   align-items: center;
   gap: 11px;
   color: var(--gold-500);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -363,7 +363,7 @@ input:focus-visible {
   gap: 10px;
   padding-block: 8px;
   border-bottom: 1px solid currentColor;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -437,7 +437,7 @@ input:focus-visible {
 
 .booking-heading small {
   color: var(--gold-500);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -465,7 +465,7 @@ input:focus-visible {
   display: block;
   margin-bottom: 8px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -488,7 +488,7 @@ input:focus-visible {
   border: 0;
   color: var(--ink);
   background: transparent;
-  font-size: 12px;
+  font-size: 13px;
   outline: none;
 }
 
@@ -507,7 +507,7 @@ input:focus-visible {
   align-items: center;
   gap: 6px;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -624,7 +624,7 @@ input:focus-visible {
   padding: 7px 10px;
   color: var(--navy-950);
   background: rgba(255, 253, 249, 0.92);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -656,7 +656,7 @@ input:focus-visible {
 
 .room-type {
   color: var(--gold-500);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -673,13 +673,13 @@ input:focus-visible {
   align-items: center;
   gap: 4px;
   color: var(--gold-500);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .room-meta {
   margin: 15px 0 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .room-description {
@@ -702,7 +702,7 @@ input:focus-visible {
 .room-footer .button {
   min-height: 40px;
   padding-inline: 14px;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .price {
@@ -713,7 +713,7 @@ input:focus-visible {
   display: block;
   margin-bottom: 4px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .price strong {
@@ -723,7 +723,7 @@ input:focus-visible {
 
 .price span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .experience-section {
@@ -798,7 +798,7 @@ input:focus-visible {
 
 .experience-card small {
   color: var(--gold-400);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .experience-card h3 {
@@ -810,7 +810,7 @@ input:focus-visible {
 .experience-card p {
   margin: 0;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .story-section {
@@ -871,7 +871,7 @@ input:focus-visible {
 
 .seal small {
   color: var(--gold-500);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -916,7 +916,7 @@ input:focus-visible {
 
 .stats span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.5;
   text-transform: uppercase;
 }
@@ -954,13 +954,13 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .footer-links strong {
   margin-bottom: 7px;
   color: var(--gold-400);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -974,7 +974,7 @@ footer {
   justify-content: space-between;
   padding-block: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .modal-backdrop {
@@ -1039,7 +1039,7 @@ footer {
   margin-block: 28px;
   padding: 17px 0;
   border-block: 1px solid var(--line);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .modal-summary strong {
@@ -1055,7 +1055,7 @@ footer {
   display: block;
   margin-bottom: 7px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1538,14 +1538,14 @@ footer {
 
 .admin-brand small {
   color: #c9a35d;
-  font-size: 7px;
+  font-size: 8px;
   letter-spacing: 0.18em;
 }
 
 .sidebar-section-label {
   padding: 0 12px 9px;
   color: rgba(255, 255, 255, 0.36);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -1592,12 +1592,12 @@ footer {
   border-radius: 50%;
   color: #d9ba7c;
   font-family: "Playfair Display", serif;
-  font-size: 11px;
+  font-size: 12px;
   font-style: normal;
 }
 
 .admin-sidebar nav span {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -1606,59 +1606,33 @@ footer {
   border-radius: 3px;
   color: #c9a35d;
   background: rgba(201, 163, 93, 0.1);
-  font-size: 7px;
+  font-size: 8px;
   font-weight: 700;
 }
 
-.sidebar-help {
+.back-to-site {
+  margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: auto;
-  padding: 14px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.sidebar-help > span {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #c9a35d;
-  border-radius: 50%;
-  color: #c9a35d;
-  font-family: "Playfair Display", serif;
-}
-
-.sidebar-help div {
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-help strong {
-  color: #fff;
-  font-size: 10px;
-}
-
-.sidebar-help small {
-  margin-top: 2px;
-  font-size: 8px;
-}
-
-.back-to-site {
-  margin-top: 12px;
+  justify-content: center;
+  gap: 8px;
   padding: 12px;
-  border: 0;
-  color: rgba(255, 255, 255, 0.54);
-  background: transparent;
-  font-size: 9px;
-  text-align: left;
+  border: 1px solid rgba(201, 163, 93, 0.45);
+  border-radius: 4px;
+  color: #d9ba7c;
+  background: rgba(201, 163, 93, 0.1);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
   cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .back-to-site:hover {
-  color: #fff;
+  color: #08192c;
+  background: #c9a35d;
+  border-color: #c9a35d;
 }
 
 .admin-main {
@@ -1686,7 +1660,7 @@ footer {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #87909a;
+  color: #6b7480;
 }
 
 .global-search {
@@ -1699,16 +1673,16 @@ footer {
   border: 0;
   background: transparent;
   outline: 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .global-search kbd {
   padding: 4px 7px;
   border: 1px solid #d9dde1;
   border-radius: 4px;
-  color: #8d959d;
+  color: #6b7480;
   background: #f7f8f9;
-  font-size: 9px;
+  font-size: 10px;
   white-space: nowrap;
 }
 
@@ -1768,7 +1742,7 @@ footer {
   border-radius: 50%;
   color: #fff;
   background: #102943;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -1778,12 +1752,12 @@ footer {
 }
 
 .admin-profile strong {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .admin-profile small {
-  color: #8a939c;
-  font-size: 8px;
+  color: #6b7480;
+  font-size: 9px;
 }
 
 .admin-profile .admin-icon {
@@ -1811,7 +1785,7 @@ footer {
 
 .admin-overline {
   color: #b28c49;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -1826,8 +1800,9 @@ footer {
 
 .admin-title-row p {
   margin: 0;
-  color: #7a848e;
-  font-size: 12px;
+  color: #5d666f;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .admin-primary,
@@ -1842,7 +1817,7 @@ footer {
   padding: 0 16px;
   border: 1px solid transparent;
   border-radius: 3px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1861,14 +1836,14 @@ footer {
 
 .admin-secondary,
 .admin-select {
-  color: #4e5964;
+  color: #3c4650;
   border-color: #dce0e4;
   background: #fff;
 }
 
 .admin-select {
   min-height: 34px;
-  font-size: 8px;
+  font-size: 9px;
   text-transform: none;
 }
 
@@ -1925,7 +1900,7 @@ footer {
 
 .stat-top span {
   color: #77818b;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -1935,7 +1910,7 @@ footer {
   border-radius: 3px;
   color: #4f8068;
   background: #eef6f2;
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .stat-card > b {
@@ -1947,8 +1922,8 @@ footer {
 }
 
 .stat-card > small {
-  color: #929aa2;
-  font-size: 9px;
+  color: #767e88;
+  font-size: 10px;
 }
 
 .dashboard-grid {
@@ -1978,7 +1953,7 @@ footer {
 
 .card-heading > div > span {
   color: #9a7538;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2004,7 +1979,7 @@ footer {
 
 .revenue-summary span {
   color: #4f8068;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .bar-chart {
@@ -2040,7 +2015,7 @@ footer {
   top: -19px;
   width: 100%;
   color: #3d4853;
-  font-size: 9px;
+  font-size: 10px;
   font-style: normal;
   font-weight: 700;
   text-align: center;
@@ -2050,7 +2025,7 @@ footer {
   position: absolute;
   transform: translateY(19px);
   color: #4f5a64;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -2090,8 +2065,8 @@ footer {
 }
 
 .occupancy-ring span {
-  color: #8b949d;
-  font-size: 8px;
+  color: #6b7480;
+  font-size: 9px;
   text-transform: uppercase;
 }
 
@@ -2104,14 +2079,14 @@ footer {
 .occupancy-list > div {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .occupancy-list span {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #717b85;
+  color: #5d666f;
 }
 
 .occupancy-list i {
@@ -2142,9 +2117,9 @@ footer {
 
 .admin-table th {
   padding: 12px 16px;
-  color: #8a939d;
+  color: #6b7480;
   background: #fafbfb;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-align: left;
@@ -2154,8 +2129,9 @@ footer {
 .admin-table td {
   padding: 14px 16px;
   border-top: 1px solid #edf0f2;
-  color: #53606c;
-  font-size: 10px;
+  color: #3f4a55;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .admin-table td:first-child strong,
@@ -2166,8 +2142,31 @@ footer {
 .admin-table td:first-child small {
   display: block;
   margin-top: 3px;
-  color: #98a0a8;
-  font-size: 8px;
+  color: #767e88;
+  font-size: 9px;
+}
+
+/* Nhóm nút thao tác trong bảng: cố định bề rộng nút để mọi dòng thẳng hàng */
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.table-actions > a,
+.table-actions form > button {
+  min-width: 74px;
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 10px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.table-actions form {
+  display: inline-flex;
+  margin: 0;
 }
 
 .status-badge {
@@ -2176,7 +2175,7 @@ footer {
   gap: 6px;
   padding: 6px 8px;
   border-radius: 99px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 600;
 }
 
@@ -2190,11 +2189,11 @@ footer {
 .status-badge--success { color: #46785e; background: #eef6f2; }
 .status-badge--warning { color: #a17732; background: #fbf4e8; }
 .status-badge--info { color: #416d96; background: #edf4fa; }
-.status-badge--muted { color: #737d87; background: #eff1f3; }
+.status-badge--muted { color: #5d666f; background: #eff1f3; }
 
 .row-action {
   border: 0;
-  color: #8b949d;
+  color: #6b7480;
   background: transparent;
   cursor: pointer;
 }
@@ -2227,20 +2226,20 @@ footer {
 }
 
 .module-owner small {
-  color: #8d959e;
-  font-size: 7px;
+  color: #6b7480;
+  font-size: 8px;
   text-transform: uppercase;
 }
 
 .module-owner strong {
   margin-top: 2px;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .module-owner > span {
   margin-left: auto;
-  color: #8a939c;
-  font-size: 9px;
+  color: #6b7480;
+  font-size: 10px;
 }
 
 .data-card {
@@ -2270,15 +2269,16 @@ footer {
   border-radius: 2px;
   color: #5f6a75;
   background: #fff;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .table-result-row {
   display: flex;
   justify-content: space-between;
   padding: 13px 18px;
-  color: #929aa2;
-  font-size: 8px;
+  color: #767e88;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .table-result-row strong {
@@ -2299,7 +2299,7 @@ footer {
   border: 1px solid #dfe3e6;
   color: #69747f;
   background: #fff;
-  font-size: 9px;
+  font-size: 10px;
   cursor: pointer;
 }
 
@@ -2315,7 +2315,7 @@ footer {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #8b949d;
+  color: #6b7480;
 }
 
 .empty-table strong {
@@ -2326,7 +2326,7 @@ footer {
 
 .empty-table span {
   margin-top: 6px;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .report-highlight {
@@ -2350,7 +2350,7 @@ footer {
 .report-highlight small {
   display: block;
   color: #55606a;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .report-highlight strong {
@@ -2423,12 +2423,12 @@ footer {
   justify-content: space-between;
   margin: 0 0 8px;
   color: #414c57;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .report-bars p strong {
   color: #102943;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -2610,12 +2610,12 @@ footer {
   border-radius: 50%;
   color: #d9ba7c;
   font-family: "Playfair Display", serif;
-  font-size: 11px;
+  font-size: 12px;
   font-style: normal;
 }
 
 .admin-sidebar nav a span {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -2624,7 +2624,7 @@ footer {
   border-radius: 3px;
   color: #c9a35d;
   background: rgba(201, 163, 93, 0.1);
-  font-size: 7px;
+  font-size: 8px;
   font-weight: 700;
 }
 
@@ -2633,7 +2633,6 @@ a.admin-brand {
 }
 
 a.back-to-site {
-  display: block;
   text-decoration: none;
 }
 
@@ -2667,7 +2666,7 @@ a.back-to-site {
   border-radius: 2px;
   color: var(--ink);
   background: var(--paper);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* Ảnh phòng có sẵn thuộc tính placeholder khi chưa có nguồn ảnh */
@@ -2689,7 +2688,7 @@ a.back-to-site {
   display: block;
   margin-top: 8px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }

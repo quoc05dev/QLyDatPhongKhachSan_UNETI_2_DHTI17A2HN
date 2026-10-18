@@ -16,7 +16,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 2 · Quản lý phòng</span>
+        <span class="admin-overline">Quản lý phòng</span>
         <h1>Quản lý danh sách phòng</h1>
         <p>Tìm kiếm, lọc trạng thái, loại phòng, đơn giá và cấu hình danh mục phòng khách sạn.</p>
     </div>
@@ -45,15 +45,15 @@
                 <option value="">-- Tất cả trạng thái --</option>
             </select>
 
-            <input type="number" name="tang" value="@Model.Tang" placeholder="Tầng" min="1" max="100" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;width:90px;" />
+            <input type="number" name="tang" value="@Model.Tang" placeholder="Tầng" min="1" max="100" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;width:90px;" />
 
-            <input asp-for="GiaMin" type="number" placeholder="Giá từ (₫)" min="0" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;width:120px;" />
-            <input asp-for="GiaMax" type="number" placeholder="Giá đến (₫)" min="0" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;width:120px;" />
+            <input asp-for="GiaMin" type="number" placeholder="Giá từ (₫)" min="0" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;width:120px;" />
+            <input asp-for="GiaMax" type="number" placeholder="Giá đến (₫)" min="0" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;width:120px;" />
 
-            <input asp-for="NgayNhan" type="date" title="Ngày nhận phòng" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;" />
-            <input asp-for="NgayTra" type="date" title="Ngày trả phòng" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;" />
+            <input asp-for="NgayNhan" type="date" title="Ngày nhận phòng" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;" />
+            <input asp-for="NgayTra" type="date" title="Ngày trả phòng" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;" />
 
-            <select asp-for="SortOrder" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;">
+            <select asp-for="SortOrder" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;">
                 <option value="soPhong_asc">Số phòng: Tăng dần</option>
                 <option value="soPhong_desc">Số phòng: Giảm dần</option>
                 <option value="donGia_asc">Đơn giá: Tăng dần</option>
@@ -115,7 +115,7 @@
                                 <span>Tầng @item.Tang</span>
                                 @if (!string.IsNullOrWhiteSpace(item.HuongPhong))
                                 {
-                                    <small style="display:block;color:#8a939d;">@item.HuongPhong</small>
+                                    <small style="display:block;color:#6b7480;">@item.HuongPhong</small>
                                 }
                             </td>
                             <td>
@@ -132,7 +132,7 @@
                                     <span>@item.NgayBaoTri.Value.ToString("dd/MM/yyyy")</span>
                                     @if (!string.IsNullOrWhiteSpace(item.GhiChuBaoTri))
                                     {
-                                        <small style="display:block;color:#8a939d;">@item.GhiChuBaoTri</small>
+                                        <small style="display:block;color:#6b7480;">@item.GhiChuBaoTri</small>
                                     }
                                 }
                                 else
@@ -142,11 +142,11 @@
                             </td>
                             <td style="text-align:right;">
                                 <div style="display:inline-flex;gap:8px;">
-                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaPhong">Chi tiết</a>
+                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaPhong">Chi tiết</a>
                                     @if (canQuanLyPhong)
                                     {
-                                        <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-action="Edit" asp-route-id="@item.MaPhong">Sửa</a>
-                                        <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;color:#c0392b;border-color:#f5c6cb;text-decoration:none;" asp-action="Delete" asp-route-id="@item.MaPhong">Xóa</a>
+                                        <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Edit" asp-route-id="@item.MaPhong">Sửa</a>
+                                        <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;color:#c0392b;border-color:#f5c6cb;text-decoration:none;" asp-action="Delete" asp-route-id="@item.MaPhong">Xóa</a>
                                     }
                                 </div>
                             </td>

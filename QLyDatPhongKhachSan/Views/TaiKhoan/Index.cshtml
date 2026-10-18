@@ -13,7 +13,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 1 · Quản trị hệ thống</span>
+        <span class="admin-overline">Quản trị hệ thống</span>
         <h1>Quản lý tài khoản người dùng</h1>
         <p>Phân quyền truy cập, quản lý trạng thái tài khoản Admin, Lễ tân và Khách hàng.</p>
     </div>
@@ -28,14 +28,14 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div style="padding:12px 16px;background:#eef6f2;border-left:4px solid #46785e;color:#2e5340;margin-bottom:20px;font-size:12px;border-radius:2px;">
+    <div style="padding:12px 16px;background:#eef6f2;border-left:4px solid #46785e;color:#2e5340;margin-bottom:20px;font-size: 13px;border-radius:2px;">
         ✓ @TempData["SuccessMessage"]
     </div>
 }
 
 @if (TempData["ErrorMessage"] != null)
 {
-    <div style="padding:12px 16px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;">
+    <div style="padding:12px 16px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size: 13px;border-radius:2px;">
         ⚠️ @TempData["ErrorMessage"]
     </div>
 }
@@ -93,7 +93,7 @@
                         {
                             "Admin" => "background:#fbf4e8;color:#a17732;",
                             "NhanVien" => "background:#edf4fa;color:#416d96;",
-                            _ => "background:#eff1f3;color:#737d87;"
+                            _ => "background:#eff1f3;color:#5d666f;"
                         };
 
                         <tr>
@@ -102,7 +102,7 @@
                             <td>@(string.IsNullOrWhiteSpace(item.HoTen) ? "—" : item.HoTen)</td>
                             <td>@(string.IsNullOrWhiteSpace(item.Email) ? "—" : item.Email)</td>
                             <td>
-                                <span style="display:inline-block;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;@roleBadge">
+                                <span style="display:inline-block;padding:3px 8px;border-radius:4px;font-size: 10px;font-weight:700;@roleBadge">
                                     @item.VaiTro
                                 </span>
                             </td>
@@ -117,17 +117,17 @@
                                 }
                             </td>
                             <td style="text-align:right;">
-                                <div style="display:inline-flex;gap:6px;">
-                                    <a class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaTaiKhoan">Chi tiết</a>
-                                    <a class="admin-primary" style="min-height:30px;padding:0 8px;font-size:9px;text-decoration:none;" asp-action="Edit" asp-route-id="@item.MaTaiKhoan">Sửa</a>
-                                    <form asp-action="ToggleStatus" asp-route-id="@item.MaTaiKhoan" method="post" style="display:inline;">
+                                <div class="table-actions">
+                                    <a class="admin-secondary" asp-action="Details" asp-route-id="@item.MaTaiKhoan">Chi tiết</a>
+                                    <a class="admin-primary" asp-action="Edit" asp-route-id="@item.MaTaiKhoan">Sửa</a>
+                                    <form asp-action="ToggleStatus" asp-route-id="@item.MaTaiKhoan" method="post">
                                         @if (item.TrangThai)
                                         {
-                                            <button type="submit" class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;color:#c0392b;border-color:#f5c6cb;" title="Khóa tài khoản">Khóa</button>
+                                            <button type="submit" class="admin-secondary" style="color:#c0392b;border-color:#f5c6cb;" title="Khóa tài khoản">Khóa</button>
                                         }
                                         else
                                         {
-                                            <button type="submit" class="admin-secondary" style="min-height:30px;padding:0 8px;font-size:9px;color:#27ae60;border-color:#abebc6;" title="Mở khóa tài khoản">Mở khóa</button>
+                                            <button type="submit" class="admin-secondary" style="color:#27ae60;border-color:#abebc6;" title="Mở khóa tài khoản">Mở khóa</button>
                                         }
                                     </form>
                                 </div>

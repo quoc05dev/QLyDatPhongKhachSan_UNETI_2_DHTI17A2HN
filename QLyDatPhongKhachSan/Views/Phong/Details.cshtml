@@ -24,7 +24,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 2 · Chi tiết phòng</span>
+        <span class="admin-overline">Chi tiết phòng</span>
         <h1>Phòng @Model.SoPhong</h1>
         <p>Chi tiết thông tin cấu hình, loại phòng, đơn giá và trạng thái vận hành hiện tại.</p>
     </div>
@@ -51,33 +51,33 @@
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:16px;border-top:1px solid #edf0f2;">
             <div>
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Số phòng</small>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Số phòng</small>
                 <strong style="font-size:18px;font-family:'Playfair Display',serif;color:var(--navy-950);">Phòng @Model.SoPhong</strong>
             </div>
 
             <div>
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Loại phòng</small>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Loại phòng</small>
                 <strong style="font-size:15px;color:#b28c49;">@(Model.LoaiPhong != null ? Model.LoaiPhong.TenLoai : "Chưa xác định")</strong>
             </div>
 
             <div>
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tầng &amp; Hướng</small>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Tầng &amp; Hướng</small>
                 <span style="font-size:13px;font-weight:500;">Tầng @Model.Tang · @(string.IsNullOrWhiteSpace(Model.HuongPhong) ? "Chưa có thông tin" : Model.HuongPhong)</span>
             </div>
 
             <div>
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá lưu trú</small>
-                <strong style="font-size:18px;color:#c9a35d;">@Model.DonGia.ToString("N0")₫ <small style="font-size:10px;color:#8a939d;">/ đêm</small></strong>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Đơn giá lưu trú</small>
+                <strong style="font-size:18px;color:#c9a35d;">@Model.DonGia.ToString("N0")₫ <small style="font-size: 11px;color:#6b7480;">/ đêm</small></strong>
             </div>
 
             <div style="grid-column: span 2;">
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tiện nghi trang bị</small>
-                <span style="font-size:12px;color:#4a5568;">@(string.IsNullOrWhiteSpace(Model.TienNghi) ? "Chưa cập nhật danh mục tiện nghi." : Model.TienNghi)</span>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Tiện nghi trang bị</small>
+                <span style="font-size: 13px;color:#4a5568;">@(string.IsNullOrWhiteSpace(Model.TienNghi) ? "Chưa cập nhật danh mục tiện nghi." : Model.TienNghi)</span>
             </div>
 
             <div style="grid-column: span 2;">
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Ghi chú chung</small>
-                <span style="font-size:12px;color:#4a5568;">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có ghi chú." : Model.GhiChu)</span>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Ghi chú chung</small>
+                <span style="font-size: 13px;color:#4a5568;">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có ghi chú." : Model.GhiChu)</span>
             </div>
         </div>
     </article>
@@ -92,15 +92,15 @@
 
         <div style="display:flex;flex-direction:column;gap:16px;padding-top:16px;border-top:1px solid #edf0f2;">
             <div>
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Ngày bảo trì gần nhất</small>
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Ngày bảo trì gần nhất</small>
                 <strong style="font-size:14px;color:var(--navy-950);">
                     @(Model.NgayBaoTri.HasValue ? Model.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "Chưa có lịch bảo trì")
                 </strong>
             </div>
 
             <div>
-                <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Nội dung / Ghi chú bảo trì</small>
-                <p style="margin-top:4px;font-size:12px;color:#4a5568;">
+                <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Nội dung / Ghi chú bảo trì</small>
+                <p style="margin-top:4px;font-size: 13px;color:#4a5568;">
                     @(string.IsNullOrWhiteSpace(Model.GhiChuBaoTri) ? "Không có ghi chú bảo trì." : Model.GhiChuBaoTri)
                 </p>
             </div>

@@ -57,14 +57,14 @@
     }
     .book-brand-text small {
         color: var(--gold-400);
-        font-size: 7px;
+        font-size: 8px;
         letter-spacing: 0.36em;
     }
     .book-breadcrumb {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 11px;
+        font-size: 12px;
         color: rgba(255,255,255,0.45);
     }
     .book-breadcrumb a {
@@ -113,7 +113,7 @@
     }
     .book-field:last-child { margin-bottom: 0; }
     .book-field label {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         color: rgba(255,255,255,0.55);
         text-transform: uppercase;
@@ -145,7 +145,7 @@
     }
     .book-field .val-err {
         color: #e74c3c;
-        font-size: 11px;
+        font-size: 12px;
     }
     .book-grid-2 {
         display: grid;
@@ -186,7 +186,7 @@
         margin: 0 0 4px;
     }
     .book-summary-type {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--gold-400);
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -203,7 +203,7 @@
         display: flex;
         align-items: flex-start;
         gap: 8px;
-        font-size: 12px;
+        font-size: 13px;
         color: rgba(255,255,255,0.65);
     }
     .book-info-list li strong { color: rgba(255,255,255,0.9); }
@@ -216,7 +216,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 12px;
+        font-size: 13px;
         color: rgba(255,255,255,0.6);
         margin-bottom: 8px;
     }
@@ -228,9 +228,9 @@
         padding: 14px 16px;
         margin: 16px 0 20px;
     }
-    .book-total-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+    .book-total-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
     .book-total-amount { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--gold-400); font-weight: 700; }
-    .book-remaining { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+    .book-remaining { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; }
     .book-remaining span { color: #f5b7b1; font-weight: 600; }
 
     .book-submit {
@@ -252,7 +252,7 @@
         display: block;
         text-align: center;
         margin-top: 12px;
-        font-size: 12px;
+        font-size: 13px;
         color: rgba(255,255,255,0.4);
         text-decoration: none;
         transition: color 0.2s;
@@ -320,7 +320,7 @@
                     {
                         <div class="book-section">
                             <h2 class="book-section-title">Chọn phòng đặt</h2>
-                            <p style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:12px;">
+                            <p style="font-size: 13px;color:rgba(255,255,255,0.55);margin-bottom:12px;">
                                 Bạn có thể chọn phòng bên dưới hoặc giữ nguyên phòng mặc định đã chọn (đang có @danhSachPhong.Count() phòng trống sẵn sàng).
                             </p>
                             <div class="book-field">
@@ -392,13 +392,13 @@
                         <div class="book-field">
                             <label asp-for="SoNguoi">@Html.DisplayNameFor(m => m.SoNguoi) <span style="color:#e74c3c">*</span></label>
                             <input asp-for="SoNguoi" type="number" min="1" max="@Model.SoNguoiToiDa" />
-                            <span style="font-size:11px;color:rgba(255,255,255,0.4);">Sức chứa tối đa: <strong style="color:var(--gold-400)">@Model.SoNguoiToiDa người</strong></span>
+                            <span style="font-size: 12px;color:rgba(255,255,255,0.4);">Sức chứa tối đa: <strong style="color:var(--gold-400)">@Model.SoNguoiToiDa người</strong></span>
                             <span asp-validation-for="SoNguoi" class="val-err"></span>
                         </div>
                         <div class="book-field">
                             <label asp-for="TienCoc">@Html.DisplayNameFor(m => m.TienCoc)</label>
                             <input asp-for="TienCoc" type="number" step="50000" min="0" id="txtTienCoc" placeholder="0" />
-                            <span style="font-size:11px;color:rgba(255,255,255,0.4);">Có thể để 0 — thanh toán khi nhận phòng</span>
+                            <span style="font-size: 12px;color:rgba(255,255,255,0.4);">Có thể để 0 — thanh toán khi nhận phòng</span>
                             <span asp-validation-for="TienCoc" class="val-err"></span>
                         </div>
                     </div>
