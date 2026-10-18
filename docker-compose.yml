@@ -1,0 +1,99 @@
+# =============================================================================
+# QLyDatPhongKhachSan - cau hinh deploy thu nghiem (test deploy)
+#
+# Cach dung:
+#   1. copy .env.example thanh .env va doi MSSQL_SA_PASSWORD
+#   2. docker compose up -d --build
+#   3. mo http://localhost:8080
+#
+# Lan chay dau tien, web se tu tao database + nap du lieu mau (tai khoan demo:
+# admin / nhanvien / khachhang, mat khau 123456).
+#
+# Services:
+#   db  - SQL Server 2022 Developer (luu tru du lieu)
+#   web - ASP.NET Core MVC (ung dung chinh)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # SQL Server 2022 Developer (mien phi cho hoc tap / phat trien)
+  # Ghim tag CU cu the (khong dung "2022-latest") de moi lan deploy cho cung ket qua.
+  # Luu y: tren may ARM (Apple Silicon) hay doi image sang
+  #        mcr.microsoft.com/azure-sql-edge.
+  # ---------------------------------------------------------------------------
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
+    restart: on-failure:5
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_password123}"
+    ports:
+      - "${DB_PORT:-1433}:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "for s in /opt/mssql-tools18/bin/sqlcmd /opt/mssql-tools/bin/sqlcmd; do [ -x \"$$s\" ] && \"$$s\" -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null && exit 0; done; exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks:
+      - hotel-net
+
+  # ---------------------------------------------------------------------------
+  # Web app (ASP.NET Core MVC)
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Mac dinh build local; tren server CD se ghi de bang image tu GHCR
+    # (vd: ghcr.io/quoc05dev/...-web:main) => `docker compose pull` lay ban da build san.
+    image: ${WEB_IMAGE:-qldpkh-web:local}
+    restart: on-failure:5
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+      # Ghi de ConnectionStrings:DefaultConnection trong appsettings.json.
+      # Duong dan "db" la ten service, phan giai qua mang noi bo cua compose.
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=QLyDatPhongKhachSanDB;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Your_password123};TrustServerCertificate=True;MultipleActiveResultSets=true"
+      # Bat nap du lieu mau (chi khi database con rong).
+      SeedSampleData: "true"
+      # Tat HTTPS redirect vi container chay HTTP thuan tuy (port 8080).
+      # Neu can HTTPS, dat reverse proxy (nginx/Caddy) phia truoc.
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - hotel-net
+
+volumes:
+  mssql-data:
+
+networks:
+  hotel-net:
+    driver: bridge
