@@ -1,12 +1,14 @@
 name: CI
 
-# Build + kiem tra tren moi lan push/PR. Khong can secret nao.
+# Build + kiem tra tren moi lan push/PR va khi duoc goi boi deploy.yml.
+# workflow_call cho phep deploy.yml tai su dung workflow nay lam CI gate.
 on:
   push:
     branches: [ main, test-deploy ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+  workflow_call:   # cho phep deploy.yml goi lai workflow nay
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -18,8 +20,11 @@ env:
 
 jobs:
   build:
-    name: Build (.NET)
+    name: Build & Lint (.NET)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +46,12 @@ jobs:
       - name: Build (Release)
         run: dotnet build ${{ env.PROJECT }} -c Release --no-restore
 
+      - name: Format check (phat hien code khong tuan thu style)
+        run: dotnet format ${{ env.PROJECT }} --verify-no-changes --no-restore
+        continue-on-error: true   # canh bao nhung khong block CI (doi team dong y thi doi thanh false)
+
       - name: Test (bo qua neu chua co project test)
+        id: test
         shell: bash
         run: |
           mapfile -t projs < <(find . -name '*.csproj' -iname '*test*')
@@ -49,12 +59,25 @@ jobs:
             echo "Khong co project test -> bo qua buoc nay."
             exit 0
           fi
-          for p in "${projs[@]}"; do dotnet test "$p" -c Release; done
+          for p in "${projs[@]}"; do
+            dotnet test "$p" -c Release --logger trx --results-directory TestResults/
+          done
+
+      - name: Upload ket qua test (khi co loi)
+        if: failure() && steps.test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/
+          retention-days: 7
 
   docker:
     name: Kiem tra Docker build
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 

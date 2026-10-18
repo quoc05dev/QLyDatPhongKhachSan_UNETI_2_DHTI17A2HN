@@ -1,26 +1,25 @@
 name: CD (Auto Deploy)
 
 # =============================================================================
-# CI/CD tu dong:
-#   1. publish-image: build Docker image tu Dockerfile -> push len GitHub
-#      Container Registry (ghcr.io). Chi can GITHUB_TOKEN, KHONG can secret.
-#   2. deploy: SSH vao server va cap nhat container (TUY CHON).
+# Pipeline:
+#   ci         → goi lai workflow CI lam gate truoc khi push image
+#   publish    → build Docker image -> push len GHCR
+#   deploy     → SSH vao server, cap nhat container, kiem tra healthy, rollback neu loi
 #
-# Muon bat buoc deploy (job 2), cau hinh trong GitHub:
-#   Settings > Secrets and variables > Actions
-#     Variables:
-#       DEPLOY_ENABLED = true
-#       DEPLOY_PATH    = /duong/dan/toi/repo/tren/server   (vd: /srv/qldpkh)
-#     Secrets:
-#       DEPLOY_HOST     = IP hoac domain cua server
-#       DEPLOY_USER     = user SSH (vd: ubuntu)
-#       DEPLOY_SSH_KEY  = noi dung private key (OpenSSH)
-#       DEPLOY_PORT     = 22            (tuy chon)
-#       GHCR_USER       = username GitHub (neu package de Private)
-#       GHCR_TOKEN      = PAT co quyen read:packages (neu package de Private)
+# Bien phai cau hinh (Settings > Secrets and variables > Actions):
+#   Variables:
+#     DEPLOY_ENABLED = true
+#     DEPLOY_PATH    = /duong/dan/tren/server   (vd: /srv/qldpkh)
+#   Secrets:
+#     DEPLOY_HOST    = IP hoac domain server
+#     DEPLOY_USER    = user SSH (vd: ubuntu)
+#     DEPLOY_SSH_KEY = noi dung private key (OpenSSH format)
+#     DEPLOY_PORT    = 22  (tuy chon)
+#     GHCR_USER      = username GitHub (chi can neu package de Private)
+#     GHCR_TOKEN     = PAT read:packages  (chi can neu package de Private)
 #
-# Tren server can co san: Docker + Docker Compose, repo da duoc clone tai
-# DEPLOY_PATH, va file .env (chua MSSQL_SA_PASSWORD) da tao tu .env.example.
+# Tren server can: Docker + Docker Compose, repo da clone tai DEPLOY_PATH,
+# file .env da tao tu .env.example.
 # =============================================================================
 
 on:
@@ -28,10 +27,7 @@ on:
     branches: [ main, test-deploy ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-
+# CD khong cancel-in-progress de tranh deploy do dang
 concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: false
@@ -41,18 +37,37 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Gate: CI phai pass truoc khi bat ky buoc deploy nao duoc chay
+  # ---------------------------------------------------------------------------
+  ci:
+    name: CI Gate
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  # ---------------------------------------------------------------------------
+  # Build & push image len GHCR
+  # ---------------------------------------------------------------------------
   publish-image:
     name: Build & push image len GHCR
     runs-on: ubuntu-latest
+    needs: ci
+    permissions:
+      contents: read
+      packages: write
     outputs:
       image: ${{ steps.vars.outputs.image }}
-      tag: ${{ github.ref_name }}
+      tag:   ${{ steps.vars.outputs.tag }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Tinh ten image (GHCR bat buoc chu thuong)
+      - name: Tinh ten image & tag
         id: vars
-        run: echo "image=${REGISTRY}/${IMAGE_NAME,,}-web" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "image=${REGISTRY}/${IMAGE_NAME,,}-web" >> "$GITHUB_OUTPUT"
+          echo "tag=${{ github.ref_name }}"           >> "$GITHUB_OUTPUT"
 
       - name: Buildx
         uses: docker/setup-buildx-action@v3
@@ -64,7 +79,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sinh tag & label
+      - name: Sinh tag & label (branch + short-SHA + latest cho main)
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -74,7 +89,7 @@ jobs:
             type=sha,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build & push
+      - name: Build & push (voi GHA layer cache)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -85,42 +100,81 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # ---------------------------------------------------------------------------
+  # SSH deploy (chi chay khi DEPLOY_ENABLED = true)
+  # ---------------------------------------------------------------------------
   deploy:
-    name: Deploy len server (tuy chon)
+    name: Deploy len server
     runs-on: ubuntu-latest
     needs: publish-image
     if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    permissions:
+      contents: read
+
     steps:
-      - name: SSH & cap nhat container
+      - name: SSH, cap nhat container & kiem tra healthy
         uses: appleboy/ssh-action@v1
         env:
-          WORKDIR: ${{ vars.DEPLOY_PATH }}
-          REF: ${{ github.ref_name }}
-          WEB_IMAGE: ${{ needs.publish-image.outputs.image }}:${{ needs.publish-image.outputs.tag }}
-          GHCR_USER: ${{ secrets.GHCR_USER }}
+          WORKDIR:    ${{ vars.DEPLOY_PATH }}
+          REF:        ${{ github.ref_name }}
+          WEB_IMAGE:  ${{ needs.publish-image.outputs.image }}:${{ needs.publish-image.outputs.tag }}
+          GHCR_USER:  ${{ secrets.GHCR_USER }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
+          host:     ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: WORKDIR,REF,WEB_IMAGE,GHCR_USER,GHCR_TOKEN
+          key:      ${{ secrets.DEPLOY_SSH_KEY }}
+          port:     ${{ secrets.DEPLOY_PORT || 22 }}
+          envs:     WORKDIR,REF,WEB_IMAGE,GHCR_USER,GHCR_TOKEN
+          # timeout SSH ket noi
+          command_timeout: 10m
           script: |
-            set -e
+            set -euo pipefail
             cd "$WORKDIR"
 
-            # Neu package GHCR la Private thi can dang nhap truoc khi pull.
-            if [ -n "$GHCR_TOKEN" ]; then
+            # ---------- 1. Dang nhap GHCR (neu package Private) ----------
+            if [ -n "${GHCR_TOKEN:-}" ]; then
               echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             fi
 
-            # Dong bo code (lay docker-compose.yml moi nhat) va cap nhat container.
+            # ---------- 2. Dong bo code (lay docker-compose.yml moi nhat) ----------
             git fetch --all --prune
             git checkout "$REF"
             git reset --hard "origin/$REF"
 
+            # ---------- 3. Ghi nho image hien tai de rollback neu can ----------
+            PREV_IMAGE=$(docker inspect --format='{{index .Config.Image}}' \
+              "$(docker compose ps -q web 2>/dev/null | head -1)" 2>/dev/null || echo "")
+
+            # ---------- 4. Pull image moi & khoi dong lai service ----------
             export WEB_IMAGE
             docker compose pull web
             docker compose up -d --remove-orphans
+
+            # ---------- 5. Cho healthcheck ket luan (toi da 90s) ----------
+            echo "Cho healthcheck web san sang..."
+            SECONDS_WAITED=0
+            until [ "$(docker inspect --format='{{.State.Health.Status}}' \
+              "$(docker compose ps -q web)")" = "healthy" ] || [ "$SECONDS_WAITED" -ge 90 ]; do
+              sleep 5
+              SECONDS_WAITED=$((SECONDS_WAITED + 5))
+            done
+
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' \
+              "$(docker compose ps -q web)" 2>/dev/null || echo "unknown")
+
+            if [ "$STATUS" != "healthy" ]; then
+              echo "!! Container khong healthy (status: $STATUS). Rollback..."
+              if [ -n "$PREV_IMAGE" ]; then
+                WEB_IMAGE="$PREV_IMAGE" docker compose up -d --remove-orphans
+              else
+                docker compose down
+              fi
+              exit 1
+            fi
+
+            # ---------- 6. Don dep image cu ----------
             docker image prune -f
+            echo ""
+            echo "=== Deploy thanh cong! Container hien tai: ==="
             docker compose ps
