@@ -1,0 +1,26 @@
+# Build context: khong dua build output, IDE, tai lieu va secret vao image.
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/TestResults/
+
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Secret (khong commit, khong dua vao image)
+.env
+
+# Tai lieu / de bai khong can thiet khi build
+*.docx
+*.md
+project_plan.*
+*.slnx
+
+# File tam cua IDE
+**/*.user
+**/*.suo
+*.swp
