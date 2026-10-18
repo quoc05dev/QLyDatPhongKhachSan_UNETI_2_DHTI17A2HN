@@ -145,13 +145,13 @@ jobs:
             echo "Dang cho web healthy..."
             for i in $(seq 1 18); do
               STATUS=$(docker inspect --format='{{.State.Health.Status}}' \
-                "$(docker compose ps -q web)" 2>/dev/null || echo "unknown")
+                "$(docker compose ps -q web 2>/dev/null | head -1)" 2>/dev/null || echo "unknown")
               [ "$STATUS" = "healthy" ] && break
               sleep 5
             done
 
             STATUS=$(docker inspect --format='{{.State.Health.Status}}' \
-              "$(docker compose ps -q web)" 2>/dev/null || echo "unknown")
+              "$(docker compose ps -q web 2>/dev/null | head -1)" 2>/dev/null || echo "unknown")
 
             if [ "$STATUS" != "healthy" ]; then
               echo "FAIL: Container khong healthy ($STATUS) -> rollback"
@@ -159,8 +159,8 @@ jobs:
               exit 1
             fi
 
-            # Cau hinh nginx + Let's Encrypt. App da healthy roi nen loi nginx
-            # chi canh bao, khong keo theo rollback (rollback cung khong sua duoc nginx).
+            # Cau hinh nginx. App da healthy roi nen loi nginx chi canh bao,
+            # khong keo theo rollback (rollback cung khong sua duoc nginx).
             bash "$WORKDIR/deploy/setup-nginx.sh" \
               || echo "CANH BAO: cau hinh nginx that bai - app van dang chay, xem log o tren."
 

@@ -69,6 +69,11 @@ jobs:
     name: Docker build check
     runs-on: ubuntu-latest
     needs: build
+    # Chi build Docker de KIEM TRA Dockerfile khi PR (truoc khi merge) hoac
+    # khi chay thu cong. Khi deploy.yml goi workflow nay, github.event_name van
+    # la "push" -> bo qua buoc nay, boi job publish-image cua deploy se build
+    # lai voi push: true. Tranh build Docker 2 lan moi lan release.
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: read
 

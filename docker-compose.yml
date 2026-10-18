@@ -28,8 +28,13 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
       MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_password123}"
+    # Chi bind vao loopback: DB khong can truy cap tu ben ngoai (app ket noi
+    # qua mang noi bo cua compose). Neu de 0.0.0.0, SQL Server se mo cong khai
+    # ra Internet va bi bot quet mat khau SA brute-force.
+    # Can ket noi SSMS tu may ngoai thi dung SSH tunnel:
+    #   ssh -L 14330:127.0.0.1:14330 root@<IP>  roi SSMS ket noi localhost:14330
     ports:
-      - "${DB_PORT:-1433}:1433"
+      - "127.0.0.1:${DB_PORT:-1433}:1433"
     volumes:
       - mssql-data:/var/opt/mssql
     healthcheck:
@@ -75,8 +80,11 @@ services:
       # Tat HTTPS redirect vi container chay HTTP thuan tuy (port 8080).
       # Neu can HTTPS, dat reverse proxy (nginx/Caddy) phia truoc.
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    # Chi bind vao loopback: chi nginx tren cung may moi truy cap duoc.
+    # Neu de 0.0.0.0, nguoi ngoai vao truc tiep http://IP:8090 se bypass qua
+    # nginx (khong go qua firewall/Cloudflare).
     ports:
-      - "${WEB_PORT:-8080}:8080"
+      - "127.0.0.1:${WEB_PORT:-8080}:8080"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
       interval: 30s
