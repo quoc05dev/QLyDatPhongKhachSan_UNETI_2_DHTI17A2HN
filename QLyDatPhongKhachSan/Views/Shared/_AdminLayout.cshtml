@@ -33,7 +33,7 @@
             <nav>
                 @if (isKhachHang)
                 {
-                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="DatPhong" asp-action="Index"><i>K</i><span>Đặt phòng</span><small>SV 3</small></a>
+                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="DatPhong" asp-action="Index"><i>K</i><span>Đặt phòng</span></a>
                     <a class="@(active == "profile" ? "is-active" : "")" asp-controller="KhachHang" asp-action="Profile"><i>H</i><span>Hồ sơ cá nhân</span></a>
                 }
                 else
@@ -41,25 +41,14 @@
                     <a class="@(active == "overview" ? "is-active" : "")" asp-controller="ThongKe" asp-action="Dashboard"><i>⌂</i><span>Tổng quan</span></a>
                     @if (isAdmin)
                     {
-                        <a class="@(active == "accounts" ? "is-active" : "")" asp-controller="TaiKhoan" asp-action="Index"><i>A</i><span>Tài khoản &amp; loại phòng</span><small>SV 1</small></a>
+                        <a class="@(active == "accounts" ? "is-active" : "")" asp-controller="TaiKhoan" asp-action="Index"><i>A</i><span>Tài khoản &amp; loại phòng</span></a>
                     }
-                    <a class="@(active == "rooms" ? "is-active" : "")" asp-controller="Phong" asp-action="Index"><i>P</i><span>Quản lý phòng</span><small>SV 2</small></a>
-                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="KhachHang" asp-action="Index"><i>K</i><span>Khách hàng &amp; đặt phòng</span><small>SV 3</small></a>
-                    <a class="@(active == "operations" ? "is-active" : "")" asp-controller="QuanLyDatPhong" asp-action="Index"><i>N</i><span>Tiếp nhận &amp; trạng thái</span><small>SV 4</small></a>
-                    <a class="@(active == "reports" ? "is-active" : "")" asp-controller="ThongKe" asp-action="DoanhThu"><i>B</i><span>Doanh thu &amp; báo cáo</span><small>SV 5</small></a>
+                    <a class="@(active == "rooms" ? "is-active" : "")" asp-controller="Phong" asp-action="Index"><i>P</i><span>Quản lý phòng</span></a>
+                    <a class="@(active == "customers" ? "is-active" : "")" asp-controller="KhachHang" asp-action="Index"><i>K</i><span>Khách hàng &amp; đặt phòng</span></a>
+                    <a class="@(active == "operations" ? "is-active" : "")" asp-controller="QuanLyDatPhong" asp-action="Index"><i>N</i><span>Tiếp nhận &amp; trạng thái</span></a>
+                    <a class="@(active == "reports" ? "is-active" : "")" asp-controller="ThongKe" asp-action="DoanhThu"><i>B</i><span>Doanh thu &amp; báo cáo</span></a>
                 }
             </nav>
-            <div class="sidebar-help">
-                <span>?</span>
-                @if (isKhachHang)
-                {
-                    <div><strong>Đặt phòng · SV3</strong><small>Chọn phòng &amp; theo dõi lịch sử</small></div>
-                }
-                else
-                {
-                    <div><strong>Module 5 · SV5</strong><small>Dashboard &amp; thống kê doanh thu</small></div>
-                }
-            </div>
             <a class="back-to-site" asp-controller="Home" asp-action="Index">← Về trang khách sạn</a>
         </aside>
 

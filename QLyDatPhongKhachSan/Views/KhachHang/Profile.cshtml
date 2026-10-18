@@ -11,15 +11,15 @@
     ViewData["Title"] = "Hồ sơ cá nhân";
     Layout = "_AdminLayout";
     ViewData["AdminActive"] = "profile";
-    var labelStyle = "font-size:10px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;";
-    var inputStyle = "min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;";
-    var errorStyle = "color:#c0392b;font-size:11px;";
-    var rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f2;font-size:12px;";
+    var labelStyle = "font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;";
+    var inputStyle = "min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;";
+    var errorStyle = "color:#c0392b;font-size: 12px;";
+    var rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f2;font-size: 13px;";
 }
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 3 · Hồ sơ cá nhân</span>
+        <span class="admin-overline">Hồ sơ cá nhân</span>
         <h1>Hồ sơ của tôi</h1>
         <p>Xem và cập nhật thông tin cá nhân để thuận tiện cho việc đặt phòng và nhận phòng.</p>
     </div>
@@ -28,11 +28,11 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size:12px;">✓ @TempData["SuccessMessage"]</p>
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size: 13px;">✓ @TempData["SuccessMessage"]</p>
 }
 @if (TempData["ErrorMessage"] != null)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size:12px;">⚠ @TempData["ErrorMessage"]</p>
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size: 13px;">⚠ @TempData["ErrorMessage"]</p>
 }
 
 <div class="dashboard-grid report-grid">
@@ -48,14 +48,14 @@
             </div>
             <div>
                 <div style="font-weight:700;color:#172433;font-size:14px;">@Model.HoTen</div>
-                <div style="color:#737d87;font-size:11px;">@@@Model.TenDangNhap · Mã KH #@Model.MaKhachHang.ToString("D4")</div>
+                <div style="color:#5d666f;font-size: 12px;">@@@Model.TenDangNhap · Mã KH #@Model.MaKhachHang.ToString("D4")</div>
             </div>
         </div>
 
-        <div style="@rowLabel"><span style="color:#737d87;">Ngày tham gia</span><span style="color:#172433;font-weight:600;">@(Model.NgayTaoTaiKhoan?.ToString("dd/MM/yyyy") ?? "N/A")</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Điện thoại</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.SoDienThoai) ? "Chưa cập nhật" : Model.SoDienThoai)</span></div>
-        <div style="@rowLabel"><span style="color:#737d87;">Email</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.Email) ? "Chưa cập nhật" : Model.Email)</span></div>
-        <div style="@rowLabel;border-bottom:0;"><span style="color:#737d87;">Quốc tịch</span><span style="color:#172433;font-weight:600;">@Model.QuocTich</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Ngày tham gia</span><span style="color:#172433;font-weight:600;">@(Model.NgayTaoTaiKhoan?.ToString("dd/MM/yyyy") ?? "N/A")</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Điện thoại</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.SoDienThoai) ? "Chưa cập nhật" : Model.SoDienThoai)</span></div>
+        <div style="@rowLabel"><span style="color:#5d666f;">Email</span><span style="color:#172433;font-weight:600;">@(string.IsNullOrEmpty(Model.Email) ? "Chưa cập nhật" : Model.Email)</span></div>
+        <div style="@rowLabel;border-bottom:0;"><span style="color:#5d666f;">Quốc tịch</span><span style="color:#172433;font-weight:600;">@Model.QuocTich</span></div>
 
         <div style="margin-top:16px;padding:12px 14px;border-left:3px solid #c9a35d;background:#fbf7ef;color:#6b5a36;font-size:11.5px;line-height:1.6;">
             Chỉ có bạn mới có quyền xem và chỉnh sửa hồ sơ này. Mọi thay đổi sẽ được đồng bộ sang tài khoản đăng nhập.
@@ -70,7 +70,7 @@
 
         <form asp-action="Profile" method="post" novalidate>
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size:12px;"></div>
+            <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size: 13px;"></div>
             <input type="hidden" asp-for="MaKhachHang" />
             <input type="hidden" asp-for="MaTaiKhoan" />
             <input type="hidden" asp-for="TenDangNhap" />
@@ -84,7 +84,7 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;">
                     <label style="@labelStyle">Tên đăng nhập</label>
-                    <input type="text" value="@Model.TenDangNhap" readonly disabled style="@inputStyle;background:#f4f6f7;color:#8a939d;" />
+                    <input type="text" value="@Model.TenDangNhap" readonly disabled style="@inputStyle;background:#f4f6f7;color:#6b7480;" />
                 </div>
 
                 <div style="display:flex;flex-direction:column;gap:6px;">
@@ -94,7 +94,7 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;">
                     <label asp-for="GioiTinh" style="@labelStyle">Giới tính</label>
-                    <div style="display:flex;align-items:center;gap:20px;min-height:42px;font-size:12px;color:#414c57;">
+                    <div style="display:flex;align-items:center;gap:20px;min-height:42px;font-size: 13px;color:#414c57;">
                         <label style="display:flex;align-items:center;gap:7px;"><input class="form-check-input" type="radio" asp-for="GioiTinh" value="Nam" /> Nam</label>
                         <label style="display:flex;align-items:center;gap:7px;"><input class="form-check-input" type="radio" asp-for="GioiTinh" value="Nữ" /> Nữ</label>
                         <label style="display:flex;align-items:center;gap:7px;"><input class="form-check-input" type="radio" asp-for="GioiTinh" value="Khác" /> Khác</label>
@@ -126,12 +126,12 @@
 
                 <div style="grid-column: span 2;display:flex;flex-direction:column;gap:6px;">
                     <label asp-for="DiaChi" style="@labelStyle">Địa chỉ liên hệ</label>
-                    <textarea asp-for="DiaChi" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố..." style="padding:10px 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;"></textarea>
+                    <textarea asp-for="DiaChi" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố..." style="padding:10px 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;"></textarea>
                     <span asp-validation-for="DiaChi" style="@errorStyle"></span>
                 </div>
                 <div style="grid-column: span 2;display:flex;flex-direction:column;gap:6px;">
                     <label asp-for="GhiChu" style="@labelStyle">Ghi chú cá nhân</label>
-                    <textarea asp-for="GhiChu" rows="2" placeholder="Sở thích hoặc yêu cầu cá nhân (nếu có)..." style="padding:10px 12px;border:1px solid #dce0e3;border-radius:2px;font-size:12px;"></textarea>
+                    <textarea asp-for="GhiChu" rows="2" placeholder="Sở thích hoặc yêu cầu cá nhân (nếu có)..." style="padding:10px 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;"></textarea>
                     <span asp-validation-for="GhiChu" style="@errorStyle"></span>
                 </div>
             </div>

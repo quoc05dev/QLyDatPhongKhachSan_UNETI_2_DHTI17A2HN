@@ -17,7 +17,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 3 · Lịch sử đặt phòng</span>
+        <span class="admin-overline">Lịch sử đặt phòng</span>
         <h1>Đơn đặt phòng của tôi</h1>
         <p>Theo dõi tiến độ xử lý và quản lý các đơn đặt phòng đã thực hiện.</p>
     </div>
@@ -29,11 +29,11 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size:12px;">✓ @TempData["SuccessMessage"]</p>
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size: 13px;">✓ @TempData["SuccessMessage"]</p>
 }
 @if (TempData["ErrorMessage"] != null)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size:12px;">⚠ @TempData["ErrorMessage"]</p>
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size: 13px;">⚠ @TempData["ErrorMessage"]</p>
 }
 
 <article class="dashboard-card data-card">
@@ -46,8 +46,8 @@
 
         <form method="get" asp-action="LichSu" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
             <input type="hidden" name="trangThaiFilter" value="@Model.TrangThaiFilter" />
-            <span style="font-size:10px;color:#737d87;font-weight:700;text-transform:uppercase;">Sắp xếp</span>
-            <select name="sortOrder" onchange="this.form.submit()" style="min-height:38px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size:11px;">
+            <span style="font-size: 11px;color:#5d666f;font-weight:700;text-transform:uppercase;">Sắp xếp</span>
+            <select name="sortOrder" onchange="this.form.submit()" style="min-height:38px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 12px;">
                 <option value="date_desc" selected="@(Model.SortOrder == "date_desc" ? "selected" : null)">Ngày đặt: Mới nhất</option>
                 <option value="date_asc" selected="@(Model.SortOrder == "date_asc" ? "selected" : null)">Ngày đặt: Cũ nhất</option>
                 <option value="checkin_asc" selected="@(Model.SortOrder == "checkin_asc" ? "selected" : null)">Ngày nhận: Gần nhất</option>
@@ -119,12 +119,12 @@
                             <td><partial name="_TrangThaiBadge" model="@item.TrangThai" /></td>
                             <td style="text-align:right;">
                                 <div style="display:inline-flex;gap:8px;">
-                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaDatPhong">Chi tiết</a>
+                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaDatPhong">Chi tiết</a>
                                     @if (item.CoTheHuy)
                                     {
                                         <form asp-action="Cancel" asp-route-id="@item.MaDatPhong" method="post" style="display:inline;">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;color:#c0392b;border-color:#f5c6cb;"
+                                            <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;color:#c0392b;border-color:#f5c6cb;"
                                                     onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng #@item.MaDatPhong.ToString("D4") (Phòng @item.SoPhong)?');">
                                                 Hủy
                                             </button>

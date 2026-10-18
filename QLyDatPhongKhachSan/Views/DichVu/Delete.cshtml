@@ -13,7 +13,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 5 · Thao tác xóa dịch vụ</span>
+        <span class="admin-overline">Thao tác xóa dịch vụ</span>
         <h1>Xóa dịch vụ: @Model.TenDichVu</h1>
         <p>Xác nhận xóa dịch vụ khỏi danh mục phục vụ của khách sạn.</p>
     </div>
@@ -21,29 +21,29 @@
 </div>
 
 <article class="dashboard-card" style="padding: 28px; max-width: 650px;">
-    <div style="padding:14px 18px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size:12px;border-radius:2px;line-height:1.6;">
+    <div style="padding:14px 18px;background:#fdf2f2;border-left:4px solid #e74c3c;color:#c0392b;margin-bottom:20px;font-size: 13px;border-radius:2px;line-height:1.6;">
         <strong style="display:block;margin-bottom:4px;font-size:13px;">🚨 Báo xác nhận xóa:</strong>
         Bạn có chắc chắn muốn xóa dịch vụ <strong>@Model.TenDichVu</strong> (#@Model.MaDichVu) không? Thao tác này không thể hoàn tác.
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 0;border-top:1px solid #edf0f2;border-bottom:1px solid #edf0f2;">
         <div>
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Tên dịch vụ</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Tên dịch vụ</small>
             <strong style="font-size:15px;color:var(--navy-950);">@Model.TenDichVu</strong>
         </div>
 
         <div>
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Giá dịch vụ</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Giá dịch vụ</small>
             <span style="font-size:14px;color:#b28c49;font-weight:600;">@Model.Gia.ToString("N0")₫</span>
         </div>
 
         <div>
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Trạng thái</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Trạng thái</small>
             <span style="font-size:14px;color:#334155;">@(Model.TrangThai ? "Đang phục vụ" : "Ngừng phục vụ")</span>
         </div>
 
         <div>
-            <small style="color:#8a939d;font-size:9px;text-transform:uppercase;font-weight:600;display:block;">Mô tả</small>
+            <small style="color:#6b7480;font-size: 10px;text-transform:uppercase;font-weight:600;display:block;">Mô tả</small>
             <span style="font-size:14px;color:#334155;">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "—" : Model.MoTa)</span>
         </div>
     </div>

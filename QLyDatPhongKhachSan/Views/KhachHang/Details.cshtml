@@ -15,14 +15,14 @@
     string avatarLetter = !string.IsNullOrWhiteSpace(Model.HoTen) ? Model.HoTen.Trim().Substring(0, 1).ToUpper() : "K";
     var danhSachDatPhong = Model.DatPhongs?.OrderByDescending(dp => dp.NgayDat).ToList() ?? new List<QLyDatPhongKhachSan.Models.DatPhong>();
     decimal tongChiTieu = danhSachDatPhong.Where(dp => dp.TrangThai != "DaHuy").Sum(dp => dp.TongTien);
-    string rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf0f2;font-size:12px;";
-    string rowLabelText = "color:#737d87;";
+    string rowLabel = "display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf0f2;font-size: 13px;";
+    string rowLabelText = "color:#5d666f;";
     string rowValueText = "color:#172433;font-weight:600;text-align:right;";
 }
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 3 · Hồ sơ khách hàng #@Model.MaKhachHang.ToString("D4")</span>
+        <span class="admin-overline">Hồ sơ khách hàng #@Model.MaKhachHang.ToString("D4")</span>
         <h1>@Model.HoTen</h1>
         <p>Thông tin nhân thân, liên hệ và toàn bộ lịch sử giao dịch đặt phòng của khách hàng.</p>
     </div>
@@ -62,7 +62,7 @@
                 <div style="width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#102943;color:#e2c894;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;">@avatarLetter</div>
                 <div>
                     <div style="font-weight:700;color:#172433;font-size:14px;">@Model.HoTen</div>
-                    <div style="color:#737d87;font-size:11px;">Mã khách hàng: #@Model.MaKhachHang.ToString("D4")</div>
+                    <div style="color:#5d666f;font-size: 12px;">Mã khách hàng: #@Model.MaKhachHang.ToString("D4")</div>
                 </div>
             </div>
 
@@ -83,7 +83,7 @@
 
         @if (!string.IsNullOrEmpty(Model.GhiChu))
         {
-            <div style="margin-top:16px;padding:12px 14px;border-left:3px solid #c9a35d;background:#fbf7ef;color:#6b5a36;font-size:12px;">
+            <div style="margin-top:16px;padding:12px 14px;border-left:3px solid #c9a35d;background:#fbf7ef;color:#6b5a36;font-size: 13px;">
                 <strong style="display:block;margin-bottom:3px;">Ghi chú nội bộ</strong>@Model.GhiChu
             </div>
         }
@@ -95,15 +95,15 @@
         </div>
         <div style="padding:18px 23px 24px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f7f9fa;border:1px solid #edf0f2;">
-                <span style="font-size:11px;color:#737d87;">Số đơn hợp lệ</span>
+                <span style="font-size: 12px;color:#5d666f;">Số đơn hợp lệ</span>
                 <strong style="font-family:'Playfair Display',serif;font-size:22px;color:#102943;">@danhSachDatPhong.Count(dp => dp.TrangThai != "DaHuy")</strong>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f7f9fa;border:1px solid #edf0f2;border-top:0;">
-                <span style="font-size:11px;color:#737d87;">Đơn đã hủy</span>
+                <span style="font-size: 12px;color:#5d666f;">Đơn đã hủy</span>
                 <strong style="font-family:'Playfair Display',serif;font-size:22px;color:#a17732;">@danhSachDatPhong.Count(dp => dp.TrangThai == "DaHuy")</strong>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#eef6f2;border:1px solid #d9ebe1;border-top:0;">
-                <span style="font-size:11px;color:#37614b;">Tổng chi tiêu</span>
+                <span style="font-size: 12px;color:#37614b;">Tổng chi tiêu</span>
                 <strong style="font-family:'Playfair Display',serif;font-size:20px;color:#37614b;">@tongChiTieu.ToString("N0")₫</strong>
             </div>
             <a class="admin-secondary" asp-controller="DatPhong" asp-action="Index" style="display:block;text-align:center;margin-top:16px;text-decoration:none;">Đặt phòng mới cho khách →</a>
@@ -168,7 +168,7 @@
                             </td>
                             <td><partial name="_TrangThaiBadge" model="@dp.TrangThai" /></td>
                             <td style="text-align:right;">
-                                <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-controller="DatPhong" asp-action="Details" asp-route-id="@dp.MaDatPhong">Chi tiết</a>
+                                <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-controller="DatPhong" asp-action="Details" asp-route-id="@dp.MaDatPhong">Chi tiết</a>
                             </td>
                         </tr>
                     }

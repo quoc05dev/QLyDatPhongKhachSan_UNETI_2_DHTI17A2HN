@@ -16,7 +16,7 @@
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Module 3 · Khách hàng</span>
+        <span class="admin-overline">Khách hàng</span>
         <h1>Quản lý khách hàng</h1>
         <p>Theo dõi hồ sơ khách hàng, tiếp nhận khách vãng lai, liên kết tài khoản và lịch sử giao dịch.</p>
     </div>
@@ -28,14 +28,14 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size:12px;">
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #4f8068;background:#eef6f2;color:#37614b;font-size: 13px;">
         ✓ @TempData["SuccessMessage"]
     </p>
 }
 
 @if (TempData["ErrorMessage"] != null)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size:12px;">
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid #c0392b;background:#fdecea;color:#a93226;font-size: 13px;">
         ⚠ @TempData["ErrorMessage"]
     </p>
 }
@@ -176,17 +176,17 @@
                             </td>
                             <td style="text-align:right;">
                                 <div style="display:inline-flex;gap:8px;">
-                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-action="Details" asp-route-id="@kh.MaKhachHang">Chi tiết</a>
-                                    <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size:10px;text-decoration:none;" asp-action="Edit" asp-route-id="@kh.MaKhachHang">Sửa</a>
+                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Details" asp-route-id="@kh.MaKhachHang">Chi tiết</a>
+                                    <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Edit" asp-route-id="@kh.MaKhachHang">Sửa</a>
                                     <form asp-action="ToggleStatus" asp-route-id="@kh.MaKhachHang" method="post" style="display:inline;">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;"
+                                        <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;"
                                                 title="@(kh.TrangThai ? "Khóa khách hàng" : "Mở khóa khách hàng")"
                                                 onclick="return confirm('Bạn có chắc muốn @(kh.TrangThai ? "khóa" : "mở khóa") khách hàng @kh.HoTen?');">
                                             @(kh.TrangThai ? "Khóa" : "Mở")
                                         </button>
                                     </form>
-                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size:10px;color:#c0392b;border-color:#f5c6cb;text-decoration:none;" asp-action="Delete" asp-route-id="@kh.MaKhachHang">Xóa</a>
+                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;color:#c0392b;border-color:#f5c6cb;text-decoration:none;" asp-action="Delete" asp-route-id="@kh.MaKhachHang">Xóa</a>
                                 </div>
                             </td>
                         </tr>

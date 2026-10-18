@@ -8,7 +8,7 @@
 @using System.Globalization
 
 @{
-    ViewData["Title"] = "Doanh thu & báo cáo - Module 5";
+    ViewData["Title"] = "Doanh thu & báo cáo";
     Layout = "_AdminLayout";
     ViewData["AdminActive"] = "reports";
 
@@ -61,22 +61,22 @@
     .export-menu.open { display: block; }
     .export-menu a {
         display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-        border-radius: 8px; color: #26333f; font-size: 12px; font-weight: 600; text-decoration: none;
+        border-radius: 8px; color: #26333f; font-size: 13px; font-weight: 600; text-decoration: none;
     }
     .export-menu a:hover { background: #f2f5f7; }
-    .export-menu a small { display: block; color: #8a939c; font-size: 9px; font-weight: 500; margin-top: 2px; }
+    .export-menu a small { display: block; color: #6b7480; font-size: 10px; font-weight: 500; margin-top: 2px; }
 </style>
 
 <div class="admin-title-row">
     <div>
-        <span class="admin-overline">Sinh viên 5 · Tài chính</span>
+        <span class="admin-overline">Tài chính</span>
         <h1>Doanh thu &amp; báo cáo</h1>
         <p>Thống kê doanh thu theo kỳ, hạng phòng và hiệu suất kinh doanh.</p>
     </div>
     <div class="title-actions">
         <form class="filter-row" method="get" asp-controller="ThongKe" asp-action="DoanhThu">
             <label class="field">
-                <span style="display:block;margin-bottom:8px;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;">Năm</span>
+                <span style="display:block;margin-bottom:8px;color:var(--muted);font-size: 10px;font-weight:700;text-transform:uppercase;">Năm</span>
                 <select name="nam">
                     @foreach (var y in danhSachNam)
                     {
@@ -85,7 +85,7 @@
                 </select>
             </label>
             <label class="field">
-                <span style="display:block;margin-bottom:8px;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;">Tháng</span>
+                <span style="display:block;margin-bottom:8px;color:var(--muted);font-size: 10px;font-weight:700;text-transform:uppercase;">Tháng</span>
                 <select name="thang">
                     @for (var m = 1; m <= 12; m++)
                     {
@@ -121,7 +121,7 @@
 
 @if (!coDuLieu)
 {
-    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid var(--gold-500);background:#fff;color:#7a848e;font-size:12px;">
+    <p style="margin-bottom:18px;padding:13px 16px;border-left:3px solid var(--gold-500);background:#fff;color:#5d666f;font-size: 13px;">
         Kỳ <strong>@TenThang(thangChon)/@namChon</strong> không có giao dịch nào còn hiệu lực,
         các con số bên dưới bằng 0. Chọn kỳ khác nếu cần xem dữ liệu.
     </p>
@@ -305,7 +305,7 @@
     }
 </article>
 
-<p style="margin-top:16px;color:#929aa2;font-size:9px;">
+<p style="margin-top:16px;color:#767e88;font-size: 10px;">
     Báo cáo dùng LINQ <code>GroupBy()</code>, <code>Sum()</code>, <code>Count()</code>,
     <code>OrderByDescending()</code>, <code>Any()</code> theo mục 9.4 của De_15.docx.
     Doanh thu chỉ tính các chi tiết chưa bị hủy.
