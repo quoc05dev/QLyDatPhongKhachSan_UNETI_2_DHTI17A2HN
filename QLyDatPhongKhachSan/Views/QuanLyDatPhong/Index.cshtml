@@ -153,7 +153,7 @@
             <div class="pagination">
                 @for (int p = 1; p <= Model.TongSoTrang; p++)
                 {
-                    <a asp-action="Index" asp-route-page="@p" asp-route-tuKhoa="@Model.TuKhoa" asp-route-trangThai="@Model.TrangThai" asp-route-maLoaiPhong="@Model.MaLoaiPhong" style="text-decoration:none;">
+                    <a asp-action="Index" asp-route-trang="@p" asp-route-tuKhoa="@Model.TuKhoa" asp-route-trangThai="@Model.TrangThai" asp-route-maLoaiPhong="@Model.MaLoaiPhong" asp-route-tuNgay="@(Model.TuNgay?.ToString("yyyy-MM-dd"))" asp-route-denNgay="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" asp-route-sapXep="@Model.SapXep" style="text-decoration:none;">
                         <button type="button" class="@(p == Model.TrangHienTai ? "active" : "")">@p</button>
                     </a>
                 }

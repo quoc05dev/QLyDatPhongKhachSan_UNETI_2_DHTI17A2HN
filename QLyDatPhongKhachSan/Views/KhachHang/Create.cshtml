@@ -29,7 +29,6 @@
 
 <article class="dashboard-card" style="padding: 28px; max-width: 900px;">
     <form asp-action="Create" method="post" novalidate>
-        @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size: 13px;"></div>
 
         <div style="font-size: 12px;font-weight:700;color:var(--navy-900);letter-spacing:0.06em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid #edf0f2;margin-bottom:18px;">1. Thông tin cá nhân</div>

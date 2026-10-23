@@ -123,7 +123,6 @@
                                     @if (item.CoTheHuy)
                                     {
                                         <form asp-action="Cancel" asp-route-id="@item.MaDatPhong" method="post" style="display:inline;">
-                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;color:#c0392b;border-color:#f5c6cb;"
                                                     onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng #@item.MaDatPhong.ToString("D4") (Phòng @item.SoPhong)?');">
                                                 Hủy

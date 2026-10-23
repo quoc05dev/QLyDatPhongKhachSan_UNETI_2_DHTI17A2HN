@@ -55,7 +55,6 @@
     </div>
 
     <form asp-action="Delete" method="post" style="margin-top:24px;padding-top:20px;border-top:1px solid #edf0f2;display:flex;gap:12px;">
-        @Html.AntiForgeryToken()
         <input type="hidden" asp-for="MaKhachHang" />
         <button type="submit" class="admin-primary" style="background:@(daCoDonDatPhong ? "#b28c49" : "#c0392b");border-color:@(daCoDonDatPhong ? "#b28c49" : "#c0392b");">
             @(daCoDonDatPhong ? "Xác nhận khóa tài khoản" : "Xác nhận xóa khách hàng")

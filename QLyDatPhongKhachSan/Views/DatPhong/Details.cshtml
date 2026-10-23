@@ -314,7 +314,6 @@
             <div class="bd-modal-actions">
                 <button class="bd-modal-close-btn" onclick="document.getElementById('modalHuyDon').classList.remove('show')">Đóng</button>
                 <form asp-action="Cancel" asp-route-id="@Model.DatPhong.MaDatPhong" method="post" style="flex:1;display:flex;">
-                    @Html.AntiForgeryToken()
                     <button type="submit" class="bd-modal-confirm-btn" style="width:100%;">Xác nhận hủy</button>
                 </form>
             </div>

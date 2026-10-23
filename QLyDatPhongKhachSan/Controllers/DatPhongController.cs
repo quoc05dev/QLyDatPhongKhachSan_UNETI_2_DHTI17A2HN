@@ -233,15 +233,34 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction("Login", "DangNhap");
             }
 
-            // Cập nhật thông tin khách hàng nếu có bổ sung từ form đặt phòng
-            if ((string.IsNullOrEmpty(khachHang.CCCD) || khachHang.CCCD == "000000000000") && !string.IsNullOrEmpty(model.CCCD))
+            // Cập nhật thông tin khách hàng theo dữ liệu khách đã nhập trên form đặt phòng
+            if (!string.IsNullOrWhiteSpace(model.HoTenKhachHang))
             {
-                khachHang.CCCD = model.CCCD.Trim();
+                khachHang.HoTen = model.HoTenKhachHang.Trim();
             }
-            if (string.IsNullOrEmpty(khachHang.SoDienThoai) && !string.IsNullOrEmpty(model.SoDienThoai))
+            if (!string.IsNullOrWhiteSpace(model.SoDienThoai))
             {
                 khachHang.SoDienThoai = model.SoDienThoai.Trim();
             }
+            if (!string.IsNullOrWhiteSpace(model.CCCD))
+            {
+                khachHang.CCCD = model.CCCD.Trim();
+            }
+            if (!string.IsNullOrWhiteSpace(model.Email))
+            {
+                khachHang.Email = model.Email.Trim();
+            }
+
+            // Đồng bộ sang tài khoản liên kết để header/hồ sơ hiển thị đúng thông tin mới
+            if (khachHang.TaiKhoan != null)
+            {
+                khachHang.TaiKhoan.HoTen = khachHang.HoTen;
+                khachHang.TaiKhoan.Email = khachHang.Email;
+                khachHang.TaiKhoan.SoDienThoai = khachHang.SoDienThoai;
+            }
+
+            await _khachHangRepository.CapNhatAsync(khachHang);
+            HttpContext.Session.SetString("HoTen", khachHang.HoTen);
 
             // Tính số ngày ở và tổng tiền dự kiến
             int soNgay = (model.NgayTraDuKien.Date - model.NgayNhan.Date).Days;

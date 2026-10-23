@@ -69,7 +69,6 @@
         <div style="height:1px;background:#edf0f2;margin:16px 0 20px;"></div>
 
         <form asp-action="Profile" method="post" novalidate>
-            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size: 13px;"></div>
             <input type="hidden" asp-for="MaKhachHang" />
             <input type="hidden" asp-for="MaTaiKhoan" />

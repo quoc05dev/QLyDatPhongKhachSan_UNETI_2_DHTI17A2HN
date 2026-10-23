@@ -179,7 +179,6 @@
                                     <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Details" asp-route-id="@kh.MaKhachHang">Chi tiết</a>
                                     <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Edit" asp-route-id="@kh.MaKhachHang">Sửa</a>
                                     <form asp-action="ToggleStatus" asp-route-id="@kh.MaKhachHang" method="post" style="display:inline;">
-                                        @Html.AntiForgeryToken()
                                         <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;"
                                                 title="@(kh.TrangThai ? "Khóa khách hàng" : "Mở khóa khách hàng")"
                                                 onclick="return confirm('Bạn có chắc muốn @(kh.TrangThai ? "khóa" : "mở khóa") khách hàng @kh.HoTen?');">
