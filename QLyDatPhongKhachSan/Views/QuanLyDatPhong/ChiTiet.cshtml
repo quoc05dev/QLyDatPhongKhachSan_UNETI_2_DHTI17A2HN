@@ -148,7 +148,6 @@
             @if (Model.TrangThai == "ChoXuLy")
             {
                 <form asp-action="TiepNhanDon" method="post">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
                     <button type="submit" class="admin-primary" style="width:100%;">✓ Tiếp nhận đơn</button>
                 </form>
@@ -157,7 +156,6 @@
             @if (Model.TrangThai == "DangXuLy")
             {
                 <form asp-action="XacNhanDatPhong" method="post">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
                     <button type="submit" class="admin-primary" style="width:100%;">✓ Xác nhận đặt phòng</button>
                 </form>
@@ -166,7 +164,6 @@
             @if (Model.TrangThai == "DaXacNhan")
             {
                 <form asp-action="CheckIn" method="post">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
                     <button type="submit" class="admin-primary" style="width:100%;background:#27ae60;color:#fff;">➔ Nhận phòng (Check-in)</button>
                 </form>
@@ -175,7 +172,6 @@
             @if (Model.TrangThai == "DangSuDung")
             {
                 <form asp-action="CheckOut" method="post">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
                     <button type="submit" class="admin-primary" style="width:100%;background:#f39c12;color:#fff;">← Trả phòng (Check-out)</button>
                 </form>
@@ -184,14 +180,12 @@
             @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DangXuLy" || Model.TrangThai == "DaXacNhan")
             {
                 <form asp-action="HuyDatPhong" method="post" onsubmit="return confirm('Bạn có chắc muốn hủy đơn này?');">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
                     <input type="hidden" name="lyDoHuy" value="Hủy từ bảng điều khiển vận hành lễ tân" />
                     <button type="submit" class="admin-secondary" style="width:100%;color:#c0392b;border-color:#f5c6cb;">✕ Hủy đơn đặt phòng</button>
                 </form>
             }
         </div>
-    </article>
     </article>
 
     @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DangXuLy" || Model.TrangThai == "DaXacNhan")
@@ -206,14 +200,13 @@
 
             @foreach (var ct in Model.ChiTietDatPhongs)
             {
-                var phongConTrongCungLoai = (ViewBag.PhongConTrongCungLoai as Dictionary<int, List<QLyDatPhongKhachSan.Models.Phong>>)?.GetValueOrDefault(ct.MaChiTiet);
+                var phongConTrongCungLoai = (ViewBag.PhongDoiKhaDung as Dictionary<int, List<QLyDatPhongKhachSan.Models.Phong>>)?.GetValueOrDefault(ct.MaChiTiet);
                 if (phongConTrongCungLoai == null || !phongConTrongCungLoai.Any())
                 {
                     continue;
                 }
 
                 <form asp-action="DoiPhong" method="post" style="margin-bottom: 16px; padding: 16px; border: 1px solid #edf0f2; border-radius: 4px;">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="maDatPhong" value="@Model.MaDatPhong" />
                     <input type="hidden" name="maChiTiet" value="@ct.MaChiTiet" />
 

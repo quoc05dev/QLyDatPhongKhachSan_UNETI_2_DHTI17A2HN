@@ -4,10 +4,10 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Helpers;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 
 namespace QLyDatPhongKhachSan.Controllers
@@ -15,51 +15,28 @@ namespace QLyDatPhongKhachSan.Controllers
     [RoleAuthorize("Admin")]
     public class TaiKhoanController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ITaiKhoanRepository _taiKhoanRepository;
+        private readonly IKhachHangRepository _khachHangRepository;
 
-        public TaiKhoanController(AppDbContext context)
+        public TaiKhoanController(ITaiKhoanRepository taiKhoanRepository, IKhachHangRepository khachHangRepository)
         {
-            _context = context;
+            _taiKhoanRepository = taiKhoanRepository;
+            _khachHangRepository = khachHangRepository;
         }
 
         // GET: TaiKhoan
         public async Task<IActionResult> Index(string searchTerm, string roleFilter, bool? statusFilter, int page = 1)
         {
             int pageSize = 5; // Số bản ghi mỗi trang theo quy định phân trang
-            var query = _context.TaiKhoans.AsQueryable();
-
-            // 1. Tìm kiếm theo Tên đăng nhập, Họ tên hoặc Email
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                string term = searchTerm.Trim().ToLower();
-                query = query.Where(t => t.TenDangNhap.ToLower().Contains(term) ||
-                                         t.HoTen.ToLower().Contains(term) ||
-                                         (t.Email != null && t.Email.ToLower().Contains(term)));
-            }
-
-            // 2. Lọc theo Vai Trò (Admin, NhanVien, KhachHang)
-            if (!string.IsNullOrWhiteSpace(roleFilter))
-            {
-                query = query.Where(t => t.VaiTro == roleFilter);
-            }
-
-            // 3. Lọc theo Trạng Thái (true: Hoạt động, false: Bị khóa)
-            if (statusFilter.HasValue)
-            {
-                query = query.Where(t => t.TrangThai == statusFilter.Value);
-            }
-
-            // Sắp xếp giảm dần theo ngày tạo hoặc mã tài khoản
-            query = query.OrderByDescending(t => t.MaTaiKhoan);
 
             // 4. Phân trang bằng Skip() và Take() trên LINQ EF Core
-            int totalItems = await query.CountAsync();
+            int totalItems = await _taiKhoanRepository.DemAsync(searchTerm, roleFilter, statusFilter);
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await _taiKhoanRepository.LayPhanTrangAsync(searchTerm, roleFilter, statusFilter, (page - 1) * pageSize, pageSize);
 
             var viewModel = new TaiKhoanListViewModel
             {
@@ -84,9 +61,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var taiKhoan = await _context.TaiKhoans
-                .Include(t => t.KhachHang)
-                .FirstOrDefaultAsync(m => m.MaTaiKhoan == id);
+            var taiKhoan = await _taiKhoanRepository.LayTheoMaCoKhachHangAsync(id.Value);
 
             if (taiKhoan == null)
             {
@@ -123,14 +98,14 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Kiểm tra trùng Tên Đăng Nhập bằng LINQ
-            if (await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == taiKhoan.TenDangNhap))
+            if (await _taiKhoanRepository.TenDangNhapDaTonTaiAsync(taiKhoan.TenDangNhap))
             {
                 ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã tồn tại trong hệ thống.");
                 return View(taiKhoan);
             }
 
             // Kiểm tra trùng Email bằng LINQ
-            if (await _context.TaiKhoans.AnyAsync(t => t.Email == taiKhoan.Email))
+            if (await _taiKhoanRepository.EmailDaTonTaiAsync(taiKhoan.Email))
             {
                 ModelState.AddModelError("Email", "Email đã được đăng ký bởi tài khoản khác.");
                 return View(taiKhoan);
@@ -138,8 +113,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             taiKhoan.NgayTao = DateTime.Now;
             taiKhoan.MatKhau = MatKhauHelper.Hash(taiKhoan.MatKhau);
-            _context.Add(taiKhoan);
-            await _context.SaveChangesAsync();
+            await _taiKhoanRepository.ThemAsync(taiKhoan);
 
             // Nếu vai trò là Khách hàng, tự động tạo hồ sơ KhachHang tương ứng
             if (taiKhoan.VaiTro == "KhachHang")
@@ -154,8 +128,7 @@ namespace QLyDatPhongKhachSan.Controllers
                     TrangThai = true,
                     GhiChu = "Tạo tự động bởi Admin"
                 };
-                _context.KhachHangs.Add(khachHang);
-                await _context.SaveChangesAsync();
+                await _khachHangRepository.ThemAsync(khachHang);
             }
 
             TempData["SuccessMessage"] = $"Thêm mới tài khoản '{taiKhoan.TenDangNhap}' thành công!";
@@ -170,7 +143,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var taiKhoan = await _context.TaiKhoans.FindAsync(id);
+            var taiKhoan = await _taiKhoanRepository.FindAsync(id);
             if (taiKhoan == null)
             {
                 return NotFound();
@@ -212,21 +185,21 @@ namespace QLyDatPhongKhachSan.Controllers
                 return View(taiKhoan);
             }
 
-            var taiKhoanCu = await _context.TaiKhoans.FindAsync(id);
+            var taiKhoanCu = await _taiKhoanRepository.FindAsync(id);
             if (taiKhoanCu == null)
             {
                 return NotFound();
             }
 
             // Kiểm tra trùng Tên Đăng Nhập ngoại trừ tài khoản hiện tại
-            if (await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == taiKhoan.TenDangNhap && t.MaTaiKhoan != id))
+            if (await _taiKhoanRepository.TenDangNhapDaTonTaiAsync(taiKhoan.TenDangNhap, id))
             {
                 ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã bị trùng với tài khoản khác.");
                 return View(taiKhoan);
             }
 
             // Kiểm tra trùng Email ngoại trừ tài khoản hiện tại
-            if (await _context.TaiKhoans.AnyAsync(t => t.Email == taiKhoan.Email && t.MaTaiKhoan != id))
+            if (await _taiKhoanRepository.EmailDaTonTaiAsync(taiKhoan.Email, id))
             {
                 ModelState.AddModelError("Email", "Email đã bị trùng với tài khoản khác.");
                 return View(taiKhoan);
@@ -247,17 +220,16 @@ namespace QLyDatPhongKhachSan.Controllers
                     taiKhoanCu.MatKhau = MatKhauHelper.Hash(taiKhoan.MatKhau);
                 }
 
-                await _context.SaveChangesAsync();
+                await _taiKhoanRepository.CapNhatAsync(taiKhoanCu);
 
                 // Cập nhật thông tin KhachHang liên kết nếu có
-                var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(k => k.MaTaiKhoan == id);
+                var khachHang = await _khachHangRepository.LayTheoMaTaiKhoanAsync(id);
                 if (khachHang != null)
                 {
                     khachHang.HoTen = taiKhoan.HoTen;
                     khachHang.Email = taiKhoan.Email;
                     khachHang.SoDienThoai = taiKhoan.SoDienThoai ?? string.Empty;
-                    _context.Update(khachHang);
-                    await _context.SaveChangesAsync();
+                    await _khachHangRepository.CapNhatAsync(khachHang);
                 }
 
                 TempData["SuccessMessage"] = doiMatKhau
@@ -266,7 +238,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _context.TaiKhoans.AnyAsync(e => e.MaTaiKhoan == id))
+                if (!await _taiKhoanRepository.TonTaiAsync(id))
                 {
                     return NotFound();
                 }
@@ -291,15 +263,14 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var taiKhoan = await _context.TaiKhoans.FindAsync(id);
+            var taiKhoan = await _taiKhoanRepository.FindAsync(id);
             if (taiKhoan == null)
             {
                 return NotFound();
             }
 
             taiKhoan.TrangThai = !taiKhoan.TrangThai;
-            _context.Update(taiKhoan);
-            await _context.SaveChangesAsync();
+            await _taiKhoanRepository.CapNhatAsync(taiKhoan);
 
             string statusText = taiKhoan.TrangThai ? "mở khóa" : "khóa";
             TempData["SuccessMessage"] = $"Đã {statusText} tài khoản '{taiKhoan.TenDangNhap}' thành công!";
@@ -315,9 +286,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var taiKhoan = await _context.TaiKhoans
-                .Include(t => t.KhachHang)
-                .FirstOrDefaultAsync(m => m.MaTaiKhoan == id);
+            var taiKhoan = await _taiKhoanRepository.LayTheoMaCoKhachHangAsync(id.Value);
 
             if (taiKhoan == null)
             {
@@ -339,14 +308,14 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var taiKhoan = await _context.TaiKhoans.FindAsync(id);
+            var taiKhoan = await _taiKhoanRepository.FindAsync(id);
             if (taiKhoan == null)
             {
                 return NotFound();
             }
 
             // Kiểm tra ràng buộc nghiệp vụ: Không xóa nếu đã có lịch sử liên kết quan trọng
-            var khachHang = await _context.KhachHangs.Include(k => k.DatPhongs).FirstOrDefaultAsync(k => k.MaTaiKhoan == id);
+            var khachHang = await _khachHangRepository.LayTheoMaTaiKhoanCoDatPhongAsync(id);
             if (khachHang != null && khachHang.DatPhongs.Any())
             {
                 TempData["ErrorMessage"] = $"Không thể xóa tài khoản '{taiKhoan.TenDangNhap}' vì đã có lịch sử giao dịch đặt phòng!";
@@ -355,11 +324,10 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (khachHang != null)
             {
-                _context.KhachHangs.Remove(khachHang);
+                await _khachHangRepository.XoaAsync(khachHang);
             }
 
-            _context.TaiKhoans.Remove(taiKhoan);
-            await _context.SaveChangesAsync();
+            await _taiKhoanRepository.XoaAsync(taiKhoan);
 
             TempData["SuccessMessage"] = $"Đã xóa tài khoản '{taiKhoan.TenDangNhap}' thành công!";
             return RedirectToAction(nameof(Index));

@@ -5,9 +5,9 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 
 namespace QLyDatPhongKhachSan.Controllers
@@ -15,57 +15,35 @@ namespace QLyDatPhongKhachSan.Controllers
     [RoleAuthorize("Admin")]
     public class LoaiPhongController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ILoaiPhongRepository _loaiPhongRepository;
+        private readonly IPhongRepository _phongRepository;
 
-        public LoaiPhongController(AppDbContext context)
+        public LoaiPhongController(ILoaiPhongRepository loaiPhongRepository, IPhongRepository phongRepository)
         {
-            _context = context;
+            _loaiPhongRepository = loaiPhongRepository;
+            _phongRepository = phongRepository;
         }
 
         // GET: LoaiPhong
         public async Task<IActionResult> Index(string searchTerm, bool? statusFilter, string sortOrder, int page = 1)
         {
             int pageSize = 5; // Số bản ghi mỗi trang theo quy định phân trang
-            var query = _context.LoaiPhongs.Include(l => l.Phongs).AsQueryable();
+            var allItems = await _loaiPhongRepository.TimKiemVaLocAsync(searchTerm, statusFilter, sortOrder);
 
-            // 1. Tìm kiếm theo tên loại phòng
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                string term = searchTerm.Trim().ToLower();
-                query = query.Where(l => l.TenLoai.ToLower().Contains(term));
-            }
-
-            // 2. Lọc theo trạng thái hoạt động
-            if (statusFilter.HasValue)
-            {
-                query = query.Where(l => l.TrangThai == statusFilter.Value);
-            }
-
-            // 3. Sắp xếp theo tên, đơn giá, sức chứa
-            sortOrder ??= "name_asc";
-            query = sortOrder switch
-            {
-                "price_asc" => query.OrderBy(l => l.DonGiaNgay),
-                "price_desc" => query.OrderByDescending(l => l.DonGiaNgay),
-                "capacity_desc" => query.OrderByDescending(l => l.SoNguoiToiDa),
-                _ => query.OrderBy(l => l.TenLoai)
-            };
-
-            // 4. Phân trang bằng Skip() / Take() trên LINQ EF Core
-            int totalItems = await query.CountAsync();
+            int totalItems = allItems.Count;
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = allItems.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             var viewModel = new LoaiPhongListViewModel
             {
                 Items = items,
                 SearchTerm = searchTerm ?? string.Empty,
                 StatusFilter = statusFilter,
-                SortOrder = sortOrder,
+                SortOrder = sortOrder ?? "name_asc",
                 PageIndex = page,
                 TotalPages = totalPages,
                 PageSize = pageSize,
@@ -83,9 +61,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var loaiPhong = await _context.LoaiPhongs
-                .Include(l => l.Phongs)
-                .FirstOrDefaultAsync(l => l.MaLoaiPhong == id);
+            var loaiPhong = await _loaiPhongRepository.LayTheoMaVoiPhongAsync(id.Value);
 
             if (loaiPhong == null)
             {
@@ -107,7 +83,7 @@ namespace QLyDatPhongKhachSan.Controllers
         public async Task<IActionResult> Create([Bind("TenLoai,SoNguoiToiDa,DonGiaNgay,MoTa,HinhAnh,TrangThai")] LoaiPhong loaiPhong)
         {
             // Kiểm tra trùng tên loại phòng bằng LINQ
-            if (await _context.LoaiPhongs.AnyAsync(l => l.TenLoai == loaiPhong.TenLoai))
+            if (await _loaiPhongRepository.TenDaTonTaiAsync(loaiPhong.TenLoai))
             {
                 ModelState.AddModelError("TenLoai", "Tên loại phòng đã tồn tại trong hệ thống.");
             }
@@ -117,8 +93,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return View(loaiPhong);
             }
 
-            _context.Add(loaiPhong);
-            await _context.SaveChangesAsync();
+            await _loaiPhongRepository.ThemAsync(loaiPhong);
 
             TempData["SuccessMessage"] = $"Thêm mới loại phòng '{loaiPhong.TenLoai}' thành công!";
             return RedirectToAction(nameof(Index));
@@ -132,7 +107,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var loaiPhong = await _context.LoaiPhongs.FindAsync(id);
+            var loaiPhong = await _loaiPhongRepository.FindAsync(id.Value);
             if (loaiPhong == null)
             {
                 return NotFound();
@@ -152,7 +127,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Kiểm tra trùng tên loại phòng ngoại trừ bản ghi hiện tại
-            if (await _context.LoaiPhongs.AnyAsync(l => l.TenLoai == loaiPhong.TenLoai && l.MaLoaiPhong != id))
+            if (await _loaiPhongRepository.TenDaTonTaiAsync(loaiPhong.TenLoai, id))
             {
                 ModelState.AddModelError("TenLoai", "Tên loại phòng đã bị trùng với loại phòng khác.");
             }
@@ -164,13 +139,13 @@ namespace QLyDatPhongKhachSan.Controllers
 
             try
             {
-                _context.Update(loaiPhong);
-                await _context.SaveChangesAsync();
+                await _loaiPhongRepository.CapNhatAsync(loaiPhong);
                 TempData["SuccessMessage"] = $"Cập nhật loại phòng '{loaiPhong.TenLoai}' thành công!";
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _context.LoaiPhongs.AnyAsync(l => l.MaLoaiPhong == id))
+                var exists = await _loaiPhongRepository.FindAsync(id);
+                if (exists == null)
                 {
                     return NotFound();
                 }
@@ -189,9 +164,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var loaiPhong = await _context.LoaiPhongs
-                .Include(l => l.Phongs)
-                .FirstOrDefaultAsync(l => l.MaLoaiPhong == id);
+            var loaiPhong = await _loaiPhongRepository.LayTheoMaVoiPhongAsync(id.Value);
 
             if (loaiPhong == null)
             {
@@ -206,22 +179,21 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var loaiPhong = await _context.LoaiPhongs.FindAsync(id);
+            var loaiPhong = await _loaiPhongRepository.FindAsync(id);
             if (loaiPhong == null)
             {
                 return NotFound();
             }
 
             // Kiểm tra ràng buộc tham chiếu: không xóa loại phòng đang có phòng sử dụng
-            bool dangDuocSuDung = await _context.Phongs.AnyAsync(p => p.MaLoaiPhong == id);
+            bool dangDuocSuDung = await _phongRepository.TonTaiPhongThuocLoaiAsync(id);
             if (dangDuocSuDung)
             {
                 TempData["ErrorMessage"] = $"Không thể xóa loại phòng '{loaiPhong.TenLoai}' vì đang có phòng thuộc loại này!";
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.LoaiPhongs.Remove(loaiPhong);
-            await _context.SaveChangesAsync();
+            await _loaiPhongRepository.XoaAsync(loaiPhong);
 
             TempData["SuccessMessage"] = $"Đã xóa loại phòng '{loaiPhong.TenLoai}' thành công!";
             return RedirectToAction(nameof(Index));

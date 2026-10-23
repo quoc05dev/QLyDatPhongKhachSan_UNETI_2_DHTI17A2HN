@@ -1,12 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.HealthChecks;
+using QLyDatPhongKhachSan.Repositories;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Cấu hình DbContext kết nối SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 1b. Đăng ký Repository generic (Controller không truy cập DbContext trực tiếp)
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// 1c. Đăng ký Repository chuyên biệt theo từng entity
+builder.Services.AddScoped<IDichVuRepository, DichVuRepository>();
+builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
+builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+builder.Services.AddScoped<ILoaiPhongRepository, LoaiPhongRepository>();
+builder.Services.AddScoped<IPhongRepository, PhongRepository>();
+builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
+builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 
 // 2. Cấu hình Session
 builder.Services.AddDistributedMemoryCache();

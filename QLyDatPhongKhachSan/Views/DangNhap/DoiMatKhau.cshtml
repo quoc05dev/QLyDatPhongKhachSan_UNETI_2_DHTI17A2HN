@@ -46,7 +46,6 @@
         }
 
         <form asp-action="DoiMatKhau" method="post" novalidate>
-            @Html.AntiForgeryToken()
             <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;">
                 <label asp-for="MatKhauHienTai" style="@labelStyle"></label>
                 <input asp-for="MatKhauHienTai" type="password" placeholder="Nhập mật khẩu hiện tại..." autofocus style="@inputStyle" />
