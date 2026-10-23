@@ -4,9 +4,9 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 
 namespace QLyDatPhongKhachSan.Controllers
 {
@@ -16,29 +16,19 @@ namespace QLyDatPhongKhachSan.Controllers
     [RoleAuthorize("Admin", "NhanVien")]
     public class DichVuController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IDichVuRepository _dichVuRepository;
 
-        public DichVuController(AppDbContext context)
+        public DichVuController(IDichVuRepository dichVuRepository)
         {
-            _context = context;
+            _dichVuRepository = dichVuRepository;
         }
 
         // GET: DichVu
         public async Task<IActionResult> Index(string searchTerm)
         {
-            var query = _context.DichVus.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                string term = searchTerm.Trim().ToLower();
-                query = query.Where(dv => dv.TenDichVu.ToLower().Contains(term));
-            }
+            var danhSach = await _dichVuRepository.TimKiem(searchTerm);
 
             ViewData["SearchTerm"] = searchTerm ?? string.Empty;
-
-            var danhSach = await query
-                .OrderByDescending(dv => dv.MaDichVu)
-                .ToListAsync();
 
             return View(danhSach);
         }
@@ -51,7 +41,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var dichVu = await _context.DichVus.FirstOrDefaultAsync(dv => dv.MaDichVu == id);
+            var dichVu = await _dichVuRepository.LayTheoMaAsync(id.Value);
             if (dichVu == null)
             {
                 return NotFound();
@@ -71,7 +61,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TenDichVu,Gia,MoTa,HinhAnh,TrangThai")] DichVu dichVu)
         {
-            if (await _context.DichVus.AnyAsync(dv => dv.TenDichVu == dichVu.TenDichVu))
+            if (await _dichVuRepository.TenDaTonTaiAsync(dichVu.TenDichVu))
             {
                 ModelState.AddModelError("TenDichVu", "Tên dịch vụ đã tồn tại trong hệ thống.");
             }
@@ -81,8 +71,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return View(dichVu);
             }
 
-            _context.Add(dichVu);
-            await _context.SaveChangesAsync();
+            await _dichVuRepository.ThemAsync(dichVu);
 
             TempData["SuccessMessage"] = $"Thêm mới dịch vụ '{dichVu.TenDichVu}' thành công!";
             return RedirectToAction(nameof(Index));
@@ -96,7 +85,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var dichVu = await _context.DichVus.FindAsync(id);
+            var dichVu = await _dichVuRepository.FindAsync(id.Value);
             if (dichVu == null)
             {
                 return NotFound();
@@ -115,7 +104,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            if (await _context.DichVus.AnyAsync(dv => dv.TenDichVu == dichVu.TenDichVu && dv.MaDichVu != id))
+            if (await _dichVuRepository.TenDaTonTaiAsync(dichVu.TenDichVu, id))
             {
                 ModelState.AddModelError("TenDichVu", "Tên dịch vụ đã bị trùng với dịch vụ khác.");
             }
@@ -127,13 +116,12 @@ namespace QLyDatPhongKhachSan.Controllers
 
             try
             {
-                _context.Update(dichVu);
-                await _context.SaveChangesAsync();
+                await _dichVuRepository.CapNhatAsync(dichVu);
                 TempData["SuccessMessage"] = $"Cập nhật dịch vụ '{dichVu.TenDichVu}' thành công!";
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _context.DichVus.AnyAsync(dv => dv.MaDichVu == id))
+                if (!await _dichVuRepository.TonTaiAsync(id))
                 {
                     return NotFound();
                 }
@@ -152,7 +140,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var dichVu = await _context.DichVus.FirstOrDefaultAsync(dv => dv.MaDichVu == id);
+            var dichVu = await _dichVuRepository.LayTheoMaAsync(id.Value);
             if (dichVu == null)
             {
                 return NotFound();
@@ -166,17 +154,17 @@ namespace QLyDatPhongKhachSan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var dichVu = await _context.DichVus.FindAsync(id);
+            var dichVu = await _dichVuRepository.FindAsync(id);
             if (dichVu == null)
             {
                 return NotFound();
             }
 
-            _context.DichVus.Remove(dichVu);
-            await _context.SaveChangesAsync();
+            await _dichVuRepository.XoaAsync(dichVu);
 
             TempData["SuccessMessage"] = $"Đã xóa dịch vụ '{dichVu.TenDichVu}' thành công!";
             return RedirectToAction(nameof(Index));
         }
     }
 }
+

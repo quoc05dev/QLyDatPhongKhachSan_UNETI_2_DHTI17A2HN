@@ -1,9 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Helpers;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 
 namespace QLyDatPhongKhachSan.Controllers;
@@ -14,12 +13,14 @@ namespace QLyDatPhongKhachSan.Controllers;
 // (hero, bảng đặt phòng, hạng phòng nổi bật lấy dữ liệu thật từ Phong/LoaiPhong).
 public class HomeController : Controller
 {
-    private readonly AppDbContext _context;
+    private readonly ILoaiPhongRepository _loaiPhongRepository;
+    private readonly IPhongRepository _phongRepository;
     private readonly IWebHostEnvironment _env;
 
-    public HomeController(AppDbContext context, IWebHostEnvironment env)
+    public HomeController(ILoaiPhongRepository loaiPhongRepository, IPhongRepository phongRepository, IWebHostEnvironment env)
     {
-        _context = context;
+        _loaiPhongRepository = loaiPhongRepository;
+        _phongRepository = phongRepository;
         _env = env;
     }
 
@@ -35,19 +36,11 @@ public class HomeController : Controller
             ["Phòng Hai Phòng"] = "https://images.unsplash.com/photo-1776876648949-63ccabf63b10?auto=format&fit=crop&w=1100&q=86",
         };
 
-    public IActionResult Index(string? loai)
+    public async Task<IActionResult> Index(string? loai)
     {
-        var loaiPhongs = _context.LoaiPhongs
-            .AsNoTracking()
-            .Where(lp => lp.TrangThai)
-            .OrderBy(lp => lp.MaLoaiPhong)
-            .ToList();
+        var loaiPhongs = await _loaiPhongRepository.LayTatCaHoatDongAsync();
 
-        var phongs = _context.Phongs
-            .AsNoTracking()
-            .Include(p => p.LoaiPhong)
-            .Where(p => p.LoaiPhong != null && p.LoaiPhong.TrangThai && p.TrangThai != "BaoTri")
-            .ToList();
+        var phongs = await _phongRepository.LayPhongHienThiTrangChuAsync();
 
         // Mỗi loại phòng lấy một phòng đại diện để tạo lưới "hạng phòng nổi bật".
         var labels = new[] { "Được yêu thích", "Bữa sáng miễn phí", "Trải nghiệm độc bản" };

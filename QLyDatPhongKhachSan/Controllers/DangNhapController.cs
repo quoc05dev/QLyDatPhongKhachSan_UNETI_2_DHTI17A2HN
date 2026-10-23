@@ -3,21 +3,22 @@
 // Nội dung thực hiện: Module 1 - Xử lý Đăng nhập, Đăng ký, Đăng xuất và Phân quyền AccessDenied bằng LINQ & EF Core.
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Helpers;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 
 namespace QLyDatPhongKhachSan.Controllers
 {
     public class DangNhapController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ITaiKhoanRepository _taiKhoanRepository;
+        private readonly IKhachHangRepository _khachHangRepository;
 
-        public DangNhapController(AppDbContext context)
+        public DangNhapController(ITaiKhoanRepository taiKhoanRepository, IKhachHangRepository khachHangRepository)
         {
-            _context = context;
+            _taiKhoanRepository = taiKhoanRepository;
+            _khachHangRepository = khachHangRepository;
         }
 
         // GET: /DangNhap/Login
@@ -49,8 +50,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             // Tìm theo tên đăng nhập, sau đó kiểm tra mật khẩu bằng PBKDF2.
             // Không so sánh trực tiếp trong LINQ vì mật khẩu được lưu dạng băm.
-            var taiKhoan = await _context.TaiKhoans
-                .FirstOrDefaultAsync(t => t.TenDangNhap == model.TenDangNhap);
+            var taiKhoan = await _taiKhoanRepository.LayTheoTenDangNhapAsync(model.TenDangNhap);
 
             // 1. Kiểm tra thông tin sai
             if (taiKhoan == null || !MatKhauHelper.Verify(taiKhoan.MatKhau, model.MatKhau))
@@ -111,7 +111,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Kiểm tra trùng Tên Đăng Nhập
-            bool isTenDangNhapExists = await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == model.TenDangNhap);
+            bool isTenDangNhapExists = await _taiKhoanRepository.TenDangNhapDaTonTaiAsync(model.TenDangNhap);
             if (isTenDangNhapExists)
             {
                 ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
@@ -119,7 +119,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Kiểm tra trùng Email
-            bool isEmailExists = await _context.TaiKhoans.AnyAsync(t => t.Email == model.Email);
+            bool isEmailExists = await _taiKhoanRepository.EmailDaTonTaiAsync(model.Email);
             if (isEmailExists)
             {
                 ModelState.AddModelError("Email", "Email này đã được sử dụng cho một tài khoản khác.");
@@ -139,8 +139,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 NgayTao = DateTime.Now
             };
 
-            _context.TaiKhoans.Add(taiKhoan);
-            await _context.SaveChangesAsync();
+            await _taiKhoanRepository.ThemAsync(taiKhoan);
 
             // Tự động tạo bản ghi KhachHang tương ứng kết nối qua MaTaiKhoan
             var khachHang = new KhachHang
@@ -154,8 +153,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 GhiChu = "Đăng ký từ hệ thống online"
             };
 
-            _context.KhachHangs.Add(khachHang);
-            await _context.SaveChangesAsync();
+            await _khachHangRepository.ThemAsync(khachHang);
 
             TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.";
             return RedirectToAction("Login");
@@ -188,7 +186,11 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             var maTaiKhoan = HttpContext.Session.GetMaTaiKhoan();
-            var taiKhoan = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+            if (maTaiKhoan == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+            var taiKhoan = await _taiKhoanRepository.LayTheoMaAsync(maTaiKhoan.Value);
             if (taiKhoan == null)
             {
                 return NotFound();
@@ -209,7 +211,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             taiKhoan.MatKhau = MatKhauHelper.Hash(model.MatKhauMoi);
-            await _context.SaveChangesAsync();
+            await _taiKhoanRepository.CapNhatAsync(taiKhoan);
 
             TempData["SuccessMessage"] = "Đổi mật khẩu thành công! Vui lòng đăng nhập lại bằng mật khẩu mới.";
             return RedirectToAction(nameof(Login));

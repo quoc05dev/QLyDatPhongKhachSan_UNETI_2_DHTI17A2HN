@@ -5,10 +5,9 @@
 
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Helpers;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -24,7 +23,11 @@ namespace QLyDatPhongKhachSan.Controllers
     {
         private const int SoPhongDatNhieuNhatToiDa = 10;
 
-        private readonly AppDbContext _context;
+        private readonly IChiTietDatPhongRepository _chiTietDatPhongRepository;
+        private readonly IDatPhongRepository _datPhongRepository;
+        private readonly IKhachHangRepository _khachHangRepository;
+        private readonly ILoaiPhongRepository _loaiPhongRepository;
+        private readonly IPhongRepository _phongRepository;
 
         static ThongKeController()
         {
@@ -33,9 +36,18 @@ namespace QLyDatPhongKhachSan.Controllers
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
-        public ThongKeController(AppDbContext context)
+        public ThongKeController(
+            IChiTietDatPhongRepository chiTietDatPhongRepository,
+            IDatPhongRepository datPhongRepository,
+            IKhachHangRepository khachHangRepository,
+            ILoaiPhongRepository loaiPhongRepository,
+            IPhongRepository phongRepository)
         {
-            _context = context;
+            _chiTietDatPhongRepository = chiTietDatPhongRepository;
+            _datPhongRepository = datPhongRepository;
+            _khachHangRepository = khachHangRepository;
+            _loaiPhongRepository = loaiPhongRepository;
+            _phongRepository = phongRepository;
         }
 
         // GET: ThongKe
@@ -48,28 +60,14 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // GET: ThongKe/Dashboard
         // Mục 9.3: các chỉ số tổng quan của khách sạn.
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            // Lấy danh sách chi tiết có thu tiền thực tế để dùng cho cả Dashboard
-            // và báo cáo thống kê. Những chi tiết đã hủy không phát sinh doanh thu.
-            var chiTiets = _context.ChiTietDatPhongs
-                .AsNoTracking()
-                .Include(ct => ct.Phong)
-                    .ThenInclude(p => p!.LoaiPhong)
-                .Where(ct => ct.TrangThai != "DaHuy")
-                .ToList();
+            // Danh sách phòng và hạng phòng dùng để tính tỷ lệ phòng theo hạng,
+            // công suất phòng. Mọi số liệu gom nhóm (GroupBy/Sum/Count) đã được
+            // đưa xuống Repository để Controller không còn truy cập DbContext.
+            var phongs = await _phongRepository.LayTatCaAsync();
 
-            var datPhongs = _context.DatPhongs
-                .AsNoTracking()
-                .Where(dp => dp.TrangThai != "DaHuy")
-                .ToList();
-
-            var phongs = _context.Phongs.AsNoTracking().ToList();
-
-            var loaiPhongs = _context.LoaiPhongs
-                .AsNoTracking()
-                .Where(lp => lp.TrangThai)
-                .ToList();
+            var loaiPhongs = await _loaiPhongRepository.LayTatCaHoatDongAsync();
 
             var model = new DashboardViewModel
             {
@@ -78,18 +76,16 @@ namespace QLyDatPhongKhachSan.Controllers
                 SoPhongTrong = phongs.Count(p => p.TrangThai == "Trong"),
                 SoPhongDangSuDung = phongs.Count(p => p.TrangThai == "DangSuDung"),
                 SoPhongBaoTri = phongs.Count(p => p.TrangThai == "BaoTri"),
-                TongKhachHang = _context.KhachHangs.AsNoTracking().Count(),
+                TongKhachHang = await _khachHangRepository.DemKhachHangAsync(),
                 // Tổng số giao dịch theo đề là TẤT CẢ các đơn, kể cả đơn đã hủy
                 // (đơn đã hủy được thống kê riêng ở thẻ "Đơn đã hủy" bên dưới).
-                TongDonDatPhong = _context.DatPhongs.AsNoTracking().Count(),
-                DonChoXuLy = datPhongs.Count(dp => dp.TrangThai == "ChoXuLy"),
-                DonDangXuLy = datPhongs.Count(dp => dp.TrangThai == "DangXuLy"),
-                DonHoanThanh = datPhongs.Count(dp => dp.TrangThai == "HoanThanh"),
-                DonDaHuy = _context.DatPhongs.AsNoTracking().Count(dp => dp.TrangThai == "DaHuy"),
-                TongDoanhThu = chiTiets.Sum(ct => ct.ThanhTien),
-                DoanhThuThangNay = chiTiets
-                    .Where(ct => ct.NgayNhan.Year == DateTime.Now.Year && ct.NgayNhan.Month == DateTime.Now.Month)
-                    .Sum(ct => ct.ThanhTien)
+                TongDonDatPhong = await _datPhongRepository.DemDatPhongAsync(),
+                DonChoXuLy = await _datPhongRepository.DemDatPhongTheoTrangThaiAsync("ChoXuLy"),
+                DonDangXuLy = await _datPhongRepository.DemDatPhongTheoTrangThaiAsync("DangXuLy"),
+                DonHoanThanh = await _datPhongRepository.DemDatPhongTheoTrangThaiAsync("HoanThanh"),
+                DonDaHuy = await _datPhongRepository.DemDatPhongTheoTrangThaiAsync("DaHuy"),
+                TongDoanhThu = await _chiTietDatPhongRepository.TongDoanhThuHieuLucAsync(),
+                DoanhThuThangNay = await _chiTietDatPhongRepository.DoanhThuThangHieuLucAsync(DateTime.Now.Year, DateTime.Now.Month)
             };
 
             // Tỷ lệ sử dụng phòng: số phòng có khách chia cho tổng số phòng đang
@@ -99,39 +95,16 @@ namespace QLyDatPhongKhachSan.Controllers
             // Any(): khách sạn đã có giao dịch chi tiết đặt phòng chưa? Nếu chưa
             // có thì không cần chạy truy vấn gom nhóm, các bảng thống kê sẽ hiện
             // thông báo "chưa có dữ liệu" đúng như thiết kế ở View.
-            var coGiaoDich = chiTiets.Any();
+            var coGiaoDich = await _chiTietDatPhongRepository.CoGiaoDichAsync();
 
             // Top phòng được đặt nhiều nhất, sắp theo số lượt đặt giảm dần.
             model.PhongDatNhieuNhat = coGiaoDich
-                ? chiTiets
-                .GroupBy(ct => new { ct.MaPhong, ct.Phong!.SoPhong, ct.Phong.LoaiPhong!.TenLoai })
-                .Select(g => new PhongThongKeItem
-                {
-                    SoPhong = g.Key.SoPhong,
-                    TenLoai = g.Key.TenLoai,
-                    SoLuotDat = g.Count(),
-                    DoanhThu = g.Sum(ct => ct.ThanhTien)
-                })
-                .OrderByDescending(p => p.SoLuotDat)
-                .ThenByDescending(p => p.DoanhThu)
-                .Take(SoPhongDatNhieuNhatToiDa)
-                .ToList()
+                ? await _chiTietDatPhongRepository.ThongKePhongDatNhieuNhatAsync(SoPhongDatNhieuNhatToiDa)
                 : new List<PhongThongKeItem>();
 
             // Doanh thu và số lượt đặt theo từng tháng trong năm hiện tại.
             model.DoanhThuTheoThang = coGiaoDich
-                ? chiTiets
-                .Where(ct => ct.NgayNhan.Year == DateTime.Now.Year)
-                .GroupBy(ct => new { ct.NgayNhan.Year, ct.NgayNhan.Month })
-                .Select(g => new DoanhThuThangItem
-                {
-                    Nam = g.Key.Year,
-                    Thang = g.Key.Month,
-                    DoanhThu = g.Sum(ct => ct.ThanhTien),
-                    SoLuotDat = g.Count()
-                })
-                .OrderBy(x => x.Thang)
-                .ToList()
+                ? await _chiTietDatPhongRepository.ThongKeDoanhThuTheoThangAsync(DateTime.Now.Year)
                 : new List<DoanhThuThangItem>();
 
             // Tỷ lệ phòng theo từng loại, tính trên tổng số phòng đang có thể thuê.
@@ -169,14 +142,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 .ToList();
 
             // Các đơn đặt phòng mới nhất để hiển thị bảng ở trang tổng quan.
-            model.DatPhongGanNhat = _context.DatPhongs
-                .AsNoTracking()
-                .Include(dp => dp.KhachHang)
-                .Include(dp => dp.ChiTietDatPhongs)
-                    .ThenInclude(ct => ct.Phong)
-                .OrderByDescending(dp => dp.NgayDat)
-                .Take(6)
-                .ToList();
+            model.DatPhongGanNhat = await _datPhongRepository.LayDatPhongGanNhatAsync(6);
 
             ViewBag.TyLeSuDungPhong = phongChoThue == 0
                 ? 0
@@ -187,13 +153,13 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // GET: ThongKe/DoanhThu
         // Mục 9.4: thống kê chi tiết bằng LINQ theo tháng, loại phòng và top phòng.
-        public IActionResult DoanhThu(int? nam, int? thang)
+        public async Task<IActionResult> DoanhThu(int? nam, int? thang)
         {
             // Không truyền tham số thì mặc định xem tháng hiện tại.
             int namChon = nam ?? DateTime.Now.Year;
             int thangChon = thang ?? DateTime.Now.Month;
 
-            var baoCao = LayBaoCaoDoanhThu(namChon, thangChon);
+            var baoCao = await LayBaoCaoDoanhThu(namChon, thangChon);
 
             ViewBag.DanhSachNam = baoCao.DanhSachNam;
             ViewBag.NamChon = baoCao.Nam;
@@ -214,12 +180,12 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // GET: ThongKe/ExportExcel
         // Xuất báo cáo doanh thu của kỳ đang chọn ra tệp Excel (.xlsx).
-        public IActionResult ExportExcel(int? nam, int? thang)
+        public async Task<IActionResult> ExportExcel(int? nam, int? thang)
         {
             int namChon = nam ?? DateTime.Now.Year;
             int thangChon = thang ?? DateTime.Now.Month;
 
-            var baoCao = LayBaoCaoDoanhThu(namChon, thangChon);
+            var baoCao = await LayBaoCaoDoanhThu(namChon, thangChon);
             var noiDung = TaoExcelBaoCao(baoCao);
 
             return File(
@@ -230,12 +196,12 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // GET: ThongKe/ExportPdf
         // Xuất báo cáo doanh thu của kỳ đang chọn ra tệp PDF.
-        public IActionResult ExportPdf(int? nam, int? thang)
+        public async Task<IActionResult> ExportPdf(int? nam, int? thang)
         {
             int namChon = nam ?? DateTime.Now.Year;
             int thangChon = thang ?? DateTime.Now.Month;
 
-            var baoCao = LayBaoCaoDoanhThu(namChon, thangChon);
+            var baoCao = await LayBaoCaoDoanhThu(namChon, thangChon);
             var noiDung = TaoPdfBaoCao(baoCao);
 
             return File(noiDung, "application/pdf", $"BaoCaoDoanhThu_{thangChon:00}_{namChon}.pdf");
@@ -243,7 +209,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // Gom toàn bộ số liệu của một kỳ (tháng/năm) vào một chỗ để màn hình
         // DoanhThu và hai chức năng xuất báo cáo luôn khớp số liệu với nhau.
-        private DoanhThuBaoCaoViewModel LayBaoCaoDoanhThu(int namChon, int thangChon)
+        private async Task<DoanhThuBaoCaoViewModel> LayBaoCaoDoanhThu(int namChon, int thangChon)
         {
             int namHienTai = DateTime.Now.Year;
 
@@ -252,72 +218,35 @@ namespace QLyDatPhongKhachSan.Controllers
             // Any(): có giao dịch nào trong hệ thống không? Nếu chưa có thì đưa năm hiện
             // tại vào ô chọn để người dùng vẫn xem được báo cáo (dù rỗng) thay vì
             // bị ô chọn năm trống hoàn toàn.
-            baoCao.DanhSachNam = _context.ChiTietDatPhongs.Any()
-                ? _context.ChiTietDatPhongs
-                    .AsNoTracking()
-                    .Select(ct => ct.NgayNhan.Year)
-                    .Distinct()
-                    .OrderByDescending(y => y)
-                    .ToList()
+            var danhSachNam = await _chiTietDatPhongRepository.LayDanhSachNamCoGiaoDichAsync();
+
+            baoCao.DanhSachNam = danhSachNam.Any()
+                ? danhSachNam
                 : new List<int> { namHienTai };
 
-            // Chi tiết trong khoảng tháng/năm được chọn.
-            var chiTietsThang = _context.ChiTietDatPhongs
-                .AsNoTracking()
-                .Include(ct => ct.Phong)
-                    .ThenInclude(p => p!.LoaiPhong)
-                .Where(ct => ct.NgayNhan.Year == namChon && ct.NgayNhan.Month == thangChon)
-                .ToList();
-
-            // Lưu cả chi tiết đã hủy để thống kê số lượt hủy, nhưng các con số
+            // Số lượt đặt còn hiệu lực trong khoảng tháng/năm được chọn.
+            // Chi tiết đã hủy được thống kê riêng (số lượt hủy), còn các con số
             // doanh thu bên dưới chỉ cộng những chi tiết còn hiệu lực.
-            var chiTietsHieuLuc = chiTietsThang.Where(ct => ct.TrangThai != "DaHuy").ToList();
+            var soLuotDatHieuLuc = await _chiTietDatPhongRepository.DemLuotDatHieuLucTrongKyAsync(namChon, thangChon);
 
             // Any(): tháng/năm đang chọn có phát sinh giao dịch nào không?
             // Dùng để báo cho người dùng biết chính xác vì sao báo cáo rỗng,
             // thay vì chỉ hiện mấy con số 0 không giải thích được.
-            baoCao.CoDuLieu = chiTietsHieuLuc.Any();
-            baoCao.DoanhThuKy = chiTietsHieuLuc.Sum(ct => ct.ThanhTien);
-            baoCao.SoLuotDat = chiTietsHieuLuc.Count;
-            baoCao.SoLuotHuy = chiTietsThang.Count(ct => ct.TrangThai == "DaHuy");
+            baoCao.CoDuLieu = soLuotDatHieuLuc > 0;
+            baoCao.DoanhThuKy = await _chiTietDatPhongRepository.DoanhThuKyHieuLucAsync(namChon, thangChon);
+            baoCao.SoLuotDat = soLuotDatHieuLuc;
+            baoCao.SoLuotHuy = await _chiTietDatPhongRepository.DemLuotHuyTrongKyAsync(namChon, thangChon);
 
             // Doanh thu theo từng tháng trong năm đang xem.
-            baoCao.DoanhThuTheoThang = _context.ChiTietDatPhongs
-                .AsNoTracking()
-                .Include(ct => ct.Phong)
-                .Where(ct => ct.NgayNhan.Year == namChon && ct.TrangThai != "DaHuy")
-                .GroupBy(ct => ct.NgayNhan.Month)
-                .Select(g => new DoanhThuThangItem
-                {
-                    Nam = namChon,
-                    Thang = g.Key,
-                    DoanhThu = g.Sum(ct => ct.ThanhTien),
-                    SoLuotDat = g.Count()
-                })
-                .OrderBy(x => x.Thang)
-                .ToList();
+            baoCao.DoanhThuTheoThang = await _chiTietDatPhongRepository.ThongKeDoanhThuTheoThangAsync(namChon);
 
             // Số lượt đặt theo tháng, bao gồm cả đơn đã hủy để thấy đủ biến động.
-            baoCao.LuotDatTheoThang = _context.DatPhongs
-                .AsNoTracking()
-                .Where(dp => dp.NgayDat.Year == namChon)
-                .GroupBy(dp => dp.NgayDat.Month)
-                .Select(g => new DoanhThuThangItem
-                {
-                    Nam = namChon,
-                    Thang = g.Key,
-                    SoLuotDat = g.Count()
-                })
-                .OrderBy(x => x.Thang)
-                .ToList();
+            baoCao.LuotDatTheoThang = await _datPhongRepository.ThongKeLuotDatTheoThangAsync(namChon);
 
             // Số phòng theo loại: dùng Any() để loại phòng không còn phòng nào.
-            var tatCaLoaiPhong = _context.LoaiPhongs
-                .AsNoTracking()
-                .OrderBy(lp => lp.MaLoaiPhong)
-                .ToList();
+            var tatCaLoaiPhong = await _loaiPhongRepository.LayTatCaAsync();
 
-            var tatCaPhong = _context.Phongs.AsNoTracking().ToList();
+            var tatCaPhong = await _phongRepository.LayTatCaAsync();
 
             baoCao.SoPhongTheoLoai = tatCaLoaiPhong
                 .Select(lp => new LoaiPhongThongKeItem
@@ -329,40 +258,13 @@ namespace QLyDatPhongKhachSan.Controllers
                 .ToList();
 
             // Doanh thu theo loại phòng trong kỳ đang xem.
-            baoCao.DoanhThuTheoLoai = chiTietsHieuLuc
-                .Where(ct => ct.Phong != null && ct.Phong.LoaiPhong != null)
-                .GroupBy(ct => ct.Phong!.LoaiPhong!.TenLoai)
-                .Select(g => new LoaiPhongThongKeItem
-                {
-                    TenLoai = g.Key,
-                    DoanhThu = g.Sum(ct => ct.ThanhTien)
-                })
-                .OrderByDescending(x => x.DoanhThu)
-                .ToList();
+            baoCao.DoanhThuTheoLoai = await _chiTietDatPhongRepository.ThongKeDoanhThuTheoLoaiTrongKyAsync(namChon, thangChon);
 
             // Phòng được đặt nhiều nhất trong kỳ.
-            baoCao.PhongDatNhieuNhat = chiTietsHieuLuc
-                .Where(ct => ct.Phong != null)
-                .GroupBy(ct => new { ct.MaPhong, ct.Phong!.SoPhong, ct.Phong.LoaiPhong!.TenLoai })
-                .Select(g => new PhongThongKeItem
-                {
-                    SoPhong = g.Key.SoPhong,
-                    TenLoai = g.Key.TenLoai,
-                    SoLuotDat = g.Count(),
-                    DoanhThu = g.Sum(ct => ct.ThanhTien)
-                })
-                .OrderByDescending(p => p.SoLuotDat)
-                .ThenByDescending(p => p.DoanhThu)
-                .Take(SoPhongDatNhieuNhatToiDa)
-                .ToList();
+            baoCao.PhongDatNhieuNhat = await _chiTietDatPhongRepository.ThongKePhongDatNhieuNhatTrongKyAsync(namChon, thangChon, SoPhongDatNhieuNhatToiDa);
 
             // Chi tiết từng lượt đặt của kỳ để hiển thị bảng.
-            baoCao.ChiTietKy = _context.DatPhongs
-                .AsNoTracking()
-                .Include(dp => dp.KhachHang)
-                .Where(dp => dp.NgayNhan.Year == namChon && dp.NgayNhan.Month == thangChon)
-                .OrderByDescending(dp => dp.NgayNhan)
-                .ToList();
+            baoCao.ChiTietKy = await _datPhongRepository.LayDatPhongNhanPhongTrongKyAsync(namChon, thangChon);
 
             return baoCao;
         }

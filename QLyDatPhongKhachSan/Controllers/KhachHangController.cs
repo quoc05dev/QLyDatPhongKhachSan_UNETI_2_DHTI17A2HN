@@ -1,25 +1,27 @@
 // ==========================================
 // Họ và tên: Lê Anh Tuấn
-// Mã sinh viên: 23103100086
+// Ma sinh viên: 23103100086
 // Nội dung thực hiện: Module 3 - Quản lý khách hàng, hồ sơ cá nhân
 // Chức năng: Khách hàng chỉ xem/sửa hồ sơ của chính mình & Chống truy cập trái phép qua URL
 // ==========================================
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 
 namespace QLyDatPhongKhachSan.Controllers
 {
     public class KhachHangController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IKhachHangRepository _khachHangRepository;
+        private readonly ITaiKhoanRepository _taiKhoanRepository;
 
-        public KhachHangController(AppDbContext context)
+        public KhachHangController(IKhachHangRepository khachHangRepository, ITaiKhoanRepository taiKhoanRepository)
         {
-            _context = context;
+            _khachHangRepository = khachHangRepository;
+            _taiKhoanRepository = taiKhoanRepository;
         }
 
         #region Helper Kiểm tra quyền & Session
@@ -31,8 +33,8 @@ namespace QLyDatPhongKhachSan.Controllers
         #endregion
 
         // =====================================================================
-        // CHỨC NĂNG CHÍNH CỦA MODULE 3 (SV3):
-        // HỒ SƠ CÁ NHÂN — KHÁCH HÀNG CHỈ XEM/SỬA HỒ SƠ CỦA CHÍNH MÌNH
+        // CHỨC NANG CHINH CUA MODULE 3 (SV3):
+        // HO SO CA NHAN - KHACH HANG CHI XEM/SUA HO SO CUA CHINH MINH
         // =====================================================================
 
         // GET: KhachHang/Profile (Xem hồ sơ cá nhân của người đang đăng nhập)
@@ -46,9 +48,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Lấy thông tin tài khoản kèm hồ sơ khách hàng bằng LINQ qua EF Core
-            var taiKhoan = await _context.TaiKhoans
-                .Include(t => t.KhachHang)
-                .FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan.Value);
+            var taiKhoan = await _taiKhoanRepository.LayTheoMaCoKhachHangAsync(maTaiKhoan.Value);
 
             if (taiKhoan == null)
             {
@@ -70,8 +70,7 @@ namespace QLyDatPhongKhachSan.Controllers
                     QuocTich = "Việt Nam",
                     TrangThai = true
                 };
-                _context.KhachHangs.Add(khachHang);
-                await _context.SaveChangesAsync();
+                await _khachHangRepository.ThemAsync(khachHang);
 
                 // Cập nhật lại MaKhachHang vào Session
                 HttpContext.Session.SetInt32("MaKhachHang", khachHang.MaKhachHang);
@@ -111,9 +110,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // BẢO MẬT: Luôn lấy khách hàng theo MaTaiKhoan trong Session, không tin cậy dữ liệu ID gửi lên từ form
-            var khachHang = await _context.KhachHangs
-                .Include(kh => kh.TaiKhoan)
-                .FirstOrDefaultAsync(kh => kh.MaTaiKhoan == maTaiKhoan.Value);
+            var khachHang = await _khachHangRepository.LayTheoMaTaiKhoanCoTaiKhoanAsync(maTaiKhoan.Value);
 
             if (khachHang == null)
             {
@@ -130,8 +127,7 @@ namespace QLyDatPhongKhachSan.Controllers
             // 2. Kiểm tra CCCD không trùng với khách hàng khác trong CSDL
             if (!string.IsNullOrWhiteSpace(model.CCCD))
             {
-                bool cccdBiTrung = await _context.KhachHangs
-                    .AnyAsync(kh => kh.CCCD == model.CCCD.Trim() && kh.MaKhachHang != khachHang.MaKhachHang);
+                bool cccdBiTrung = await _khachHangRepository.CCCDDaTonTaiAsync(model.CCCD, khachHang.MaKhachHang);
 
                 if (cccdBiTrung)
                 {
@@ -142,8 +138,7 @@ namespace QLyDatPhongKhachSan.Controllers
             // 3. Kiểm tra Email không trùng với khách hàng khác (nếu có nhập)
             if (!string.IsNullOrWhiteSpace(model.Email))
             {
-                bool emailBiTrung = await _context.KhachHangs
-                    .AnyAsync(kh => kh.Email == model.Email.Trim() && kh.MaKhachHang != khachHang.MaKhachHang);
+                bool emailBiTrung = await _khachHangRepository.EmailDaTonTaiAsync(model.Email, khachHang.MaKhachHang);
 
                 if (emailBiTrung)
                 {
@@ -181,7 +176,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 khachHang.TaiKhoan.SoDienThoai = khachHang.SoDienThoai;
             }
 
-            await _context.SaveChangesAsync();
+            await _khachHangRepository.CapNhatAsync(khachHang);
 
             // Cập nhật lại họ tên hiển thị trong Session
             HttpContext.Session.SetString("HoTen", khachHang.HoTen);
@@ -192,7 +187,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // =====================================================================
         // BẢO MẬT URL (Mục 7.5 & 22.7):
-        // KHÁCH HÀNG KHÔNG ĐƯỢC PHÉP TRUY CẬP HỒ SƠ NGƯỜI KHÁC QUA URL
+        // KHACH HANG KHONG DUOC PHEP TRUY CAP HO SO NGUOI KHAC QUA URL
         // =====================================================================
 
         // GET: KhachHang/Details/5
@@ -229,12 +224,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Admin và Nhân viên được xem chi tiết khách hàng
-            var khachHang = await _context.KhachHangs
-                .Include(k => k.TaiKhoan)
-                .Include(k => k.DatPhongs)
-                    .ThenInclude(dp => dp.ChiTietDatPhongs)
-                        .ThenInclude(ct => ct.Phong)
-                .FirstOrDefaultAsync(m => m.MaKhachHang == id);
+            var khachHang = await _khachHangRepository.LayTheoMaCoTaiKhoanVaDatPhongFullAsync(id.Value);
 
             if (khachHang == null)
             {
@@ -245,16 +235,16 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // =====================================================================
-        // CRUD KHÁCH HÀNG DÀNH CHO ADMIN VÀ LỄ TÂN (MODULE 3)
+        // CRUD KHACH HANG DANH CHO ADMIN VA LE TAN (MODULE 3)
         // =====================================================================
 
         // GET: KhachHang (Danh sách khách hàng kèm Tìm kiếm, Lọc, Sắp xếp, Phân trang LINQ)
         public async Task<IActionResult> Index(
-            string? searchTerm, 
-            string? gioiTinhFilter, 
-            bool? statusFilter, 
-            string? coTaiKhoanFilter, 
-            string? sortOrder, 
+            string? searchTerm,
+            string? gioiTinhFilter,
+            bool? statusFilter,
+            string? coTaiKhoanFilter,
+            string? sortOrder,
             int page = 1)
         {
             var vaiTro = GetCurrentUserRole();
@@ -271,69 +261,22 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction("Login", "DangNhap", new { returnUrl = "/KhachHang" });
             }
 
-            var query = _context.KhachHangs
-                .Include(k => k.TaiKhoan)
-                .Include(k => k.DatPhongs)
-                .AsQueryable();
-
             // Thống kê nhanh toàn bộ CSDL
-            int tongKhachHang = await _context.KhachHangs.CountAsync();
-            int soKhachHoatDong = await _context.KhachHangs.CountAsync(k => k.TrangThai);
-            int soKhachBiKhoa = await _context.KhachHangs.CountAsync(k => !k.TrangThai);
-            int soKhachCoTaiKhoan = await _context.KhachHangs.CountAsync(k => k.MaTaiKhoan != null);
-            int soKhachVangLai = await _context.KhachHangs.CountAsync(k => k.MaTaiKhoan == null);
+            int tongKhachHang = await _khachHangRepository.DemTatCaAsync();
+            int soKhachHoatDong = await _khachHangRepository.DemTheoTrangThaiAsync(true);
+            int soKhachBiKhoa = await _khachHangRepository.DemTheoTrangThaiAsync(false);
+            int soKhachCoTaiKhoan = await _khachHangRepository.DemCoTaiKhoanAsync(true);
+            int soKhachVangLai = await _khachHangRepository.DemCoTaiKhoanAsync(false);
 
-            // 1. Tìm kiếm (Họ tên, SĐT, CCCD, Email, Địa chỉ)
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                var term = searchTerm.Trim().ToLower();
-                query = query.Where(k => k.HoTen.ToLower().Contains(term) ||
-                                         k.SoDienThoai.Contains(term) ||
-                                         k.CCCD.Contains(term) ||
-                                         (k.Email != null && k.Email.ToLower().Contains(term)) ||
-                                         (k.DiaChi != null && k.DiaChi.ToLower().Contains(term)));
-            }
-
-            // 2. Lọc theo Giới tính
-            if (!string.IsNullOrWhiteSpace(gioiTinhFilter))
-            {
-                query = query.Where(k => k.GioiTinh == gioiTinhFilter);
-            }
-
-            // 3. Lọc theo Trạng thái
-            if (statusFilter.HasValue)
-            {
-                query = query.Where(k => k.TrangThai == statusFilter.Value);
-            }
-
-            // 4. Lọc theo Loại khách (Có tài khoản / Khách vãng lai)
-            if (!string.IsNullOrWhiteSpace(coTaiKhoanFilter))
-            {
-                if (coTaiKhoanFilter == "co")
-                    query = query.Where(k => k.MaTaiKhoan != null);
-                else if (coTaiKhoanFilter == "khong")
-                    query = query.Where(k => k.MaTaiKhoan == null);
-            }
-
-            // 5. Sắp xếp
-            sortOrder = string.IsNullOrEmpty(sortOrder) ? "id_desc" : sortOrder;
-            query = sortOrder switch
-            {
-                "id_asc" => query.OrderBy(k => k.MaKhachHang),
-                "name_asc" => query.OrderBy(k => k.HoTen),
-                "name_desc" => query.OrderByDescending(k => k.HoTen),
-                _ => query.OrderByDescending(k => k.MaKhachHang)
-            };
-
-            // 6. Phân trang bằng Skip/Take
+            // Phân trang bằng Skip/Take
             int pageSize = 8;
-            int totalItems = await query.CountAsync();
+            int totalItems = await _khachHangRepository.DemTimKiemVaLocAsync(searchTerm, gioiTinhFilter, statusFilter, coTaiKhoanFilter);
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await _khachHangRepository.TimKiemVaLocPhanTrangAsync(searchTerm, gioiTinhFilter, statusFilter, coTaiKhoanFilter, string.IsNullOrEmpty(sortOrder) ? "id_desc" : sortOrder, (page - 1) * pageSize, pageSize);
 
             var viewModel = new KhachHangListViewModel
             {
@@ -342,7 +285,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 GioiTinhFilter = gioiTinhFilter,
                 StatusFilter = statusFilter,
                 CoTaiKhoanFilter = coTaiKhoanFilter,
-                SortOrder = sortOrder,
+                SortOrder = string.IsNullOrEmpty(sortOrder) ? "id_desc" : sortOrder,
                 TongKhachHang = tongKhachHang,
                 SoKhachHoatDong = soKhachHoatDong,
                 SoKhachBiKhoa = soKhachBiKhoa,
@@ -367,10 +310,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Nạp danh sách tài khoản khách hàng chưa được liên kết với hồ sơ nào
-            ViewBag.TaiKhoans = await _context.TaiKhoans
-                .Where(t => t.VaiTro == "KhachHang" && !_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan))
-                .OrderBy(t => t.TenDangNhap)
-                .ToListAsync();
+            ViewBag.TaiKhoans = await _taiKhoanRepository.LayTatCaChuaLienKetKhachHangAsync();
 
             var model = new KhachHang
             {
@@ -401,7 +341,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (!string.IsNullOrWhiteSpace(khachHang.CCCD))
             {
-                bool cccdBiTrung = await _context.KhachHangs.AnyAsync(k => k.CCCD == khachHang.CCCD.Trim());
+                bool cccdBiTrung = await _khachHangRepository.CCCDDaTonTaiAsync(khachHang.CCCD);
                 if (cccdBiTrung)
                 {
                     ModelState.AddModelError("CCCD", "Số CCCD/Hộ chiếu này đã được sử dụng bởi khách hàng khác.");
@@ -410,7 +350,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (!string.IsNullOrWhiteSpace(khachHang.Email))
             {
-                bool emailBiTrung = await _context.KhachHangs.AnyAsync(k => k.Email == khachHang.Email.Trim());
+                bool emailBiTrung = await _khachHangRepository.EmailDaTonTaiAsync(khachHang.Email);
                 if (emailBiTrung)
                 {
                     ModelState.AddModelError("Email", "Địa chỉ Email này đã được đăng ký bởi khách hàng khác.");
@@ -427,17 +367,13 @@ namespace QLyDatPhongKhachSan.Controllers
                 khachHang.QuocTich = string.IsNullOrWhiteSpace(khachHang.QuocTich) ? "Việt Nam" : khachHang.QuocTich.Trim();
                 khachHang.GhiChu = khachHang.GhiChu?.Trim();
 
-                _context.Add(khachHang);
-                await _context.SaveChangesAsync();
+                await _khachHangRepository.ThemAsync(khachHang);
 
                 TempData["SuccessMessage"] = $"Thêm mới khách hàng '{khachHang.HoTen}' thành công!";
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.TaiKhoans = await _context.TaiKhoans
-                .Where(t => t.VaiTro == "KhachHang" && !_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan))
-                .OrderBy(t => t.TenDangNhap)
-                .ToListAsync();
+            ViewBag.TaiKhoans = await _taiKhoanRepository.LayTatCaChuaLienKetKhachHangAsync();
 
             return View(khachHang);
         }
@@ -474,9 +410,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Admin / Nhân viên được sửa thông tin khách hàng
-            var khachHang = await _context.KhachHangs
-                .Include(k => k.TaiKhoan)
-                .FirstOrDefaultAsync(k => k.MaKhachHang == id);
+            var khachHang = await _khachHangRepository.LayTheoMaCoTaiKhoanAsync(id.Value);
 
             if (khachHang == null)
             {
@@ -484,10 +418,7 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             // Nạp danh sách tài khoản có thể liên kết (chưa liên kết hoặc đang thuộc khách hàng này)
-            ViewBag.TaiKhoans = await _context.TaiKhoans
-                .Where(t => t.VaiTro == "KhachHang" && (!_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan) || t.MaTaiKhoan == khachHang.MaTaiKhoan))
-                .OrderBy(t => t.TenDangNhap)
-                .ToListAsync();
+            ViewBag.TaiKhoans = await _taiKhoanRepository.LayTatCaCoTheLienKetAsync(khachHang.MaTaiKhoan);
 
             return View(khachHang);
         }
@@ -519,8 +450,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (!string.IsNullOrWhiteSpace(khachHang.CCCD))
             {
-                bool cccdBiTrung = await _context.KhachHangs
-                    .AnyAsync(kh => kh.CCCD == khachHang.CCCD.Trim() && kh.MaKhachHang != id);
+                bool cccdBiTrung = await _khachHangRepository.CCCDDaTonTaiAsync(khachHang.CCCD, id);
                 if (cccdBiTrung)
                 {
                     ModelState.AddModelError("CCCD", "Số CCCD/Hộ chiếu này đã được sử dụng bởi khách hàng khác.");
@@ -529,8 +459,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (!string.IsNullOrWhiteSpace(khachHang.Email))
             {
-                bool emailBiTrung = await _context.KhachHangs
-                    .AnyAsync(kh => kh.Email == khachHang.Email.Trim() && kh.MaKhachHang != id);
+                bool emailBiTrung = await _khachHangRepository.EmailDaTonTaiAsync(khachHang.Email, id);
                 if (emailBiTrung)
                 {
                     ModelState.AddModelError("Email", "Địa chỉ Email này đã được đăng ký bởi khách hàng khác.");
@@ -541,9 +470,7 @@ namespace QLyDatPhongKhachSan.Controllers
             {
                 try
                 {
-                    var existing = await _context.KhachHangs
-                        .Include(k => k.TaiKhoan)
-                        .FirstOrDefaultAsync(k => k.MaKhachHang == id);
+                    var existing = await _khachHangRepository.LayTheoMaCoTaiKhoanAsync(id);
 
                     if (existing == null)
                     {
@@ -570,13 +497,13 @@ namespace QLyDatPhongKhachSan.Controllers
                         existing.TaiKhoan.SoDienThoai = existing.SoDienThoai;
                     }
 
-                    await _context.SaveChangesAsync();
+                    await _khachHangRepository.CapNhatAsync(existing);
                     TempData["SuccessMessage"] = $"Cập nhật thông tin khách hàng '{existing.HoTen}' thành công!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _context.KhachHangs.AnyAsync(e => e.MaKhachHang == id))
+                    if (await _khachHangRepository.LayTheoMaAsync(id) == null)
                     {
                         return NotFound();
                     }
@@ -584,10 +511,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 }
             }
 
-            ViewBag.TaiKhoans = await _context.TaiKhoans
-                .Where(t => t.VaiTro == "KhachHang" && (!_context.KhachHangs.Any(kh => kh.MaTaiKhoan == t.MaTaiKhoan) || t.MaTaiKhoan == khachHang.MaTaiKhoan))
-                .OrderBy(t => t.TenDangNhap)
-                .ToListAsync();
+            ViewBag.TaiKhoans = await _taiKhoanRepository.LayTatCaCoTheLienKetAsync(khachHang.MaTaiKhoan);
 
             return View(khachHang);
         }
@@ -603,10 +527,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (id == null) return NotFound();
 
-            var khachHang = await _context.KhachHangs
-                .Include(k => k.TaiKhoan)
-                .Include(k => k.DatPhongs)
-                .FirstOrDefaultAsync(m => m.MaKhachHang == id);
+            var khachHang = await _khachHangRepository.LayTheoMaTaiKhoanCoDatPhongAsync(id.Value);
 
             if (khachHang == null) return NotFound();
 
@@ -624,23 +545,20 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
 
-            var khachHang = await _context.KhachHangs
-                .Include(k => k.DatPhongs)
-                .FirstOrDefaultAsync(m => m.MaKhachHang == id);
+            var khachHang = await _khachHangRepository.LayTheoMaTaiKhoanCoDatPhongAsync(id);
 
             if (khachHang == null) return NotFound();
 
             // Nếu khách hàng đã phát sinh đơn đặt phòng -> Khóa thay vì xóa cứng để đảm bảo toàn vẹn dữ liệu
-            if (khachHang.DatPhongs.Any())
+            if (khachHang.DatPhongs != null && khachHang.DatPhongs.Any())
             {
                 khachHang.TrangThai = false;
-                await _context.SaveChangesAsync();
+                await _khachHangRepository.CapNhatAsync(khachHang);
                 TempData["SuccessMessage"] = $"Khách hàng '{khachHang.HoTen}' đã phát sinh {khachHang.DatPhongs.Count} đơn đặt phòng, hệ thống đã chuyển sang trạng thái Bị khóa / Vô hiệu hóa để bảo tồn lịch sử giao dịch!";
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.KhachHangs.Remove(khachHang);
-            await _context.SaveChangesAsync();
+            await _khachHangRepository.XoaAsync(khachHang);
             TempData["SuccessMessage"] = $"Đã xóa khách hàng '{khachHang.HoTen}' thành công!";
             return RedirectToAction(nameof(Index));
         }
@@ -656,11 +574,11 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
 
-            var khachHang = await _context.KhachHangs.FindAsync(id);
+            var khachHang = await _khachHangRepository.LayTheoMaAsync(id);
             if (khachHang == null) return NotFound();
 
             khachHang.TrangThai = !khachHang.TrangThai;
-            await _context.SaveChangesAsync();
+            await _khachHangRepository.CapNhatAsync(khachHang);
 
             TempData["SuccessMessage"] = $"Đã {(khachHang.TrangThai ? "kích hoạt" : "khóa")} khách hàng '{khachHang.HoTen}' thành công!";
             return RedirectToAction(nameof(Index));

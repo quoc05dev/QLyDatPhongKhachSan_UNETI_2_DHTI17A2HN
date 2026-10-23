@@ -4,10 +4,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Helpers;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +17,15 @@ namespace QLyDatPhongKhachSan.Controllers
 {
     public class PhongController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IPhongRepository _phongRepository;
+        private readonly ILoaiPhongRepository _loaiPhongRepository;
+        private readonly IChiTietDatPhongRepository _chiTietDatPhongRepository;
 
-        public PhongController(AppDbContext context)
+        public PhongController(IPhongRepository phongRepository, ILoaiPhongRepository loaiPhongRepository, IChiTietDatPhongRepository chiTietDatPhongRepository)
         {
-            _context = context;
+            _phongRepository = phongRepository;
+            _loaiPhongRepository = loaiPhongRepository;
+            _chiTietDatPhongRepository = chiTietDatPhongRepository;
         }
 
         // GET: Phong
@@ -106,63 +110,21 @@ namespace QLyDatPhongKhachSan.Controllers
                 }
             }
 
-            var query = _context.Phongs
-                .Include(p => p.LoaiPhong)
-                .AsNoTracking()
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(keyword))
+            if (!isPriceFilterValid)
             {
-                keyword = keyword.Trim();
-                query = query.Where(p =>
-                    p.SoPhong.Contains(keyword) ||
-                    (p.LoaiPhong != null && p.LoaiPhong.TenLoai.Contains(keyword)) ||
-                    p.ChiTietDatPhongs.Any(ct =>
-                        ct.DatPhong != null &&
-                        ct.DatPhong.KhachHang != null &&
-                        ct.DatPhong.KhachHang.HoTen.Contains(keyword)));
+                giaMin = null;
+                giaMax = null;
+            }
+            if (!isAvailabilityFilterValid)
+            {
+                ngayNhan = null;
+                ngayTra = null;
             }
 
-            if (maLoaiPhong.HasValue)
-            {
-                query = query.Where(p => p.MaLoaiPhong == maLoaiPhong);
-            }
+            sortOrder = string.IsNullOrEmpty(sortOrder) ? "soPhong_asc" : sortOrder;
 
-            if (tang.HasValue)
-            {
-                query = query.Where(p => p.Tang == tang);
-            }
+            int totalItems = await _phongRepository.DemTimKiemVaLocFullAsync(keyword, maLoaiPhong, tang, trangThai, isPriceFilterValid ? giaMin : null, isPriceFilterValid ? giaMax : null, isAvailabilityFilterValid ? ngayNhan : null, isAvailabilityFilterValid ? ngayTra : null);
 
-            if (!string.IsNullOrWhiteSpace(trangThai))
-            {
-                query = query.Where(p => p.TrangThai == trangThai);
-            }
-
-            if (isPriceFilterValid)
-            {
-                if (giaMin.HasValue)
-                {
-                    query = query.Where(p => p.DonGia >= giaMin.Value);
-                }
-                if (giaMax.HasValue)
-                {
-                    query = query.Where(p => p.DonGia <= giaMax.Value);
-                }
-            }
-
-            if (ngayNhan.HasValue && ngayTra.HasValue && isAvailabilityFilterValid)
-            {
-                var requestedStart = ngayNhan.Value.Date;
-                var requestedEnd = ngayTra.Value.Date;
-                query = query.Where(p =>
-                    !p.ChiTietDatPhongs.Any(ct =>
-                        ct.DatPhong != null
-                        && ct.DatPhong.TrangThai != "DaHuy"
-                        && ct.NgayNhan.Date < requestedEnd
-                        && ct.NgayTra.Date > requestedStart));
-            }
-
-            int totalItems = await query.CountAsync();
             int pageSize = new PhongListViewModel().PageSize;
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
@@ -179,39 +141,9 @@ namespace QLyDatPhongKhachSan.Controllers
                 page = 1;
             }
 
-            switch (sortOrder)
-            {
-                case "soPhong_desc":
-                    query = query.OrderByDescending(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-                case "donGia_asc":
-                    query = query.OrderBy(p => p.DonGia).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-                case "donGia_desc":
-                    query = query.OrderByDescending(p => p.DonGia).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-                case "tang_asc":
-                    query = query.OrderBy(p => p.Tang).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-                case "tang_desc":
-                    query = query.OrderByDescending(p => p.Tang).ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-                case "loaiPhong_asc":
-                    query = query.OrderBy(p => p.LoaiPhong != null ? p.LoaiPhong.TenLoai : "").ThenBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-                case "soPhong_asc":
-                default:
-                    sortOrder = "soPhong_asc";
-                    query = query.OrderBy(p => p.SoPhong).ThenBy(p => p.MaPhong);
-                    break;
-            }
+            var phongs = await _phongRepository.TimKiemVaLocFullAsync(keyword, maLoaiPhong, tang, trangThai, isPriceFilterValid ? giaMin : null, isPriceFilterValid ? giaMax : null, isAvailabilityFilterValid ? ngayNhan : null, isAvailabilityFilterValid ? ngayTra : null, sortOrder, (page - 1) * pageSize, pageSize);
 
-            var phongs = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var loaiPhongs = await _context.LoaiPhongs.AsNoTracking().OrderBy(l => l.TenLoai).ToListAsync();
+            var loaiPhongs = await _loaiPhongRepository.LayTatCaAsync();
             var trangThaiList = new List<SelectListItem>
             {
                 new SelectListItem { Value = "Trong", Text = TrangThaiHelper.HienThi("Trong") },
@@ -224,9 +156,6 @@ namespace QLyDatPhongKhachSan.Controllers
             var viewModel = new PhongListViewModel
             {
                 Phongs = phongs,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalItems = totalItems,
                 Keyword = keyword,
                 MaLoaiPhong = maLoaiPhong,
                 Tang = tang,
@@ -235,6 +164,9 @@ namespace QLyDatPhongKhachSan.Controllers
                 GiaMax = giaMax,
                 NgayNhan = ngayNhan,
                 NgayTra = ngayTra,
+                CurrentPage = page,
+                
+                TotalItems = totalItems,
                 SortOrder = sortOrder,
                 LoaiPhongList = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", maLoaiPhong),
                 TrangThaiList = new SelectList(trangThaiList, "Value", "Text", trangThai)
@@ -252,11 +184,8 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var phong = await _context.Phongs
-                .Include(p => p.LoaiPhong)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.MaPhong == id);
-                
+            var phong = await _phongRepository.LayTheoMaAsync(id.Value);
+
             if (phong == null)
             {
                 return NotFound();
@@ -267,8 +196,9 @@ namespace QLyDatPhongKhachSan.Controllers
 
         private void PopulateDropdowns(int? selectedLoaiPhong = null, string? selectedTrangThai = null)
         {
-            ViewBag.MaLoaiPhong = new SelectList(_context.LoaiPhongs.AsNoTracking(), "MaLoaiPhong", "TenLoai", selectedLoaiPhong);
-            
+            var loaiPhongs = _loaiPhongRepository.LayTatCaAsync().GetAwaiter().GetResult();
+            ViewBag.MaLoaiPhong = new SelectList(loaiPhongs, "MaLoaiPhong", "TenLoai", selectedLoaiPhong);
+
             var trangThaiList = new List<SelectListItem>
             {
                 new SelectListItem { Value = "Trong", Text = TrangThaiHelper.HienThi("Trong") },
@@ -296,15 +226,14 @@ namespace QLyDatPhongKhachSan.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool isDuplicate = await _context.Phongs.AnyAsync(p => p.SoPhong == phong.SoPhong);
+                bool isDuplicate = await _phongRepository.SoPhongDaTonTaiAsync(phong.SoPhong);
                 if (isDuplicate)
                 {
                     ModelState.AddModelError(nameof(Phong.SoPhong), "Số phòng đã tồn tại.");
                 }
                 else
                 {
-                    _context.Add(phong);
-                    await _context.SaveChangesAsync();
+                    await _phongRepository.ThemAsync(phong);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -321,7 +250,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var phong = await _context.Phongs.FindAsync(id);
+            var phong = await _phongRepository.LayTheoMaCoLoaiPhongAsync(id.Value);
             if (phong == null)
             {
                 return NotFound();
@@ -343,7 +272,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
             if (ModelState.IsValid)
             {
-                bool isDuplicate = await _context.Phongs.AnyAsync(p => p.SoPhong == phong.SoPhong && p.MaPhong != phong.MaPhong);
+                bool isDuplicate = await _phongRepository.SoPhongDaTonTaiAsync(phong.SoPhong, phong.MaPhong);
                 if (isDuplicate)
                 {
                     ModelState.AddModelError(nameof(Phong.SoPhong), "Số phòng đã tồn tại.");
@@ -352,12 +281,11 @@ namespace QLyDatPhongKhachSan.Controllers
                 {
                     try
                     {
-                        _context.Update(phong);
-                        await _context.SaveChangesAsync();
+                        await _phongRepository.CapNhatAsync(phong);
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        if (!PhongExists(phong.MaPhong))
+                        if (await _phongRepository.LayTheoMaAsync(phong.MaPhong) == null)
                         {
                             return NotFound();
                         }
@@ -382,17 +310,14 @@ namespace QLyDatPhongKhachSan.Controllers
                 return NotFound();
             }
 
-            var phong = await _context.Phongs
-                .Include(p => p.LoaiPhong)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.MaPhong == id);
-                
+            var phong = await _phongRepository.LayTheoMaAsync(id.Value);
+
             if (phong == null)
             {
                 return NotFound();
             }
 
-            bool hasHistory = await _context.ChiTietDatPhongs.AnyAsync(ct => ct.MaPhong == id);
+            bool hasHistory = await _phongRepository.CoLichSuDatPhongAsync(id.Value);
             ViewBag.HasHistory = hasHistory;
 
             return View(phong);
@@ -404,20 +329,19 @@ namespace QLyDatPhongKhachSan.Controllers
         [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            bool hasHistory = await _context.ChiTietDatPhongs.AnyAsync(ct => ct.MaPhong == id);
+            bool hasHistory = await _phongRepository.CoLichSuDatPhongAsync(id);
             if (hasHistory)
             {
                 TempData["ErrorMessage"] = "Không thể xóa phòng vì phòng đã phát sinh lịch sử đặt phòng.";
                 return RedirectToAction(nameof(Delete), new { id = id });
             }
 
-            var phong = await _context.Phongs.FindAsync(id);
+            var phong = await _phongRepository.LayTheoMaAsync(id);
             if (phong != null)
             {
                 try
                 {
-                    _context.Phongs.Remove(phong);
-                    await _context.SaveChangesAsync();
+                    await _phongRepository.XoaAsync(phong);
                 }
                 catch (DbUpdateException)
                 {
@@ -425,13 +349,8 @@ namespace QLyDatPhongKhachSan.Controllers
                     return RedirectToAction(nameof(Delete), new { id = id });
                 }
             }
-            
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool PhongExists(int id)
-        {
-            return _context.Phongs.Any(e => e.MaPhong == id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

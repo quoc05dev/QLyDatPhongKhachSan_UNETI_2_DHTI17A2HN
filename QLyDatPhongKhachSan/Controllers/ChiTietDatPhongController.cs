@@ -6,9 +6,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 
 namespace QLyDatPhongKhachSan.Controllers
 {
@@ -18,11 +18,15 @@ namespace QLyDatPhongKhachSan.Controllers
     [RoleAuthorize("Admin", "NhanVien")]
     public class ChiTietDatPhongController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IChiTietDatPhongRepository _chiTietDatPhongRepository;
+        private readonly IPhongRepository _phongRepository;
+        private readonly IDatPhongRepository _datPhongRepository;
 
-        public ChiTietDatPhongController(AppDbContext context)
+        public ChiTietDatPhongController(IChiTietDatPhongRepository chiTietDatPhongRepository, IPhongRepository phongRepository, IDatPhongRepository datPhongRepository)
         {
-            _context = context;
+            _chiTietDatPhongRepository = chiTietDatPhongRepository;
+            _phongRepository = phongRepository;
+            _datPhongRepository = datPhongRepository;
         }
 
         #region Công thức tính tiền
@@ -104,17 +108,14 @@ namespace QLyDatPhongKhachSan.Controllers
         #endregion
 
         // GET: ChiTietDatPhong/Details/5 (Xem chi tiết & hóa đơn tính tiền)
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var chiTiet = _context.ChiTietDatPhongs
-                .Include(ct => ct.Phong)
-                .Include(ct => ct.DatPhong)
-                .FirstOrDefault(ct => ct.MaChiTiet == id);
+            var chiTiet = await _chiTietDatPhongRepository.LayTheoMaAsync(id.Value);
 
             if (chiTiet == null)
             {
@@ -128,21 +129,17 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: ChiTietDatPhong/Create?maDatPhong=5
-        public IActionResult Create(int? maDatPhong)
+        public async Task<IActionResult> Create(int? maDatPhong)
         {
             // Nạp danh sách phòng có thể chọn (loại bỏ phòng đang bảo trì)
-            var phongs = _context.Phongs
-                .Include(p => p.LoaiPhong)
-                .Where(p => p.TrangThai != "BaoTri")
-                .OrderBy(p => p.SoPhong)
-                .ToList();
+            var phongs = await _phongRepository.LayDanhSachPhongKhongBaoTriAsync();
 
             ViewBag.DanhSachPhong = new SelectList(phongs, "MaPhong", "SoPhong");
 
             // Thông tin đặt phòng khi được gọi từ màn hình chi tiết đơn
             if (maDatPhong.HasValue)
             {
-                ViewBag.DatPhong = _context.DatPhongs.FirstOrDefault(dp => dp.MaDatPhong == maDatPhong.Value);
+                ViewBag.DatPhong = await _datPhongRepository.FindAsync(maDatPhong.Value);
                 ViewBag.MaDatPhong = maDatPhong.Value;
             }
 
@@ -159,7 +156,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: ChiTietDatPhong/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(ChiTietDatPhong chiTiet)
+        public async Task<IActionResult> Create(ChiTietDatPhong chiTiet)
         {
             if (!KiemTraNgayHopLe(chiTiet.NgayNhan, chiTiet.NgayTra, out string loi))
             {
@@ -174,18 +171,15 @@ namespace QLyDatPhongKhachSan.Controllers
             // Tính tiền trước khi lưu, không tin vào giá trị gửi lên từ form
             ApDungCongThucTinhTien(chiTiet);
 
-            _context.ChiTietDatPhongs.Add(chiTiet);
-            _context.SaveChanges();
+            await _chiTietDatPhongRepository.ThemAsync(chiTiet);
 
             // Cập nhật tổng tiền của hóa đơn đặt phòng
-            var datPhong = _context.DatPhongs
-                .Include(dp => dp.ChiTietDatPhongs)
-                .FirstOrDefault(dp => dp.MaDatPhong == chiTiet.MaDatPhong);
+            var datPhong = await _datPhongRepository.LayTheoMaVoiChiTietAsync(chiTiet.MaDatPhong);
 
             if (datPhong != null)
             {
                 datPhong.TongTien = TinhTongTien(datPhong.ChiTietDatPhongs);
-                _context.SaveChanges();
+                await _datPhongRepository.CapNhatAsync(datPhong);
             }
 
             return RedirectToAction(nameof(Details), new { id = chiTiet.MaChiTiet });
