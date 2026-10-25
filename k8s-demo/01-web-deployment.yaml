@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qldpkh-web
+  namespace: hotel-demo
+  labels:
+    app: qldpkh-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qldpkh-web
+  template:
+    metadata:
+      labels:
+        app: qldpkh-web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+              value: "true"
+            - name: SeedSampleData
+              value: "true"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: connection-string
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qldpkh-web
+  namespace: hotel-demo
+  labels:
+    app: qldpkh-web
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: qldpkh-web
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qldpkh-web-ingress
+  namespace: hotel-demo
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - hotel.example.com
+      secretName: hotel-tls
+  rules:
+    - host: hotel.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qldpkh-web
+                port:
+                  number: 8080
