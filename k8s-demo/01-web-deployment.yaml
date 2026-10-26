@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: qldpkh-web
-  namespace: hotel-demo
+  namespace: k8s-hoteluneti
   labels:
     app: qldpkh-web
 spec:
@@ -63,7 +63,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qldpkh-web
-  namespace: hotel-demo
+  namespace: k8s-hoteluneti
   labels:
     app: qldpkh-web
 spec:
@@ -80,7 +80,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: qldpkh-web-ingress
-  namespace: hotel-demo
+  namespace: k8s-hoteluneti
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
@@ -88,10 +88,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - hotel.example.com
-      secretName: hotel-tls
+        - uhotel.click
+      secretName: uhotel-tls
   rules:
-    - host: hotel.example.com
+    - host: uhotel.click
       http:
         paths:
           - path: /

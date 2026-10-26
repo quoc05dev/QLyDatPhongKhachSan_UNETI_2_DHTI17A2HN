@@ -1,23 +1,16 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: hotel-demo
+  name: k8s-hoteluneti
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: qldpkh-secrets
-  namespace: hotel-demo
-type: Opaque
-stringData:
-  sa-password: "ChangeMe_123456!"
-  connection-string: "Server=mssql,1433;Database=QLyDatPhongKhachSanDB;User Id=sa;Password=ChangeMe_123456!;TrustServerCertificate=True;MultipleActiveResultSets=true"
+# Secret đã được tách ra file 00-secret.yaml (gitignored).
+# Xem 00-secret.yaml.example để tạo file đó.
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: mssql
-  namespace: hotel-demo
+  namespace: k8s-hoteluneti
   labels:
     app: mssql
 spec:
@@ -33,7 +26,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mssql
-  namespace: hotel-demo
+  namespace: k8s-hoteluneti
 spec:
   serviceName: mssql
   replicas: 1

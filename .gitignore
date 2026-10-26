@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Kubernetes secrets (chứa password - không commit)
+k8s-demo/00-secret.yaml
+
 # User-specific files
 *.rsuser
 *.suo
@@ -480,3 +483,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Kubernetes secrets (chứa password - không commit)
+k8s-demo/00-secret.yaml
