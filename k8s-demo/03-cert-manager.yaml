@@ -35,7 +35,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: uhotel-tls
-  namespace: hotel-demo
+  namespace: k8s-hoteluneti
 spec:
   secretName: uhotel-tls          # phải khớp với secretName trong Ingress
   issuerRef:
