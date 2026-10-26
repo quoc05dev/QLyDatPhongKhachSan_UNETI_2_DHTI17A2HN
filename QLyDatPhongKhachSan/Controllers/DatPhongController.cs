@@ -23,6 +23,7 @@ namespace QLyDatPhongKhachSan.Controllers
         private readonly IKhachHangRepository _khachHangRepository;
         private readonly ITaiKhoanRepository _taiKhoanRepository;
         private readonly IWebHostEnvironment _env;
+        private readonly Services.IEmailService _emailService;
 
         public DatPhongController(
             IDatPhongRepository datPhongRepository,
@@ -31,7 +32,8 @@ namespace QLyDatPhongKhachSan.Controllers
             ILoaiPhongRepository loaiPhongRepository,
             IKhachHangRepository khachHangRepository,
             ITaiKhoanRepository taiKhoanRepository,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            Services.IEmailService emailService)
         {
             _datPhongRepository = datPhongRepository;
             _chiTietDatPhongRepository = chiTietDatPhongRepository;
@@ -40,6 +42,7 @@ namespace QLyDatPhongKhachSan.Controllers
             _khachHangRepository = khachHangRepository;
             _taiKhoanRepository = taiKhoanRepository;
             _env = env;
+            _emailService = emailService;
         }
 
         #region Helper: Quản lý Session & Khách hàng
@@ -299,7 +302,13 @@ namespace QLyDatPhongKhachSan.Controllers
 
             await _chiTietDatPhongRepository.ThemAsync(chiTiet);
 
-            TempData["SuccessMessage"] = $"Đặt phòng {phong.SoPhong} thành công! Đơn đặt phòng #{datPhong.MaDatPhong:D4} đã được gửi tới bộ phận Lễ tân xử lý.";
+            try
+            {
+                await _emailService.GuiXacNhanDatPhongThanhCongAsync(datPhong.MaDatPhong);
+            }
+            catch { }
+
+            TempData["SuccessMessage"] = $"Đặt phòng {phong.SoPhong} thành công! Đơn đặt phòng #{datPhong.MaDatPhong:D4} đã được gửi tới bộ phận Lễ tân xử lý. Vui lòng kiểm tra email để xem xác nhận.";
             return RedirectToAction(nameof(Details), new { id = datPhong.MaDatPhong });
         }
 
@@ -685,6 +694,82 @@ namespace QLyDatPhongKhachSan.Controllers
 
             TempData["SuccessMessage"] = $"Đã hủy đơn đặt phòng #{datPhong.MaDatPhong:D4} thành công và phòng đã được giải phóng sẵn sàng đón khách.";
             return RedirectToAction(nameof(LichSu));
+        }
+
+        // GET: DatPhong/ThanhToan/5
+        [HttpGet]
+        public async Task<IActionResult> ThanhToan(int id)
+        {
+            var maTaiKhoan = GetCurrentMaTaiKhoan();
+            if (maTaiKhoan == null)
+            {
+                return RedirectToAction("Login", "DangNhap", new { returnUrl = Url.Action("ThanhToan", "DatPhong", new { id }) });
+            }
+
+            var datPhong = await _datPhongRepository.LayTheoMaVoiChiTietVaLoaiPhongAsync(id);
+            if (datPhong == null) return NotFound();
+
+            var khachHang = await GetOrCreateCurrentKhachHangAsync();
+            if (khachHang == null || datPhong.MaKhachHang != khachHang.MaKhachHang)
+            {
+                return Forbid();
+            }
+
+            var viewModel = new DatPhongChiTietViewModel
+            {
+                DatPhong = datPhong,
+                ChiTiet = datPhong.ChiTietDatPhongs.FirstOrDefault(),
+                KhachHang = datPhong.KhachHang ?? khachHang,
+                Phong = datPhong.ChiTietDatPhongs.FirstOrDefault()?.Phong,
+                SoNgayO = (datPhong.NgayTraDuKien.Date - datPhong.NgayNhan.Date).Days < 1 ? 1 : (datPhong.NgayTraDuKien.Date - datPhong.NgayNhan.Date).Days
+            };
+            return View(viewModel);
+        }
+
+        // POST: DatPhong/ThanhToan/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ThanhToan(int id, string phuongThuc, decimal soTien)
+        {
+            var maTaiKhoan = GetCurrentMaTaiKhoan();
+            if (maTaiKhoan == null)
+            {
+                return RedirectToAction("Login", "DangNhap");
+            }
+
+            var datPhong = await _datPhongRepository.LayTheoMaVoiChiTietVaLoaiPhongAsync(id);
+            if (datPhong == null) return NotFound();
+
+            var khachHang = await GetOrCreateCurrentKhachHangAsync();
+            if (khachHang == null || datPhong.MaKhachHang != khachHang.MaKhachHang)
+            {
+                return Forbid();
+            }
+
+            if (soTien <= 0)
+            {
+                TempData["ErrorMessage"] = "Số tiền thanh toán không hợp lệ.";
+                return RedirectToAction(nameof(ThanhToan), new { id });
+            }
+
+            decimal conLai = datPhong.TongTien - datPhong.TienCoc;
+            if (conLai <= 0)
+            {
+                TempData["SuccessMessage"] = "Đơn đã được thanh toán đầy đủ.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            decimal thanhToan = soTien > conLai ? conLai : soTien;
+            datPhong.TienCoc += thanhToan;
+
+            if (string.IsNullOrWhiteSpace(datPhong.GhiChu))
+                datPhong.GhiChu = $"Thanh toán {thanhToan:N0}đ ({phuongThuc}) lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
+            else
+                datPhong.GhiChu += $" | Thanh toán {thanhToan:N0}đ ({phuongThuc}) lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
+
+            await _datPhongRepository.CapNhatAsync(datPhong);
+            TempData["SuccessMessage"] = $"Đã ghi nhận thanh toán {thanhToan:N0}đ ({(phuongThuc == "ChuyenKhoan" ? "Chuyển khoản" : "Tiền mặt")}).";
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }

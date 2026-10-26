@@ -1,0 +1,79 @@
+@model QLyDatPhongKhachSan.ViewModels.DatPhongChiTietViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = $"Thanh toán đơn #{Model.DatPhong.MaDatPhong:D4}";
+    Layout = "_HomeLayout";
+    var gD = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<style>
+    .pay-wrap{max-width:860px;margin:40px auto;padding:0 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+    .pay-card{background:#fff;border:1px solid #edf0f2;box-shadow:0 18px 40px rgba(15,23,42,0.06);border-radius:4px;overflow:hidden}
+    .pay-head{padding:18px 24px;border-bottom:1px solid #f1f3f5;display:flex;align-items:center;justify-content:space-between}
+    .pay-head h1{margin:0;font-family:"Playfair Display",serif;font-size:22px}
+    .pay-body{padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+    .pay-row{display:flex;align-items:center;justify-content:space-between;font-size:14px}
+    .pay-row strong{font-size:15px}
+    .pay-total{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #f1f3f5;font-size:15px}
+    .pay-total strong{font-size:18px;color:#b28c49}
+    .pay-methods{display:flex;flex-direction:column;gap:10px}
+    .pay-method{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #edf0f2;border-radius:3px;cursor:pointer}
+    .pay-method.active{border-color:#b28c49;box-shadow:0 0 0 1px rgba(178,140,73,0.2)}
+    .pay-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 22px;background:linear-gradient(90deg,#b28c49,#d9b57e);color:#fff;border:0;text-decoration:none;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+    .pay-back{display:inline-flex;align-items:center;gap:8px;color:#6b7480;text-decoration:none;font-size:13px}
+    @@media(max-width:820px){.pay-wrap{grid-template-columns:1fr}}
+</style>
+
+<div class="pay-wrap">
+    <section class="pay-card">
+        <header class="pay-head">
+            <div>
+                <small style="text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:#b28c49;">Thanh toán</small>
+                <h1>Đơn đặt phòng #@Model.DatPhong.MaDatPhong.ToString("D4")</h1>
+            </div>
+            <a class="pay-back" asp-action="Details" asp-route-id="@Model.DatPhong.MaDatPhong">← Chi tiết đơn</a>
+        </header>
+        <div class="pay-body">
+            <div class="pay-row"><span>Phòng</span><strong>@(Model.Phong?.SoPhong ?? "-") - @(Model.Phong?.LoaiPhong?.TenLoai ?? "-")</strong></div>
+            <div class="pay-row"><span>Ngày nhận - trả</span><strong>@Model.DatPhong.NgayNhan.ToString("dd/MM/yyyy") - @Model.DatPhong.NgayTraDuKien.ToString("dd/MM/yyyy") (@Model.SoNgayO đêm)</strong></div>
+            <div class="pay-row"><span>Khách hàng</span><strong>@(Model.KhachHang?.HoTen ?? "-")</strong></div>
+            <hr style="border:0;border-top:1px solid #f1f3f5;margin:4px 0" />
+            <div class="pay-row"><span>Tổng tiền phòng</span><span>@Model.DatPhong.TongTien.ToString("N0")₫</span></div>
+            <div class="pay-row"><span>Đã đặt cọc</span><span>@Model.DatPhong.TienCoc.ToString("N0")₫</span></div>
+            <div class="pay-total"><span>Còn lại cần thanh toán</span><strong>@Model.ConLaiPhaiThanhToan.ToString("N0")₫</strong></div>
+        </div>
+    </section>
+
+    <aside class="pay-card">
+        <header class="pay-head">
+            <div>
+                <small style="text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:#b28c49;">Phương thức</small>
+                <h1>Chọn phương thức thanh toán</h1>
+            </div>
+        </header>
+        <div class="pay-body">
+            <form asp-action="ThanhToan" asp-route-id="@Model.DatPhong.MaDatPhong" method="post" style="display:flex;flex-direction:column;gap:14px;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="soTien" value="@Model.ConLaiPhaiThanhToan" />
+                <div class="pay-methods">
+                    <label class="pay-method active">
+                        <input type="radio" name="phuongThuc" value="TienMat" checked style="accent-color:#b28c49" />
+                        <div>
+                            <strong>Thanh toán tại lễ tân</strong>
+                            <div style="font-size:12px;color:#6b7480">Trả bằng tiền mặt khi nhận phòng</div>
+                        </div>
+                    </label>
+                    <label class="pay-method">
+                        <input type="radio" name="phuongThuc" value="ChuyenKhoan" style="accent-color:#b28c49" />
+                        <div>
+                            <strong>Chuyển khoản ngân hàng</strong>
+                            <div style="font-size:12px;color:#6b7480">Xác nhận cọc/trả trước qua chuyển khoản</div>
+                        </div>
+                    </label>
+                </div>
+                <button type="submit" class="pay-btn">Xác nhận thanh toán</button>
+                <p style="font-size:12px;color:#6b7480;text-align:center;margin:0;">Thanh toán được ghi nhận nội bộ (demo).</p>
+            </form>
+        </div>
+    </aside>
+</div>

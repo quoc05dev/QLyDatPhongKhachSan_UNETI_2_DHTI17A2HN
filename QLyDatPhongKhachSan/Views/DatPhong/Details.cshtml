@@ -281,8 +281,21 @@
         <div class="bd-total">
             <small>Còn lại cần thanh toán</small>
             <strong>@Model.ConLaiPhaiThanhToan.ToString("N0")₫</strong>
-            <span>(Thanh toán khi nhận phòng hoặc trả phòng)</span>
+            <span>(Thanh toán tại lễ tân hoặc thanh toán trực tuyến)</span>
         </div>
+
+        @if (Model.ConLaiPhaiThanhToan > 0)
+        {
+            <a asp-action="ThanhToan" asp-route-id="@Model.DatPhong.MaDatPhong" class="book-submit" style="display:block;text-align:center;text-decoration:none;margin-top:12px;">
+                Thanh toán cọc/trả trước
+            </a>
+        }
+        else if (Model.DatPhong.TienCoc >= Model.DatPhong.TongTien && Model.DatPhong.TongTien > 0)
+        {
+            <div style="margin-top:12px;padding:10px 12px;background:#f0f8f3;border:1px solid #b8e0c9;border-radius:3px;font-size:12px;color:#2d7a4f;text-align:center;">
+                Đã thanh toán đủ
+            </div>
+        }
 
         <a asp-action="LichSu" class="bd-btn-back">← Về danh sách lịch sử</a>
 

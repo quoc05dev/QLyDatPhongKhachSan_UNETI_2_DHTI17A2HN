@@ -118,8 +118,12 @@
                             </td>
                             <td><partial name="_TrangThaiBadge" model="@item.TrangThai" /></td>
                             <td style="text-align:right;">
-                                <div style="display:inline-flex;gap:8px;">
+                                <div style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
                                     <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaDatPhong">Chi tiết</a>
+                                    @if (item.TongTien - item.TienCoc > 0)
+                                    {
+                                        <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="ThanhToan" asp-route-id="@item.MaDatPhong">Thanh toán</a>
+                                    }
                                     @if (item.CoTheHuy)
                                     {
                                         <form asp-action="Cancel" asp-route-id="@item.MaDatPhong" method="post" style="display:inline;">

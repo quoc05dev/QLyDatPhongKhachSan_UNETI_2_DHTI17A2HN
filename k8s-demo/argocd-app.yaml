@@ -1,0 +1,33 @@
+# ArgoCD Application quản lý toàn bộ stack QLyDatPhong.
+# Apply thủ công MỘT LẦN trên VPS:
+#   kubectl -n argocd apply -f k8s-demo/argocd-app.yaml
+# Sau đó mọi push lên branch main (thư mục k8s-demo/manifests) sẽ được ArgoCD tự sync.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qldpkh-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/quoc05dev/QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN.git
+    targetRevision: main
+    path: k8s-demo/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: k8s-hoteluneti
+  syncPolicy:
+    automated:
+      # Tự rollback resource bị sửa tay ngoài ArgoCD (kệkubectl apply tay sẽ bị ghi đè)
+      selfHeal: true
+      # Không bật prune - tránh xóa nhầm resource khi đổi tên file
+      prune: false
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+  # Nếu sync lỗi do web apply trước SQL chưa xong, ArgoCD tự retry (đã cấu hình bên trên)

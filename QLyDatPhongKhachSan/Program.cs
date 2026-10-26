@@ -3,6 +3,7 @@ using QLyDatPhongKhachSan.Data;
 using QLyDatPhongKhachSan.HealthChecks;
 using QLyDatPhongKhachSan.Repositories;
 using QLyDatPhongKhachSan.Repositories.Interfaces;
+using QLyDatPhongKhachSan.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddScoped<ILoaiPhongRepository, LoaiPhongRepository>();
 builder.Services.AddScoped<IPhongRepository, PhongRepository>();
 builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
+
+// 1d. Đăng ký dịch vụ
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // 2. Cấu hình Session
 builder.Services.AddDistributedMemoryCache();
