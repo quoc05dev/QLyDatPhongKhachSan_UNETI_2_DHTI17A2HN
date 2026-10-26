@@ -15,6 +15,9 @@ spec:
       labels:
         app: qldpkh-web
     spec:
+      # Bỏ comment nếu image GHCR là private (cần tạo secret ghcr-cred trước, xem README A2/B1)
+      # imagePullSecrets:
+      #   - name: ghcr-cred
       containers:
         - name: web
           image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main
