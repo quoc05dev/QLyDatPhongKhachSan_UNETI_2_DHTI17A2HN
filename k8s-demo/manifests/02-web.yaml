@@ -85,8 +85,11 @@ metadata:
   name: qldpkh-web-ingress
   namespace: k8s-hoteluneti
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # CF Full(strict) + cert-manager cấp cert cho origin; KHÔNG force redirect
+    # để tránh loop khi CF vẫn ở Flexible
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "32m"
 spec:
   ingressClassName: nginx
   tls:
