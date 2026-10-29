@@ -18,7 +18,8 @@ name: CD (Auto Deploy)
 # Package GHCR: Public -> khong can them secret nao.
 # Tren server can co: Docker, Docker Compose, repo da clone, file .env.
 # Deploy dong tao cau hinh nginx reverse proxy.
-# HTTPS: khong cai SSL tai origin - nginx chi listen 80, Cloudflare lo phia truoc.
+# HTTPS: nginx luon listen 80; neu co cert Let's Encrypt cho NGINX_DOMAIN thi
+# setup-nginx.sh tu them server 443 de ho tro Cloudflare Full/Full (strict).
 # =============================================================================
 
 on:
