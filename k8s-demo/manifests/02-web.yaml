@@ -1,3 +1,19 @@
+# PVC lưu key ring DataProtection (cookie đăng nhập/session/antiforgery).
+# BẮT BUỘC với Kubernetes: không có nó, mỗi lần pod recreate = mất key =
+# mọi user bị logout. Key nằm chung qua PVC nên sống sót qua rolling update.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qldpkh-dp-keys
+  namespace: k8s-hoteluneti
+  labels:
+    app: qldpkh-web
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 64Mi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,18 +26,56 @@ spec:
   selector:
     matchLabels:
       app: qldpkh-web
+  # Tạo pod mới trước, chờ ready rồi mới kill pod cũ => không downtime.
+  # replicas>1 cần Redis cho Session/RateLimiter (hiện là in-memory per-pod).
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       labels:
         app: qldpkh-web
     spec:
-      # Bỏ comment nếu image GHCR là private (cần tạo secret ghcr-cred trước, xem README A2/B1)
-      # imagePullSecrets:
-      #   - name: ghcr-cred
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+      # Thay thế depends_on: service_healthy của Docker Compose:
+      # đợi SQL Server trả lời được TRƯỚC khi khởi động app.
+      initContainers:
+        - name: wait-for-mssql
+          image: mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
+          command:
+            - /bin/bash
+            - -c
+            - |
+              for i in $(seq 1 60); do
+                if /opt/mssql-tools18/bin/sqlcmd -C -S mssql -U sa -P "$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null; then
+                  echo "SQL Server san sang (lan $i)"; exit 0
+                fi
+                echo "Cho SQL Server... ($i)"; sleep 5
+              done
+              echo "SQL Server khong san sang sau 300s"; exit 1
+          env:
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: sa-password
       containers:
         - name: web
-          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main
+          # Digest pin: image mới nhất từ Compose (pre-migration).
+          # Sau này CI (kubectl set image) sẽ cập nhật digest, field này nằm trong
+          # ignoreDifferences của ArgoCD để 2 nguồn không xung đột.
+          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main@sha256:708b49ccf8e7d217ffc559ec4d6daca4d4407f784facb76bad9ae9a2ec8a0500
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           ports:
             - containerPort: 8080
           env:
@@ -29,24 +83,36 @@ spec:
               value: "Production"
             - name: ASPNETCORE_URLS
               value: "http://+:8080"
-            # ingress-nginx không chạy trên loopback => cho phép tin forwarded headers.
-            # App chỉ lộ qua Ingress, không có Service NodePort/LoadBalancer.
+            # Host nginx nằm trên node khác về mặt network namespace => không phải
+            # loopback, nên phải bật cờ tin forwarded headers (X-Forwarded-Proto...).
             - name: TrustAllForwardedHeaders
               value: "true"
             - name: SeedSampleData
               value: "false"
-            # Nếu cần seed demo, đặt SeedSampleData=true và thêm key
-            # seed-admin-password vào secret qldpkh-secrets, rồi bỏ comment:
-            # - name: SeedAdminPassword
+            # Parity với docker-compose.yml — thiếu thì app rơi về appsettings.json.
+            - name: AllowedHosts
+              value: "uhotel.click;www.uhotel.click;dev.uhotel.click;localhost;127.0.0.1"
+            # Trỏ đúng chỗ mount PVC bên dưới để key ring sống qua restart.
+            - name: DP_KEY_PATH
+              value: "/data/dataprotection"
+            # Google OAuth TẮT tạm thời: không khai biến nào => app tự tắt
+            # (Program.cs kiểm tra thiếu ClientId/Secret thì bỏ qua AddGoogle).
+            # Muốn BẬT lại: thêm 2 key vào secret qldpkh-secrets rồi mở comment:
+            # - name: Authentication__Google__ClientId
             #   valueFrom:
-            #     secretKeyRef:
-            #       name: qldpkh-secrets
-            #       key: seed-admin-password
+            #     secretKeyRef: { name: qldpkh-secrets, key: google-client-id }
+            # - name: Authentication__Google__ClientSecret
+            #   valueFrom:
+            #     secretKeyRef: { name: qldpkh-secrets, key: google-client-secret }
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
                   name: qldpkh-secrets
                   key: connection-string
+          volumeMounts:
+            - name: dp-keys
+              mountPath: /data/dataprotection
+          # readiness: có kiểm tra DB (/health = 503 khi mất DB) => dừng đưa traffic.
           readinessProbe:
             httpGet:
               path: /health
@@ -58,9 +124,11 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
+          # liveness: KHÔNG kiểm tra DB — nếu dùng /health thì khi DB chạm
+          # K8s sẽ restart pod web vô ích (vòng xoáy).
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/live
               port: 8080
               httpHeaders:
                 - name: Host
@@ -76,7 +144,16 @@ spec:
             limits:
               cpu: 500m
               memory: 1Gi
+      volumes:
+        - name: dp-keys
+          persistentVolumeClaim:
+            claimName: qldpkh-dp-keys
 ---
+# NodePort 30444: host nginx (cổng 80/443) proxy thẳng tới đây.
+# Đã survey NodePort đang dùng trên cluster: 30080, 30443, 31359, 31367,
+# 31684, 31778, 32506 => 30444 trống.
+# Lưu ý: nếu firewall mở NodePort ra public thì client bypass được TLS —
+# phải chặn từ ngoài (chỉ cho 127.0.0.1 truy cập nếu kube-proxy không bind riêng).
 apiVersion: v1
 kind: Service
 metadata:
@@ -85,40 +162,20 @@ metadata:
   labels:
     app: qldpkh-web
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
     - name: http
       port: 8080
       targetPort: 8080
+      nodePort: 30444
       protocol: TCP
   selector:
     app: qldpkh-web
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: qldpkh-web-ingress
-  namespace: k8s-hoteluneti
-  annotations:
-    # CF Full(strict) + cert-manager cấp cert cho origin; KHÔNG force redirect
-    # để tránh loop khi CF vẫn ở Flexible
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-body-size: "32m"
-spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - uhotel.click
-      secretName: uhotel-tls
-  rules:
-    - host: uhotel.click
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: qldpkh-web
-                port:
-                  number: 8080
+# Ingress qldpkh-web-ingress ĐÃ GỠ khỏi stack production.
+# Lý do: host nginx giữ 80/443 (phục vụ 22 domain) và proxy thẳng vào
+# NodePort 30444 => ingress-nginx/cert-manager không còn tham gia đường đi.
+# (ingress-nginx trong cluster cũng không thể sống: crashloop "port 80 is
+# already in use" — sẽ được gỡ ở Phase dọn dẹp.)
+# NHỚ: ArgoCD prune=false nên phải xoá tay:
+#   kubectl -n k8s-hoteluneti delete ingress qldpkh-web-ingress --ignore-not-found

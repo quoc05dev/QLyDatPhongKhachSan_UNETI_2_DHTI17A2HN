@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,21 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = cookieSecurePolicy;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+
+// 2a. DataProtection: persist key ring ra thư mục ổn định.
+//     Mặc định ASP.NET ghi vào ~/.aspnet/DataProtection-Keys TRONG container/pod:
+//     pod restart = mất key = mọi cookie đăng nhập/session/antiforgery bị vô hiệu (logout toàn bộ).
+//     Kubernetes: mount PVC vào DP_KEY_PATH để key sống qua rolling update và dùng chung giữa replica.
+//     Local/Compose không đặt DP_KEY_PATH: dùng thư mục tạm (hành vi ephemeral như cũ).
+var dpKeyPath = Environment.GetEnvironmentVariable("DP_KEY_PATH");
+if (string.IsNullOrWhiteSpace(dpKeyPath))
+{
+    dpKeyPath = Path.Combine(Path.GetTempPath(), "QLyDatPhongKhachSan-dp-keys");
+}
+Directory.CreateDirectory(dpKeyPath);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dpKeyPath))
+    .SetApplicationName("QLyDatPhongKhachSan");
 
 // 2b. Xác thực ngoài (Google OAuth) để đăng nhập / đăng ký bằng tài khoản Google.
 //     Chỉ bật khi đã có ClientId + ClientSecret trong appsettings hoặc biến môi trường
@@ -174,6 +190,10 @@ app.MapControllerRoute(
 
 // Endpoint cho HEALTHCHECK: 200 khi app + database san sang, 503 khi khong.
 app.MapHealthChecks("/health");
+
+// Liveness cho Kubernetes: KHÔNG kiểm tra database.
+// Dùng /health (có kiểm tra DB) làm liveness sẽ restart pod vô ích khi DB chạm.
+app.MapGet("/health/live", () => Results.Ok("Alive"));
 
 app.Run();
 
