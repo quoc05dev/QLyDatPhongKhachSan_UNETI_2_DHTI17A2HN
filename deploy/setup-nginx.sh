@@ -16,6 +16,10 @@
 #   NGINX_DOMAIN - bat buoc. De trong = bo qua cau hinh nginx.
 #   WEB_PORT     - mac dinh lay trong .env cua compose (8080). Doc tu do de
 #                  khong lech voi docker-compose.yml.
+#   PROXY_TARGET - upstream backend. Mac dinh: 127.0.0.1:WEB_PORT (Docker Compose).
+#                  Sau chuyen production sang Kubernetes, dat trong .env:
+#                    PROXY_TARGET=127.0.0.1:30444   (NodePort cua Service K8s)
+#                  Chi dat PROXY_TARGET la du, khong can doi WEB_PORT.
 # =============================================================================
 set -euo pipefail
 
@@ -30,6 +34,13 @@ if [ -z "${WEB_PORT:-}" ] && [ -f .env ]; then
   WEB_PORT="$(grep -E '^[[:space:]]*WEB_PORT=' .env | tail -1 | cut -d= -f2- | tr -d '[:space:]' || true)"
 fi
 WEB_PORT="${WEB_PORT:-8080}"
+
+# PROXY_TARGET: upstream hien tai. Doc tu .env neu khong truyen vao tu ben ngoai.
+# Sau khi chuyen sang K8s: PROXY_TARGET=127.0.0.1:30444 (NodePort Service).
+if [ -z "${PROXY_TARGET:-}" ] && [ -f .env ]; then
+  PROXY_TARGET="$(grep -E '^[[:space:]]*PROXY_TARGET=' .env | tail -1 | cut -d= -f2- | tr -d '[:space:]' || true)"
+fi
+PROXY_TARGET="${PROXY_TARGET:-127.0.0.1:$WEB_PORT}"
 
 # Server nay SSH bang root -> khong dung/ khong can sudo.
 # Nhung may nao chay bang user thuong van dung duoc sudo.
@@ -48,7 +59,7 @@ if [ -f "$SSL_CERT" ] && [ -f "$SSL_KEY" ]; then
   HAS_SSL=1
 fi
 
-echo "[nginx] domain=$DOMAIN web_port=$WEB_PORT ssl=$HAS_SSL chay_quyen=$(id -un)"
+echo "[nginx] domain=$DOMAIN proxy_target=$PROXY_TARGET ssl=$HAS_SSL chay_quyen=$(id -un)"
 
 # --- 1. cai nginx neu thieu ---------------------------------------------------
 if ! command -v nginx >/dev/null 2>&1; then
@@ -71,7 +82,7 @@ fi
 emit_proxy_location() {
   local indent="${1:-    }"
   echo "${indent}location / {"
-  echo "${indent}    proxy_pass http://127.0.0.1:$WEB_PORT;"
+  echo "${indent}    proxy_pass http://$PROXY_TARGET;"
   echo "${indent}    proxy_http_version 1.1;"
   echo "${indent}    proxy_set_header Host \$host;"
   echo "${indent}    proxy_set_header X-Real-IP \$client_ip;"

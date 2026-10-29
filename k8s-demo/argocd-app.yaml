@@ -16,6 +16,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: k8s-hoteluneti
+  # CI (GitHub Actions) làm chủ image digest qua `kubectl set image`.
+  # Nếu không ignore field image, selfHeal sẽ ghi đè digest CI về :main
+  # => mất roll image mới. ArgoCD làm chủ phần manifest còn lại.
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: qldpkh-web
+      namespace: k8s-hoteluneti
+      jsonPointers:
+        - /spec/template/spec/containers/0/image
   syncPolicy:
     automated:
       # Tự rollback resource bị sửa tay ngoài ArgoCD (kệkubectl apply tay sẽ bị ghi đè)

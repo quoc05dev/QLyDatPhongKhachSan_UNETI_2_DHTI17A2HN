@@ -2,24 +2,30 @@ name: CD (Auto Deploy)
 
 # =============================================================================
 # Trigger: moi lan push len main.
-# Pipeline: CI gate → build & push image GHCR → SSH deploy len server.
+# Pipeline: CI gate -> build & push image GHCR -> SSH kubectl set image (K8s).
+#
+# Kiens truc sau chuyen doi: production chay tren Kubernetes (k3s) + ArgoCD.
+#   - ArgoCD dong thuc manifest (sync/selfHeal) tu branch main.
+#   - CI nay lam chu IMAGE: kubectl set image digest moi cho Deployment.
+#   - ArgoCD co ignoreDifferences tren truong image (k8s-demo/argocd-app.yaml)
+#     de 2 nguon khong ghi de nhau.
+#   - Nguoi vao site van di qua host nginx (80/443) -> NodePort K8s.
 #
 # Secrets can thiet (Settings > Secrets and variables > Actions):
 #   DEPLOY_HOST    = IP hoac domain server
-#   DEPLOY_USER    = ubuntu
+#   DEPLOY_USER    = root (can quyen kubectl/ k3s)
 #   DEPLOY_SSH_KEY = noi dung private key SSH (OpenSSH)
 #   DEPLOY_PORT    = 22 (tuy chon)
 #
 # Variables:
 #   DEPLOY_ENABLED = true        (bat auto deploy)
-#   DEPLOY_PATH    = /srv/qldpkh (thu muc repo tren server)
-#   NGINX_DOMAIN   = uhotel.click (domain tro ve VPS; de trong = bo qua nginx)
+#   DEPLOY_PATH    = /srv/qldpkh (khong con dung cho K8s, giu de ve sau)
+#   NGINX_DOMAIN   = uhotel.click (khong con dung cho K8s - nginx cau hinh 1 lan)
 #
 # Package GHCR: Public -> khong can them secret nao.
-# Tren server can co: Docker, Docker Compose, repo da clone, file .env.
-# Deploy dong tao cau hinh nginx reverse proxy.
-# HTTPS: nginx luon listen 80; neu co cert Let's Encrypt cho NGINX_DOMAIN thi
-# setup-nginx.sh tu them server 443 de ho tro Cloudflare Full/Full (strict).
+# Tren server can co: kubectl/ k3s (dang chay), ArgoCD (dong thuc manifest).
+# Deploy KHONG con chay docker compose va KHONG con cau hinh nginx (da cau hinh
+# 1 lan trong Phase cut-over, xem deploy/setup-nginx.sh).
 # =============================================================================
 
 on:
@@ -58,6 +64,7 @@ jobs:
     outputs:
       image: ${{ steps.vars.outputs.image }}
       tag:   ${{ github.ref_name }}
+      digest: ${{ steps.build.outputs.digest }}
 
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +93,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build & push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -97,10 +105,11 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ---------------------------------------------------------------------------
-  # 3. SSH deploy (chi chay khi DEPLOY_ENABLED = true)
+  # 3. SSH -> kubectl set image (chi chay khi DEPLOY_ENABLED = true)
+  #    CI lam chu image digest; ArgoCD lam chu manifest con lai.
   # ---------------------------------------------------------------------------
   deploy:
-    name: Deploy len server
+    name: Deploy len K8s
     runs-on: ubuntu-latest
     needs: publish-image
     if: ${{ vars.DEPLOY_ENABLED == 'true' }}
@@ -108,63 +117,39 @@ jobs:
       contents: read
 
     steps:
-      - name: SSH → pull image → up → healthcheck → rollback neu loi
+      - name: SSH -> kubectl set image -> rollout status -> rollback neu loi
         uses: appleboy/ssh-action@v1
         env:
-          WORKDIR:      ${{ vars.DEPLOY_PATH }}
-          REF:          ${{ github.ref_name }}
-          WEB_IMAGE:    ${{ needs.publish-image.outputs.image }}:${{ github.ref_name }}
-          NGINX_DOMAIN: ${{ vars.NGINX_DOMAIN }}
+          NS:          k8s-hoteluneti
+          WEB_IMAGE:   ${{ needs.publish-image.outputs.image }}
+          IMAGE_DIGEST: ${{ needs.publish-image.outputs.digest }}
         with:
           host:            ${{ secrets.DEPLOY_HOST }}
           username:        ${{ secrets.DEPLOY_USER }}
           key:             ${{ secrets.DEPLOY_SSH_KEY }}
           port:            ${{ secrets.DEPLOY_PORT || 22 }}
-          envs:            WORKDIR,REF,WEB_IMAGE,NGINX_DOMAIN
+          envs:            NS,WEB_IMAGE,IMAGE_DIGEST
           command_timeout: 10m
           script: |
             set -euo pipefail
-            # DEPLOY_PATH co the duoc dat la "~/..." -> mo rong thanh duong day du
-            # (vi `cd "$WORKDIR"` co ngoac kep nen khong tu mo rong dau ~)
-            WORKDIR="${WORKDIR/#\~/$HOME}"
-            cd "$WORKDIR"
 
-            # Luu image dang chay de rollback
-            PREV_IMAGE=$(docker inspect --format='{{index .Config.Image}}' \
-              "$(docker compose ps -q web 2>/dev/null | head -1)" 2>/dev/null || true)
+            # Luu image truoc do de rollback
+            PREV_IMAGE=$(kubectl -n "$NS" get deploy qldpkh-web \
+              -o jsonpath='{.spec.template.spec.containers[0].image}')
 
-            # Lay docker-compose.yml moi nhat tu git
-            git fetch --all --prune
-            git reset --hard "origin/$REF"
+            echo "Cap nhat image: ${WEB_IMAGE}@${IMAGE_DIGEST}"
+            kubectl -n "$NS" set image deploy/qldpkh-web \
+              web="${WEB_IMAGE}@${IMAGE_DIGEST}"
 
-            # Pull image moi & khoi dong
-            export WEB_IMAGE
-            docker compose pull web
-            docker compose up -d --remove-orphans
-
-            # Cho healthcheck (toi da 90s)
-            echo "Dang cho web healthy..."
-            for i in $(seq 1 18); do
-              STATUS=$(docker inspect --format='{{.State.Health.Status}}' \
-                "$(docker compose ps -q web 2>/dev/null | head -1)" 2>/dev/null || echo "unknown")
-              [ "$STATUS" = "healthy" ] && break
-              sleep 5
-            done
-
-            STATUS=$(docker inspect --format='{{.State.Health.Status}}' \
-              "$(docker compose ps -q web 2>/dev/null | head -1)" 2>/dev/null || echo "unknown")
-
-            if [ "$STATUS" != "healthy" ]; then
-              echo "FAIL: Container khong healthy ($STATUS) -> rollback"
-              [ -n "$PREV_IMAGE" ] && WEB_IMAGE="$PREV_IMAGE" docker compose up -d --remove-orphans
+            # Cho rollout toi da 180s (image pull + khoi dong + health)
+            if kubectl -n "$NS" rollout status deploy/qldpkh-web --timeout=180s; then
+              echo "Deploy thanh cong!"
+              kubectl -n "$NS" get deploy qldpkh-web \
+                -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
+              kubectl -n "$NS" get pods -l app=qldpkh-web
+            else
+              echo "FAIL: rollout loi -> rollback ve image cu ($PREV_IMAGE)"
+              kubectl -n "$NS" set image deploy/qldpkh-web web="$PREV_IMAGE" || true
+              kubectl -n "$NS" rollout status deploy/qldpkh-web --timeout=120s || true
               exit 1
             fi
-
-            # Cau hinh nginx. App da healthy roi nen loi nginx chi canh bao,
-            # khong keo theo rollback (rollback cung khong sua duoc nginx).
-            bash "$WORKDIR/deploy/setup-nginx.sh" \
-              || echo "CANH BAO: cau hinh nginx that bai - app van dang chay, xem log o tren."
-
-            docker image prune -f
-            echo "Deploy thanh cong!"
-            docker compose ps
