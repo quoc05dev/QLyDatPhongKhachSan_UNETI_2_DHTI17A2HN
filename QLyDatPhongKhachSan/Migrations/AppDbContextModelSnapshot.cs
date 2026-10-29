@@ -302,10 +302,17 @@ namespace QLyDatPhongKhachSan.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("GoogleSubject")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("HoTen")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("LaTaiKhoanGoogle")
+                        .HasColumnType("bit");
 
                     b.Property<string>("MatKhau")
                         .IsRequired()
@@ -333,6 +340,10 @@ namespace QLyDatPhongKhachSan.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("MaTaiKhoan");
+
+                    b.HasIndex("GoogleSubject")
+                        .IsUnique()
+                        .HasFilter("[GoogleSubject] IS NOT NULL");
 
                     b.HasIndex("TenDangNhap")
                         .IsUnique();

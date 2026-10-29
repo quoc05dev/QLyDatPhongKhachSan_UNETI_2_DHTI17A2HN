@@ -96,6 +96,12 @@ namespace QLyDatPhongKhachSan.Repositories
         public Task<TaiKhoan?> LayTheoTenDangNhapAsync(string tenDangNhap) =>
             _context.TaiKhoans.FirstOrDefaultAsync(t => t.TenDangNhap == tenDangNhap);
 
+        public Task<TaiKhoan?> LayTheoEmailAsync(string email) =>
+            _context.TaiKhoans.FirstOrDefaultAsync(t => t.Email == email);
+
+        public Task<TaiKhoan?> LayTheoGoogleSubjectAsync(string googleSubject) =>
+            _context.TaiKhoans.FirstOrDefaultAsync(t => t.GoogleSubject == googleSubject);
+
         public Task<bool> TenDangNhapDaTonTaiAsync(string tenDangNhap, int? boQuaMa = null) =>
             _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == tenDangNhap && (boQuaMa == null || t.MaTaiKhoan != boQuaMa));
 

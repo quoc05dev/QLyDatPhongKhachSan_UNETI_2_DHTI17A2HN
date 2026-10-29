@@ -17,6 +17,9 @@ namespace QLyDatPhongKhachSan.Repositories
         public Task<KhachHang?> LayTheoMaTaiKhoanAsync(int maTaiKhoan) =>
             _context.KhachHangs.FirstOrDefaultAsync(k => k.MaTaiKhoan == maTaiKhoan);
 
+        public Task<KhachHang?> LayTheoEmailAsync(string email) =>
+            _context.KhachHangs.FirstOrDefaultAsync(k => k.Email == email);
+
         public Task<KhachHang?> LayTheoMaTaiKhoanCoDatPhongAsync(int maTaiKhoan) =>
             _context.KhachHangs.Include(k => k.DatPhongs).FirstOrDefaultAsync(k => k.MaTaiKhoan == maTaiKhoan);
 

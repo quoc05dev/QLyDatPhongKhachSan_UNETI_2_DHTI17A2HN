@@ -25,7 +25,6 @@
         <div asp-validation-summary="ModelOnly" style="color:#c0392b;margin-bottom:16px;font-size: 13px;"></div>
         <input type="hidden" asp-for="MaTaiKhoan" />
         <input type="hidden" asp-for="TenDangNhap" />
-        <input type="hidden" asp-for="MatKhau" />
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
             <div style="display:flex;flex-direction:column;gap:6px;">
@@ -59,6 +58,12 @@
                 <label asp-for="SoDienThoai" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Số điện thoại</label>
                 <input asp-for="SoDienThoai" placeholder="09xxxxxxxx" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
                 <span asp-validation-for="SoDienThoai" style="color:#c0392b;font-size: 12px;"></span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label for="MatKhauMoi" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Mật khẩu mới (để trống nếu không đổi)</label>
+                <input type="password" id="MatKhauMoi" name="MatKhauMoi" minlength="6" maxlength="128" autocomplete="new-password" placeholder="Tối thiểu 6 ký tự" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                @Html.ValidationMessage("MatKhauMoi", new { style = "color:#c0392b;font-size: 12px;" })
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;justify-content:center;">

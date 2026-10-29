@@ -75,7 +75,7 @@ bash: line 9: cd: /***/Quoc/QLyDatPhongKhachSan: No such file or directory
 ```bash
 cd /root/Quoc/QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN
 cp .env.example .env
-sed -i 's/MSSQL_SA_PASSWORD=Your_password123/MSSQL_SA_PASSWORD=<mat-khau-manh>/' .env
+sed -i 's/^MSSQL_SA_PASSWORD=.*/MSSQL_SA_PASSWORD=<mat-khau-manh>/' .env
 cat .env   # xác nhận đã thay
 ```
 
@@ -366,7 +366,7 @@ Sinh mật khẩu mạnh (PowerShell, đủ 4 nhóm ký tự — SQL Server bắ
 ```
 
 ```bash
-sed -i 's/MSSQL_SA_PASSWORD=Your_password123/MSSQL_SA_PASSWORD=<mat-khau-sinh-duoc>/' .env
+sed -i 's/^MSSQL_SA_PASSWORD=.*/MSSQL_SA_PASSWORD=<mat-khau-sinh-duoc>/' .env
 # Điều chỉnh port cho khớp .env.example (kiểm tra lại ss -tlnp ở GĐ 0.2)
 cat .env
 ```

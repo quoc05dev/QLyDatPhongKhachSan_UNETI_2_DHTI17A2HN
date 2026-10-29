@@ -596,6 +596,16 @@
 
         function filterRooms(targetLoai) {
             var visibleCount = 0;
+            var hopLe = false;
+            filterBtns.forEach(function (btn) {
+                if (btn.getAttribute("data-loai") === targetLoai) {
+                    hopLe = true;
+                }
+            });
+            if (!hopLe && targetLoai !== "all") {
+                targetLoai = "all";
+            }
+
             filterBtns.forEach(function (btn) {
                 if (btn.getAttribute("data-loai") === targetLoai) {
                     btn.classList.add("is-selected");
@@ -619,7 +629,12 @@
                     searchStatus.style.display = "none";
                 } else {
                     searchStatus.style.display = "flex";
-                    searchStatusText.innerHTML = 'Hiển thị <strong>' + visibleCount + '</strong> hạng phòng thuộc loại ' + targetLoai + '.';
+                    searchStatusText.textContent = "";
+                    searchStatusText.appendChild(document.createTextNode("Hiển thị "));
+                    var strong = document.createElement("strong");
+                    strong.textContent = String(visibleCount);
+                    searchStatusText.appendChild(strong);
+                    searchStatusText.appendChild(document.createTextNode(" hạng phòng thuộc loại " + targetLoai + "."));
                 }
             }
         }

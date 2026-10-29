@@ -155,29 +155,23 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: TaiKhoan/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,Email,SoDienThoai,VaiTro,TrangThai,NgayTao")] TaiKhoan taiKhoan)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("MaTaiKhoan,TenDangNhap,HoTen,Email,SoDienThoai,VaiTro,TrangThai,NgayTao")] TaiKhoan taiKhoan,
+            string? MatKhauMoi)
         {
             if (id != taiKhoan.MaTaiKhoan)
             {
                 return NotFound();
             }
 
-            // Nếu không nhập mật khẩu mới thì coi như giữ mật khẩu cũ.
-            bool doiMatKhau = !string.IsNullOrWhiteSpace(taiKhoan.MatKhau);
-            if (doiMatKhau)
+            // Mật khẩu cũ (hash) không bao giờ được đưa vào form. Chỉ khi admin
+            // nhập ô "Mật khẩu mới" mới thay đổi mật khẩu.
+            ModelState.Remove("MatKhau");
+            bool doiMatKhau = !string.IsNullOrWhiteSpace(MatKhauMoi);
+            if (doiMatKhau && MatKhauMoi!.Length is < 6 or > 128)
             {
-                if (taiKhoan.MatKhau.Length < 6)
-                {
-                    ModelState.AddModelError("MatKhau", "Mật khẩu mới phải có ít nhất 6 ký tự.");
-                }
-            }
-            else
-            {
-                // Ô mật khẩu gửi lên rỗng sẽ bị model binder đổi thành null, khiến
-                // framework tự sinh lỗi [Required] và chặn lưu. Để trống ở đây
-                // có nghĩa là không đổi mật khẩu nên phải bỏ lỗi này đi.
-                ModelState.Remove("MatKhau");
-                taiKhoan.MatKhau = string.Empty;
+                ModelState.AddModelError("MatKhauMoi", "Mật khẩu mới phải từ 6 - 128 ký tự.");
             }
 
             if (!ModelState.IsValid)
@@ -217,7 +211,7 @@ namespace QLyDatPhongKhachSan.Controllers
 
                 if (doiMatKhau)
                 {
-                    taiKhoanCu.MatKhau = MatKhauHelper.Hash(taiKhoan.MatKhau);
+                    taiKhoanCu.MatKhau = MatKhauHelper.Hash(MatKhauMoi!);
                 }
 
                 await _taiKhoanRepository.CapNhatAsync(taiKhoanCu);

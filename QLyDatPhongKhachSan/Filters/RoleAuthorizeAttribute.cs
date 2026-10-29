@@ -4,7 +4,9 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using QLyDatPhongKhachSan.Helpers;
+using QLyDatPhongKhachSan.Repositories.Interfaces;
 
 namespace QLyDatPhongKhachSan.Filters
 {
@@ -18,7 +20,7 @@ namespace QLyDatPhongKhachSan.Filters
             _allowedRoles = allowedRoles;
         }
 
-        public override void OnActionExecuting(ActionExecutingContext context)
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var session = context.HttpContext.Session;
 
@@ -29,7 +31,24 @@ namespace QLyDatPhongKhachSan.Filters
                 return;
             }
 
-            // 2. Kiểm tra vai trò nếu có chỉ định vai trò cho phép
+            // 2. Đối chiếu lại với DB: tài khoản có thể đã bị xóa, bị khóa hoặc
+            //    đổi vai trò sau khi đăng nhập. Không tin tuyệt đối session cũ.
+            var maTaiKhoan = session.GetMaTaiKhoan();
+            var taiKhoanRepository = context.HttpContext.RequestServices.GetService<ITaiKhoanRepository>();
+            if (maTaiKhoan.HasValue && taiKhoanRepository != null)
+            {
+                var taiKhoan = await taiKhoanRepository.LayTheoMaAsync(maTaiKhoan.Value);
+                if (taiKhoan == null || !taiKhoan.TrangThai)
+                {
+                    session.ClearUserSession();
+                    context.Result = new RedirectToActionResult("Login", "DangNhap", new { returnUrl = context.HttpContext.Request.Path });
+                    return;
+                }
+
+                session.SetUserSession(taiKhoan.MaTaiKhoan, taiKhoan.TenDangNhap, taiKhoan.HoTen, taiKhoan.VaiTro);
+            }
+
+            // 3. Kiểm tra vai trò nếu có chỉ định vai trò cho phép
             if (_allowedRoles != null && _allowedRoles.Length > 0)
             {
                 var userRole = session.GetVaiTro();
@@ -41,7 +60,7 @@ namespace QLyDatPhongKhachSan.Filters
                 }
             }
 
-            base.OnActionExecuting(context);
+            await next();
         }
     }
 }
