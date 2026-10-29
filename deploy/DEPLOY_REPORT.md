@@ -1,7 +1,7 @@
 # BÁO CÁO DEPLOY + RUNBOOK TÁI SỬ DỤNG
 
 > Dự án: QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN (ASP.NET Core 10 MVC + SQL Server + Docker)
-> Kết quả: pipeline CD chạy thành công, app truy cập qua `http://<domain>` (Cloudflare proxy → nginx origin :80 → web container :8090).
+> Kết quả: pipeline CD chạy thành công, app truy cập qua `https://<domain>` (Cloudflare proxy → nginx origin :443 hoặc :80 → web container :8090).
 > Tài liệu này gồm 2 phần: **Phần A** là báo cáo debug thực tế, **Phần B** là runbook chuẩn tái sử dụng cho project khác.
 
 ---
@@ -373,6 +373,19 @@ cat .env
 
 Lưu ý: `.env` là untracked → `git reset --hard` trong CD **không** xoá nó.
 
+**4.2b Cert HTTPS cho origin (khuyến nghị):**
+
+Nếu Cloudflare đang dùng SSL mode **Full** hoặc **Full (strict)**, origin phải có
+server 443. Tạo cert Let's Encrypt một lần (DNS đã trỏ về VPS):
+
+```bash
+certbot certonly --nginx -d <domain> -d www.<domain> --non-interactive --agree-tos
+```
+
+`setup-nginx.sh` tự thêm `listen 443 ssl` khi thấy
+`/etc/letsencrypt/live/<domain>/fullchain.pem`. Nếu chưa có cert, script chỉ mở
+port 80 và Cloudflare phải để SSL mode **Flexible**.
+
 **4.3 KIỂM THỬ 4a — git remote/branch đúng:**
 
 ```bash
@@ -469,6 +482,7 @@ curl -fsS http://<domain>/health    # hoặc http://<host>:<WEB_PORT>/health n�
 | `oom=true` | Container bị OOM kill | `docker inspect --format 'oom={{.State.OOMKilled}}'` | `docker update --memory=2g ...` |
 | `db is unhealthy` fail sau ~7s | Health state cũ, compose không recreate | `docker compose ps -a` | `docker compose up -d --force-recreate db` |
 | nginx 502 Bad Gateway | Web container chưa healthy / sai `WEB_PORT` | `docker compose ps`, `curl localhost:<WEB_PORT>/health` | Fix web trước, reload nginx |
+| `https://` 502 nhưng `http://` 200 | Cloudflare trỏ origin :443, chưa có server 443 cho domain nên rơi vào `default_server` của domain khác | `grep X-Debug-Host`, `curl -k --resolve <domain>:443:127.0.0.1 https://<domain>/health` | Tạo cert: `certbot certonly --nginx -d <domain> -d www.<domain>`, rồi chạy lại `setup-nginx.sh` |
 | Healthcheck timeout 90s nhưng web chạy tay OK | First-boot init lâu hơn 90s | So thời gian `docker compose up` tay với 90s | Boot tay trước GĐ 4.5, hoặc tăng loop |
 
 **Quy tắc đọc log:**
@@ -501,6 +515,7 @@ free -m
 - [ ] GĐ 3.2: secret `DEPLOY_SSH_KEY` cột *Updated* = hôm nay
 - [ ] GĐ 3.5: package GHCR = Public
 - [ ] GĐ 4.2: `.env` tồn tại trên server, password mạnh, port không trùng (`ss -tlnp`)
+- [ ] GĐ 4.2b: có cert HTTPS nếu Cloudflare dùng Full/Full (strict)
 - [ ] GĐ 4.5: boot tay OK, `curl /health` ra `OK`
 - [ ] `free -m` available >= 4GB
 - [ ] GĐ 5.4: log job có đủ 5 mốc
