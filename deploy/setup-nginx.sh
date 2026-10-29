@@ -64,6 +64,12 @@ fi
 {
   echo "# Tu dong tao boi deploy/setup-nginx.sh - khong sua tay, se bi ghi de."
   echo "# HTTPS do Cloudflare xu ly, origin chi phuc vu HTTP."
+  echo "# Lay IP that cua khach tu Cloudflare; fallback remote_addr khi khong qua CF."
+  echo "map \$http_cf_connecting_ip \$client_ip {"
+  echo "    default \$http_cf_connecting_ip;"
+  echo "    \"\"      \$remote_addr;"
+  echo "}"
+  echo ""
   echo "server {"
   echo "    listen 80;"
   echo "    listen [::]:80;"
@@ -76,11 +82,11 @@ fi
   echo "        proxy_pass http://127.0.0.1:$WEB_PORT;"
   echo "        proxy_http_version 1.1;"
   echo "        proxy_set_header Host \$host;"
-  echo "        proxy_set_header X-Real-IP \$remote_addr;"
-  echo "        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;"
-  # Cloudflare da gui X-Forwarded-Proto (https) -> giu nguyen, khong de $scheme
-  # ghi de thanh http, de app biet dung scheme khi sinh URL tuyet doi.
-  echo "        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;"
+  echo "        proxy_set_header X-Real-IP \$client_ip;"
+  echo "        proxy_set_header X-Forwarded-For \$client_ip;"
+  # Origin chi nhan ket noi qua Cloudflare (da terminate TLS), nen luon bao
+  # https cho app. Khong dung \$http_x_forwarded_proto vi client co the spoof.
+  echo "        proxy_set_header X-Forwarded-Proto https;"
   echo "        proxy_read_timeout 120s;"
   echo "        proxy_send_timeout 120s;"
   echo "    }"

@@ -6,6 +6,8 @@ namespace QLyDatPhongKhachSan.Repositories.Interfaces
     {
         Task<TaiKhoan?> LayTheoMaAsync(int id);
         Task<TaiKhoan?> LayTheoTenDangNhapAsync(string tenDangNhap);
+        Task<TaiKhoan?> LayTheoEmailAsync(string email);
+        Task<TaiKhoan?> LayTheoGoogleSubjectAsync(string googleSubject);
         Task<bool> TenDangNhapDaTonTaiAsync(string tenDangNhap, int? boQuaMa = null);
         Task<bool> EmailDaTonTaiAsync(string? email, int? boQuaMa = null);
         Task<bool> TonTaiAsync(int id);

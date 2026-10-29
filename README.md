@@ -594,13 +594,16 @@ QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN/
 
 ## 🔑 Tài Khoản Kiểm Thử
 
-| Vai trò | Tên đăng nhập | Mật khẩu | Ghi chú |
-|---------|---------------|----------|---------|
-| Admin | `admin` | `Admin@123` | Quản lý toàn hệ thống |
-| Nhân viên | `nhanvien01` | `Nv@123` | Lễ tân |
-| Nhân viên | `nhanvien02` | `Nv@123` | Lễ tân |
-| Khách hàng | `khachhang01` | `Kh@123` | Khách hàng mẫu |
-| Khách hàng bị khóa | `khachhang_locked` | `Kh@123` | Test tài khoản bị khóa |
+> Seed dữ liệu mẫu **mặc định TẮT**. Nếu bật `SeedSampleData=true`, đặt
+> `SeedAdminPassword` mạnh để thay mật khẩu admin mặc định trước khi dùng thật.
+
+| Vai trò | Tên đăng nhập | Mật khẩu seed | Ghi chú |
+|---------|---------------|---------------|---------|
+| Admin | `admin` | `123456` | Quản lý toàn hệ thống |
+| Nhân viên | `nhanvien` | `123456` | Lễ tân |
+| Khách hàng | `khachhang` | `123456` | Khách hàng mẫu |
+| Khách hàng bị khóa | `khoa` | `123456` | Test tài khoản bị khóa |
+| Khách hàng | `khachhang2` | `123456` | Khách hàng mẫu |
 
 ---
 

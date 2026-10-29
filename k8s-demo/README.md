@@ -274,5 +274,5 @@ Trong UI: click `qldpkh-demo` → tab `Sync Status` để xem tree của resourc
 2. **App chạy HTTP trong cluster, HTTPS do Ingress lo** — tương tự docker-compose + nginx trước đó.
 3. **SQL của StatefulSet** volume PVC giữ nguyên khi pod restart, chỉ bị mất khi `kubectl delete pvc`.
 4. **Chỉ deploy với 1 replica SQL** (Developer free edition giới hạn 10GB/data instance).
-5. **Sau khi deploy, app tự chạy Migration + Seed** nhờ `SeedSampleData=true` — chỉ có dữ liệu khi DB còn trống.
+5. **Sau khi deploy, app tự chạy Migration**; seed mặc định TẮT. Nếu cần dữ liệu demo, đặt `SeedSampleData=true` và thêm key `seed-admin-password` (mật khẩu mạnh) vào secret `qldpkh-secrets` — chỉ seed khi DB còn trống.
 6. **Pipeline CD cũ vẫn deploy compose** — sau khi chuyển hẳn sang ArgoCD, tắt workflow cũ đi để tránh 2 nguồn deploy xung đột nhau.

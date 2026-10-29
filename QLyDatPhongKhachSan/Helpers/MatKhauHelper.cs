@@ -34,16 +34,16 @@ namespace QLyDatPhongKhachSan.Helpers
                 return false;
             }
 
-            // Mật khẩu cũ lưu dạng rõ, vẫn cho đăng nhập được để không khóa tài khoản
+            // Chỉ chấp nhận hash PBKDF2. Không hỗ trợ mật khẩu lưu dạng rõ.
             if (!matKhauHash.StartsWith("PBKDF2$", StringComparison.Ordinal))
             {
-                return matKhauHash == matKhau;
+                return false;
             }
 
             var parts = matKhauHash.Split('$');
             if (parts.Length != 4
                 || !int.TryParse(parts[1], out int iterations)
-                || iterations <= 0)
+                || iterations is < 1 or > 1_000_000)
             {
                 return false;
             }
@@ -56,6 +56,11 @@ namespace QLyDatPhongKhachSan.Helpers
                 expected = Convert.FromBase64String(parts[3]);
             }
             catch (FormatException)
+            {
+                return false;
+            }
+
+            if (salt.Length is < 8 or > 64 || expected.Length is < 16 or > 64)
             {
                 return false;
             }

@@ -25,6 +25,9 @@ namespace QLyDatPhongKhachSan.Data
             modelBuilder.Entity<TaiKhoan>(entity =>
             {
                 entity.HasIndex(e => e.TenDangNhap).IsUnique();
+                entity.HasIndex(e => e.GoogleSubject)
+                      .IsUnique()
+                      .HasFilter("[GoogleSubject] IS NOT NULL");
             });
 
             // 2. Phong: SoPhong Unique & Quan hệ LoaiPhong (1-N)

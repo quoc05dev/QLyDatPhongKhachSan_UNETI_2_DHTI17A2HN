@@ -29,10 +29,19 @@ spec:
               value: "Production"
             - name: ASPNETCORE_URLS
               value: "http://+:8080"
-            - name: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+            # ingress-nginx không chạy trên loopback => cho phép tin forwarded headers.
+            # App chỉ lộ qua Ingress, không có Service NodePort/LoadBalancer.
+            - name: TrustAllForwardedHeaders
               value: "true"
             - name: SeedSampleData
-              value: "true"
+              value: "false"
+            # Nếu cần seed demo, đặt SeedSampleData=true và thêm key
+            # seed-admin-password vào secret qldpkh-secrets, rồi bỏ comment:
+            # - name: SeedAdminPassword
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: qldpkh-secrets
+            #       key: seed-admin-password
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
@@ -42,6 +51,9 @@ spec:
             httpGet:
               path: /health
               port: 8080
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 40
             periodSeconds: 10
             timeoutSeconds: 5
@@ -50,6 +62,9 @@ spec:
             httpGet:
               path: /health
               port: 8080
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 60
             periodSeconds: 20
             timeoutSeconds: 5

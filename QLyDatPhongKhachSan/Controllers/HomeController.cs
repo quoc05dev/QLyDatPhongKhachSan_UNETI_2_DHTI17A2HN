@@ -40,6 +40,11 @@ public class HomeController : Controller
     {
         var loaiPhongs = await _loaiPhongRepository.LayTatCaHoatDongAsync();
 
+        // Chỉ chấp nhận loại phòng có thật; query string lạ bị bỏ qua.
+        var loaiHopLe = loaiPhongs
+            .Select(lp => lp.TenLoai)
+            .FirstOrDefault(ten => string.Equals(ten, loai, StringComparison.OrdinalIgnoreCase));
+
         var phongs = await _phongRepository.LayPhongHienThiTrangChuAsync();
 
         // Mỗi loại phòng lấy một phòng đại diện để tạo lưới "hạng phòng nổi bật".
@@ -82,7 +87,7 @@ public class HomeController : Controller
         {
             Phongs = cards,
             LoaiPhongs = loaiPhongs.Select(lp => lp.TenLoai).ToList(),
-            LoaiPhongFilter = loai,
+            LoaiPhongFilter = loaiHopLe,
             IsLoggedIn = HttpContext.Session.IsLoggedIn(),
             VaiTro = HttpContext.Session.GetVaiTro(),
             HoTen = HttpContext.Session.GetHoTen()

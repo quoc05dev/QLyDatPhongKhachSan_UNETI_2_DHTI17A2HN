@@ -5,6 +5,7 @@ namespace QLyDatPhongKhachSan.Repositories.Interfaces
     public interface IKhachHangRepository : IGenericRepository<KhachHang>
     {
         Task<KhachHang?> LayTheoMaTaiKhoanAsync(int maTaiKhoan);
+        Task<KhachHang?> LayTheoEmailAsync(string email);
         Task<KhachHang?> LayTheoMaTaiKhoanCoDatPhongAsync(int maTaiKhoan);
         Task<KhachHang?> LayTheoMaAsync(int maKhachHang);
         Task<KhachHang?> LayTheoMaCoTaiKhoanAsync(int maKhachHang);

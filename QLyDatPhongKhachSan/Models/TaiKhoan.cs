@@ -48,6 +48,16 @@ namespace QLyDatPhongKhachSan.Models
         [Display(Name = "Ngày tạo")]
         public DateTime NgayTao { get; set; } = DateTime.Now;
 
+        // Định danh duy nhất của Google (claim "sub"). Chỉ lưu cho tài khoản
+        // được tạo/liên kết qua Google OAuth.
+        [StringLength(255)]
+        public string? GoogleSubject { get; set; }
+
+        // Đánh dấu tài khoản được tạo bằng Google. Tài khoản có mật khẩu cục bộ
+        // sẽ không được tự động liên kết chỉ dựa vào email (chống pre-hijack).
+        [Display(Name = "Đăng nhập bằng Google")]
+        public bool LaTaiKhoanGoogle { get; set; }
+
         // Navigation
         public virtual KhachHang? KhachHang { get; set; }
     }

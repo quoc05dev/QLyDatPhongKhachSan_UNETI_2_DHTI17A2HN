@@ -7,12 +7,14 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Models;
 using QLyDatPhongKhachSan.Repositories.Interfaces;
 using QLyDatPhongKhachSan.ViewModels;
 
 namespace QLyDatPhongKhachSan.Controllers
 {
+    [RoleAuthorize]
     public class KhachHangController : Controller
     {
         private readonly IKhachHangRepository _khachHangRepository;
@@ -239,6 +241,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // =====================================================================
 
         // GET: KhachHang (Danh sách khách hàng kèm Tìm kiếm, Lọc, Sắp xếp, Phân trang LINQ)
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Index(
             string? searchTerm,
             string? gioiTinhFilter,
@@ -248,17 +251,12 @@ namespace QLyDatPhongKhachSan.Controllers
             int page = 1)
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap", new
                 {
-                    message = "Khách hàng không có quyền xem danh sách khách hàng của hệ thống!"
+                    message = "Bạn không có quyền xem danh sách khách hàng của hệ thống!"
                 });
-            }
-
-            if (GetCurrentUserId() == null)
-            {
-                return RedirectToAction("Login", "DangNhap", new { returnUrl = "/KhachHang" });
             }
 
             // Thống kê nhanh toàn bộ CSDL
@@ -301,10 +299,11 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: KhachHang/Create (Tiếp nhận khách hàng mới / khách vãng lai)
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Create()
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
@@ -325,10 +324,11 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: KhachHang/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Create(KhachHang khachHang)
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
@@ -409,6 +409,11 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction(nameof(Profile));
             }
 
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
+            {
+                return RedirectToAction("AccessDenied", "DangNhap");
+            }
+
             // Admin / Nhân viên được sửa thông tin khách hàng
             var khachHang = await _khachHangRepository.LayTheoMaCoTaiKhoanAsync(id.Value);
 
@@ -426,10 +431,11 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: KhachHang/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int id, KhachHang khachHang)
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap", new
                 {
@@ -517,10 +523,11 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // GET: KhachHang/Delete/5 (Xác nhận xóa hoặc khóa khách hàng)
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> Delete(int? id)
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
@@ -537,10 +544,11 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: KhachHang/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var vaiTro = GetCurrentUserRole();
-            if (vaiTro == "KhachHang")
+            if (vaiTro != "Admin" && vaiTro != "NhanVien")
             {
                 return RedirectToAction("AccessDenied", "DangNhap");
             }
@@ -566,6 +574,7 @@ namespace QLyDatPhongKhachSan.Controllers
         // POST: KhachHang/ToggleStatus/5 (Chuyển đổi nhanh trạng thái Hoạt động / Khóa)
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("Admin", "NhanVien")]
         public async Task<IActionResult> ToggleStatus(int id)
         {
             var vaiTro = GetCurrentUserRole();

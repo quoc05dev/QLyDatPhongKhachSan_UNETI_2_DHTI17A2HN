@@ -2,12 +2,13 @@
 # QLyDatPhongKhachSan - cau hinh deploy thu nghiem (test deploy)
 #
 # Cach dung:
-#   1. copy .env.example thanh .env va doi MSSQL_SA_PASSWORD
-#   2. docker compose up -d --build
-#   3. mo http://localhost:8080
+#   1. copy .env.example thanh .env, dat MSSQL_SA_PASSWORD manh
+#   2. neu can du lieu demo: dat SEED_SAMPLE_DATA=true va SEED_ADMIN_PASSWORD manh
+#   3. docker compose up -d --build
+#   4. mo http://localhost:8080
 #
-# Lan chay dau tien, web se tu tao database + nap du lieu mau (tai khoan demo:
-# admin / nhanvien / khachhang, mat khau 123456).
+# Seed du lieu mau mac dinh TAT. Khi bat, bat buoc dat SEED_ADMIN_PASSWORD o
+# moi truong Production de khong tao tai khoan admin/123456.
 #
 # Services:
 #   db  - SQL Server 2022 Developer (luu tru du lieu)
@@ -27,7 +28,7 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_password123}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD is required}"
     # Chi bind vao loopback: DB khong can truy cap tu ben ngoai (app ket noi
     # qua mang noi bo cua compose). Neu de 0.0.0.0, SQL Server se mo cong khai
     # ra Internet va bi bot quet mat khau SA brute-force.
@@ -74,12 +75,19 @@ services:
       ASPNETCORE_URLS: "http://+:8080"
       # Ghi de ConnectionStrings:DefaultConnection trong appsettings.json.
       # Duong dan "db" la ten service, phan giai qua mang noi bo cua compose.
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=QLyDatPhongKhachSanDB;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Your_password123};TrustServerCertificate=True;MultipleActiveResultSets=true"
-      # Bat nap du lieu mau (chi khi database con rong).
-      SeedSampleData: "true"
-      # Tat HTTPS redirect vi container chay HTTP thuan tuy (port 8080).
-      # Neu can HTTPS, dat reverse proxy (nginx/Caddy) phia truoc.
-      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=QLyDatPhongKhachSanDB;User Id=sa;Password=${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD is required};TrustServerCertificate=True;MultipleActiveResultSets=true"
+      # Mac dinh TAT. Chi bat khi can demo, va phai dat SEED_ADMIN_PASSWORD manh.
+      SeedSampleData: "${SEED_SAMPLE_DATA:-false}"
+      SeedAdminPassword: "${SEED_ADMIN_PASSWORD:-}"
+      # Chan Host header khong khop ten mien (co the ghi de qua ALLOWED_HOSTS).
+      AllowedHosts: "${ALLOWED_HOSTS:-uhotel.click;www.uhotel.click;dev.uhotel.click;localhost;127.0.0.1}"
+      # (Tuy chon) Dang nhap / dang ky bang Google OAuth.
+      Authentication__Google__ClientId: "${GOOGLE_CLIENT_ID:-}"
+      Authentication__Google__ClientSecret: "${GOOGLE_CLIENT_SECRET:-}"
+      # Container chay HTTP thuan tuy (port 8080); nginx phia truoc terminate TLS.
+      # Docker NAT co the doi source IP -> tin forwarded headers tu bridge noi bo.
+      # An toan vi web chi bind 127.0.0.1, khong lo truc tiep ra Internet.
+      TrustAllForwardedHeaders: "true"
     # Chi bind vao loopback: chi nginx tren cung may moi truy cap duoc.
     # Neu de 0.0.0.0, nguoi ngoai vao truc tiep http://IP:8090 se bypass qua
     # nginx (khong go qua firewall/Cloudflare).
