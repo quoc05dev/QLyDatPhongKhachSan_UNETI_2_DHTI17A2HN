@@ -153,3 +153,51 @@ jobs:
               kubectl -n "$NS" rollout status deploy/qldpkh-web --timeout=120s || true
               exit 1
             fi
+
+  # ---------------------------------------------------------------------------
+  # 4. Commit-back image digest vao git manifest (chay sau deploy thanh cong)
+  #
+  # BAI HOC: ignoreDifferences tren truong image KHONG chan ArgoCD selfHeal
+  # khi sync (da xay ra: ArgoCD revert image ve digest cu trong git -> rollout
+  # lai image cu -> pod khoi dong lai, /health/live bi404 do image cu).
+  # Co che nay dam bao git LUON dong bo voi image dang deploy => moi lan sync
+  # (bat ky ly do gi) deu la no-op, khong revert nua.
+  #
+  # [skip ci] de commit-back khong kich hoat CD tiep tuc (tranh vong lap).
+  # ---------------------------------------------------------------------------
+  update-manifest:
+    name: Commit-back image digest
+    runs-on: ubuntu-latest
+    needs: [deploy, publish-image]
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cap nhat image digest trong 02-web.yaml & push
+        env:
+          NEW_IMAGE:  ${{ needs.publish-image.outputs.image }}
+          NEW_DIGEST: ${{ needs.publish-image.outputs.digest }}
+          BRANCH:     ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          FILE=k8s-demo/manifests/02-web.yaml
+
+          # Chi doi dong image cua container web (khong dong vao initContainer mssql)
+          sed -i -E "s|^([[:space:]]*image: ghcr.io/.*-web:).*|\1${BRANCH}@${NEW_DIGEST}|" "$FILE"
+          echo "Dong image sau khi doi:"
+          grep -n "image:" "$FILE"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE"
+          if git diff --cached --quiet; then
+            echo "Manifest da dong bo voi digest moi - khong can commit."
+          else
+            git commit -m "chore(deploy): cap nhat image digest ${NEW_DIGEST} [skip ci]"
+            git pull --rebase origin "$BRANCH"
+            git push origin "HEAD:${BRANCH}"
+            echo "Da push commit-back len ${BRANCH}."
+          fi

@@ -67,10 +67,12 @@ spec:
                   key: sa-password
       containers:
         - name: web
-          # Digest pin: image mới nhất từ Compose (pre-migration).
-          # Sau này CI (kubectl set image) sẽ cập nhật digest, field này nằm trong
-          # ignoreDifferences của ArgoCD để 2 nguồn không xung đột.
-          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main@sha256:708b49ccf8e7d217ffc559ec4d6daca4d4407f784facb76bad9ae9a2ec8a0500
+          # Digest pin: image đang deploy thật trên cluster (post-migration CI build).
+          # CD (deploy.yml job update-manifest) sẽ commit-back digest mới nhất vào
+          # dòng này mỗi lần deploy ([skip ci]) => git LUON khớp cluster, nên mọi
+          # lần ArgoCD sync đều no-op trên image (ignoreDifferences chỉ là lưới an
+          # toàn thứ 2 — selfHeal KHÔNG bị chặn bởi ignoreDifferences, đã bị revert 1 lần).
+          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main@sha256:558ac881d8cc67a1cbf782916f102840f3293889a64ba59dcf439d7ef7697673
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

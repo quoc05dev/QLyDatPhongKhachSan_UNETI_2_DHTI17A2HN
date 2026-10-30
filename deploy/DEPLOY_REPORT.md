@@ -527,3 +527,55 @@ free -m
 2. `.env` không bao giờ commit — luôn tạo tay từ `.env.example` trên từng server.
 3. Verify biến (secret/variable) trước, đọc log pipeline sau — ⅔ lỗi trong báo cáo này là do config sai, không phải do code.
 4. Không deploy khi tài nguyên server đã đầy — pipeline fail symptom cuối cùng luôn là hạ tầng, nhưng root cause thường là project khác trên cùng máy.
+
+---
+
+## PART 8 — Chuyển production uhotel.click sang Kubernetes (k3s) — 2026-10-30
+
+**Kiến trúc sau cut-over:**
+
+```
+Client → Cloudflare (Full strict) → host nginx :80/:443 (21 domain KHÔNG đổi)
+       → proxy_pass 127.0.0.1:30444 (PROXY_TARGET trong .env server)
+       → Service qldpkh-web NodePort 30444 → pod qldpkh-web → Service mssql → StatefulSet mssql-0
+```
+
+- Ingress-nginx/cert-manager **không tham gia** đường đi (đã uninstall ingress-nginx: crashloop "port 80 already in use").
+- ArgoCD app `qldpkh-demo` sync path `k8s-demo/manifests` (prune=false, selfHeal=true).
+- CD: `deploy.yml` = CI gate → build GHCR → SSH `kubectl set image` → **commit-back digest** vào `02-web.yaml` (`[skip ci]`).
+- Google OAuth/SMTP **tắt tạm** (không khai env → app tự tắt). Bật lại: thêm key vào secret `qldpkh-secrets`.
+- Scale replicas=1 (Session/RateLimiter in-memory; scale >1 cần Redis).
+
+**Các phase đã chạy:**
+
+1. `Program.cs`: persist DataProtection keys (`DP_KEY_PATH` → PVC `qldpkh-dp-keys`) + endpoint `/health/live` (liveness KHÔNG kiểm tra DB).
+2. Manifest: PVC dp-keys, initContainer `wait-for-mssql`, securityContext non-root 1654, NodePort 30444, probes Host header.
+3. Dump Compose DB → `kubectl cp` vào pod mssql-0 → `RESTORE ... WITH MOVE` → row-count khớp 100% (DatPhong 42, ChiTietDatPhong 42, TaiKhoan 8, KhachHang 23, Phong 18, DichVu 6, LoaiPhong 5).
+4. Cut-over: `PROXY_TARGET=127.0.0.1:30444` + `bash deploy/setup-nginx.sh` → verify `https://uhotel.click/health` = 200 qua Cloudflare → `docker compose down` (giữ volume `mssql-data` ≥7 ngày).
+
+**Sự cố đã ghi nhận & cách xử lý:**
+
+| Sự cố | Nguyên nhân | Xử lý |
+|---|---|---|
+| ArgoCD selfHeal revert image về digest cũ sau `kubectl set image` → pod mới 404 | `ignoreDifferences` KHÔNG chặn selfHeal ghi đè field image | Re-set image ngay; thêm job `update-manifest` commit-back digest vào git (`[skip ci]`) — git luôn khớp cluster |
+| 502 sau khi sửa nginx | Server repo ở commit cũ → script `setup-nginx.sh` chưa có `PROXY_TARGET` → vẫn trỏ `:8090` | `git reset --hard origin/main` + chạy lại script |
+| Test qua nginx vội (upstream vẫn :8090 trong log) | Race đúng lúc graceful reload | Chờ reload xong, re-test → 200 |
+
+**Rollback (nếu cần ≤7 ngày):**
+
+```bash
+# 1. Trỏ traffic về Compose
+cd /root/Quoc/QLyDatPhongKhachSan_UNETI_2_DHTI17A2HN
+sed -i 's|^PROXY_TARGET=.*|PROXY_TARGET=127.0.0.1:8090|' .env
+bash deploy/setup-nginx.sh && nginx -t && systemctl reload nginx
+# 2. Khởi động lại stack Compose (volume còn nguyên)
+docker compose up -d
+```
+
+**Backup còn giữ:** `/root/backup-uhotel-k8s-migration/` (.bak đã verify RESTORE OK, env snapshot, compose, nginx conf, image digests).
+
+**Cần làm tiếp (nằm ngoài migration):**
+- Xoay password SA `qldpkh-secrets` + `k8s-demo/00-secret.yaml` (password đang nằm ở 2 nơi local/server).
+- Bật lại Google OAuth/SMTP khi có ClientId/Secret.
+- Firewall: chặn NodePort 30444 ra public (hiện kube-proxy bind wildcard — client ngoài bypass TLS nếu biết IP:30444).
+- Giữ volume Compose ≥7 ngày rồi `docker volume rm qlydatphongkhachsan_uneti_2_dhti17a2hn_mssql-data`.

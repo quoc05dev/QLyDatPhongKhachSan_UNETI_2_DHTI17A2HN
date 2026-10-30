@@ -409,6 +409,9 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 
+# Skill opencode cục bộ (nginx-debug...) - giữ local, không commit
+.opencode/
+
 ##
 ## Visual studio for Mac
 ##
