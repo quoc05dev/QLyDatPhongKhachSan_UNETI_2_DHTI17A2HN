@@ -3,7 +3,7 @@
 > Cấu trúc thư mục `k8s-demo/`:
 > - `00-secret.yaml` (gitignored, tạo từ `00-secret.yaml.example`) — password SA + connection string, KHÔNG commit
 > - `manifests/01-mssql.yaml` — Namespace + headless Service + StatefulSet SQL Server (PVC 10Gi)
-> - `manifests/02-web.yaml` — Deployment + ClusterIP Service + Ingress (domain `uhotel.click`)
+> - `manifests/02-web.yaml` — PVC DataProtection + Deployment + Service **NodePort 30444** (Ingress ĐÃ GỠ — host nginx 80/443 proxy thẳng vào NodePort)
 > - `optional/03-cert-manager.yaml` — ClusterIssuer + Certificate Let's Encrypt (chỉ áp trên VPS đã cài cert-manager)
 > - `argocd-app.yaml` — Application ArgoCD (apply thủ công 1 lần, sau đó GitOps tự chạy)
 
@@ -271,8 +271,8 @@ Trong UI: click `qldpkh-demo` → tab `Sync Status` để xem tree của resourc
 ## Lưu ý quan trọng
 
 1. **`00-secret.yaml` KHÔNG commit** - đã được đưa vào `.gitignore`. Password chỉ tồn tại trên máy. Khi dùng ArgoCD phải apply tay secret 1 lần (xem C1).
-2. **App chạy HTTP trong cluster, HTTPS do Ingress lo** — tương tự docker-compose + nginx trước đó.
+2. **App chạy HTTP trong cluster (8080), HTTPS do host nginx (80/443) lo** — host nginx `proxy_pass` vào Service NodePort 30444 (`PROXY_TARGET` trong `.env` trên server, xem `deploy/setup-nginx.sh`). Cloudflare SSL mode phải là **Full (strict)**.
 3. **SQL của StatefulSet** volume PVC giữ nguyên khi pod restart, chỉ bị mất khi `kubectl delete pvc`.
 4. **Chỉ deploy với 1 replica SQL** (Developer free edition giới hạn 10GB/data instance).
 5. **Sau khi deploy, app tự chạy Migration**; seed mặc định TẮT. Nếu cần dữ liệu demo, đặt `SeedSampleData=true` và thêm key `seed-admin-password` (mật khẩu mạnh) vào secret `qldpkh-secrets` — chỉ seed khi DB còn trống.
-6. **Pipeline CD cũ vẫn deploy compose** — sau khi chuyển hẳn sang ArgoCD, tắt workflow cũ đi để tránh 2 nguồn deploy xung đột nhau.
+6. **Pipeline CD (`.github/workflows/deploy.yml`)**: CI gate → build GHCR → SSH `kubectl set image` → **commit-back image digest** vào `02-web.yaml` (`[skip ci]`). Git luôn khớp cluster nên mọi lần ArgoCD sync đều no-op trên image. Lưu ý: `ignoreDifferences` KHÔNG chặn selfHeal — commit-back là cơ chế chính giữ 2 nguồn không ghi đè nhau.
