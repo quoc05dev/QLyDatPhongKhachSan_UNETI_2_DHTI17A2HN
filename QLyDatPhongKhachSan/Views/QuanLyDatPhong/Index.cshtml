@@ -92,6 +92,7 @@
                 <thead>
                     <tr>
                         <th>Mã đơn</th>
+                        <th>Ngày đặt</th>
                         <th>Khách hàng</th>
                         <th>Số điện thoại</th>
                         <th>Thời gian lưu trú</th>
@@ -125,10 +126,8 @@
                         };
 
                         <tr>
-                            <td>
-                                <strong>#@item.MaDatPhong</strong>
-                                <small>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</small>
-                            </td>
+                            <td><strong>#@item.MaDatPhong</strong></td>
+                            <td><small>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</small></td>
                             <td><strong style="color:var(--navy-900);">@(item.KhachHang?.HoTen ?? "—")</strong></td>
                             <td>@(item.KhachHang?.SoDienThoai ?? "—")</td>
                             <td>@item.NgayNhan.ToString("dd/MM/yyyy") → @item.NgayTraDuKien.ToString("dd/MM/yyyy")</td>
