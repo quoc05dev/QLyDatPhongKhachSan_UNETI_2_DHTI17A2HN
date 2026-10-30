@@ -2113,7 +2113,7 @@ footer {
   padding: 12px 16px;
   color: #6b7480;
   background: #fafbfb;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-align: left;
@@ -2124,7 +2124,7 @@ footer {
   padding: 14px 16px;
   border-top: 1px solid #edf0f2;
   color: #3f4a55;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -2137,7 +2137,7 @@ footer {
   display: block;
   margin-top: 3px;
   color: #767e88;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 /* Nhóm nút thao tác trong bảng: cố định bề rộng nút để mọi dòng thẳng hàng */
