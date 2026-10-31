@@ -7,6 +7,6 @@ namespace QLyDatPhongKhachSan.Services
     /// </summary>
     public interface IChatbotService
     {
-        Task<string> HoiAsync(string cauHoi, int? maTaiKhoan);
+        Task<string> HoiAsync(string cauHoi, int? maTaiKhoan, string? vaiTro = null, string? hoTen = null);
     }
 }

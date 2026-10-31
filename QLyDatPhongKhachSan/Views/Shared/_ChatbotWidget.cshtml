@@ -2,6 +2,10 @@
     Chatbot CSKH — widget nổi góc phải dưới.
     Tự chứa (CSS/JS inline) để gắn vào bất kỳ layout nào không mất style.
 *@
+@using QLyDatPhongKhachSan.Helpers
+@{
+    var laNhanVien = Context.Session.GetVaiTro() is "Admin" or "NhanVien";
+}
 <style>
     #cb-fab {
         position: fixed; right: 22px; bottom: 22px; z-index: 9000;
@@ -51,6 +55,10 @@
         <div class="cb-msg cb-bot">Xin chào! Mình có thể hỗ trợ bạn về giá phòng, phòng trống, dịch vụ và theo dõi đơn đặt phòng.</div>
     </div>
     <div class="cb-chips" id="cb-chips">
+        @if (laNhanVien)
+        {
+            <button type="button">Hôm nay có gì?</button>
+        }
         <button type="button">Giá phòng bao nhiêu?</button>
         <button type="button">Còn phòng trống không?</button>
         <button type="button">Có dịch vụ gì?</button>

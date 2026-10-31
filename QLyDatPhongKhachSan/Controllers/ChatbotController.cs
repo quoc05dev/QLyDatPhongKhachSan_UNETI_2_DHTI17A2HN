@@ -30,7 +30,11 @@ namespace QLyDatPhongKhachSan.Controllers
 
             // Câu hỏi dài bất thường thì cắt ngắn (chống spam payload).
             var cauHoi = request.CauHoi.Length > 300 ? request.CauHoi[..300] : request.CauHoi;
-            var cauTraLoi = await _chatbotService.HoiAsync(cauHoi, HttpContext.Session.GetMaTaiKhoan());
+            var cauTraLoi = await _chatbotService.HoiAsync(
+                cauHoi,
+                HttpContext.Session.GetMaTaiKhoan(),
+                HttpContext.Session.GetVaiTro(),
+                HttpContext.Session.GetHoTen());
 
             return Ok(new { cauTraLoi });
         }

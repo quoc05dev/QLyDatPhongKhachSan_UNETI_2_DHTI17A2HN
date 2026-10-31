@@ -17,24 +17,37 @@ namespace QLyDatPhongKhachSan.Services
         private readonly IDichVuRepository _dichVuRepository;
         private readonly IDatPhongRepository _datPhongRepository;
         private readonly IKhachHangRepository _khachHangRepository;
+        private readonly IAdminBriefingService _adminBriefingService;
 
         public ChatbotService(
             ILoaiPhongRepository loaiPhongRepository,
             IPhongRepository phongRepository,
             IDichVuRepository dichVuRepository,
             IDatPhongRepository datPhongRepository,
-            IKhachHangRepository khachHangRepository)
+            IKhachHangRepository khachHangRepository,
+            IAdminBriefingService adminBriefingService)
         {
             _loaiPhongRepository = loaiPhongRepository;
             _phongRepository = phongRepository;
             _dichVuRepository = dichVuRepository;
             _datPhongRepository = datPhongRepository;
             _khachHangRepository = khachHangRepository;
+            _adminBriefingService = adminBriefingService;
         }
 
-        public async Task<string> HoiAsync(string cauHoi, int? maTaiKhoan)
+        public async Task<string> HoiAsync(string cauHoi, int? maTaiKhoan, string? vaiTro = null, string? hoTen = null)
         {
             var t = BoDau(BoDauMoi(cauHoi)).ToLowerInvariant();
+            var laNhanVien = vaiTro is "Admin" or "NhanVien";
+
+            // 0) Trợ lý vận hành (chỉ Admin/Nhân viên): bản tin mới nhất của hệ thống
+            if (laNhanVien && (t.Contains("tinh hinh") || t.Contains("hom nay") || t.Contains("bao cao")
+                || t.Contains("tong quan") || t.Contains("cong viec") || t.Contains("cho xu ly")
+                || t.Contains("tin moi") || t.Contains("hien trang") || t.Contains("viec gi")))
+            {
+                var briefing = await _adminBriefingService.TaoBriefingAsync(hoTen);
+                return briefing.LoiChao + "\n" + string.Join("\n", briefing.ThongDiep.Select(d => "• " + d));
+            }
 
             // 1) Truy vấn đơn đặt phòng theo mã (chỉ chủ đơn mới xem được)
             if (t.Contains("don") || t.Contains("ma don") || t.Contains("dat phong cua toi"))
@@ -118,10 +131,23 @@ namespace QLyDatPhongKhachSan.Services
                      + "Lễ tân sẽ xác nhận trong vài phút!";
             }
 
-            // 9) Lời chào
+            // 9) Lời chào — nhân viên được chào kèm bản tin, khách được chào chung
             if (t.Contains("chao") || t.Contains("hello") || t.Contains("hi ") || t == "hi")
             {
+                if (laNhanVien)
+                {
+                    var briefing = await _adminBriefingService.TaoBriefingAsync(hoTen);
+                    return briefing.LoiChao + "\n" + string.Join("\n", briefing.ThongDiep.Select(d => "• " + d))
+                         + "\n\nBạn hỏi thêm \"hôm nay có gì\" để cập nhật mới nhất nhé!";
+                }
                 return "Xin chào! Mình là trợ lý ảo của UNETI Grand. Bạn hỏi mình về giá phòng, phòng trống, dịch vụ, chính sách hay đơn đặt phòng nhé!";
+            }
+
+            if (laNhanVien)
+            {
+                return "Mình là trợ lý vận hành của khách sạn. Bạn thử hỏi:\n"
+                     + "• \"Hôm nay có gì?\" — bản tin: đơn chờ xử lý, khách đến/đi, phòng trống\n"
+                     + "• \"Giá phòng bao nhiêu?\"\n• \"Đơn #2031\"";
             }
 
             return "Mình chưa hiểu câu hỏi 😅 Bạn thử một trong các chủ đề sau:\n"

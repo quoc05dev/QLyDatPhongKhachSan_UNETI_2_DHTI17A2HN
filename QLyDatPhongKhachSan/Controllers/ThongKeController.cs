@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using QLyDatPhongKhachSan.Filters;
 using QLyDatPhongKhachSan.Helpers;
 using QLyDatPhongKhachSan.Repositories.Interfaces;
+using QLyDatPhongKhachSan.Services;
 using QLyDatPhongKhachSan.ViewModels;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -28,6 +29,7 @@ namespace QLyDatPhongKhachSan.Controllers
         private readonly IKhachHangRepository _khachHangRepository;
         private readonly ILoaiPhongRepository _loaiPhongRepository;
         private readonly IPhongRepository _phongRepository;
+        private readonly IAdminBriefingService _adminBriefingService;
 
         static ThongKeController()
         {
@@ -41,13 +43,15 @@ namespace QLyDatPhongKhachSan.Controllers
             IDatPhongRepository datPhongRepository,
             IKhachHangRepository khachHangRepository,
             ILoaiPhongRepository loaiPhongRepository,
-            IPhongRepository phongRepository)
+            IPhongRepository phongRepository,
+            IAdminBriefingService adminBriefingService)
         {
             _chiTietDatPhongRepository = chiTietDatPhongRepository;
             _datPhongRepository = datPhongRepository;
             _khachHangRepository = khachHangRepository;
             _loaiPhongRepository = loaiPhongRepository;
             _phongRepository = phongRepository;
+            _adminBriefingService = adminBriefingService;
         }
 
         // GET: ThongKe
@@ -147,6 +151,10 @@ namespace QLyDatPhongKhachSan.Controllers
             ViewBag.TyLeSuDungPhong = phongChoThue == 0
                 ? 0
                 : Math.Round((double)phongs.Count(p => p.TrangThai == "DangSuDung") / phongChoThue * 100, 1);
+
+            // Quản gia AI: bản tin vận hành mới nhất chào Admin/Nhân viên
+            // khi mở Dashboard (đăng nhập là thấy ngay việc cần làm).
+            ViewBag.Briefing = await _adminBriefingService.TaoBriefingAsync(HttpContext.Session.GetHoTen());
 
             return View(model);
         }
