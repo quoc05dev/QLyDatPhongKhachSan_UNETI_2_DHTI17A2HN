@@ -111,6 +111,7 @@
             if (scrim) scrim.addEventListener("click", closeSidebar);
         })();
     </script>
+    @await Html.PartialAsync("_ChatbotWidget")
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

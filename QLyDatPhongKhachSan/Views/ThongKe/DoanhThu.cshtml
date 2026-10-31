@@ -145,6 +145,27 @@
     </div>
 </div>
 
+@{
+    var tomTatAI = (List<string>?)ViewBag.TomTatAI;
+}
+@if (tomTatAI != null && tomTatAI.Any())
+{
+    <article class="dashboard-card" style="padding:18px 22px;margin-bottom:18px;border-left:4px solid #b28c49;">
+        <div class="card-heading" style="margin-bottom:10px;">
+            <div>
+                <span>Phân tích nhanh</span>
+                <h2 style="font-size:15px;">AI tóm tắt kỳ báo cáo</h2>
+            </div>
+        </div>
+        <ul style="margin:0;padding-left:18px;color:#3f4a55;font-size:13px;line-height:1.7;">
+            @foreach (var cau in tomTatAI)
+            {
+                <li>@cau</li>
+            }
+        </ul>
+    </article>
+}
+
 <div class="dashboard-grid report-grid">
     <article class="dashboard-card revenue-card">
         <div class="card-heading">

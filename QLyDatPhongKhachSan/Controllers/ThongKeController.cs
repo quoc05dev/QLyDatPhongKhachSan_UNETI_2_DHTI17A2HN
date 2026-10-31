@@ -174,8 +174,67 @@ namespace QLyDatPhongKhachSan.Controllers
             ViewBag.DoanhThuTheoLoai = baoCao.DoanhThuTheoLoai;
             ViewBag.PhongDatNhieuNhat = baoCao.PhongDatNhieuNhat;
             ViewBag.ChiTietKy = baoCao.ChiTietKy;
+            ViewBag.TomTatAI = TaoTomTatAI(baoCao);
 
             return View();
+        }
+
+        // "AI tóm tắt": phân tích nhanh số liệu kỳ đang xem thành 3 câu chốt
+        // (xu hướng so tháng trước, hạng phòng chủ lực, tỷ lệ hủy + gợi ý).
+        // Rule-based trên dữ liệu thật — không gọi API ngoài nên không bịa số.
+        private static List<string> TaoTomTatAI(DoanhThuBaoCaoViewModel baoCao)
+        {
+            var t = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+            var ketQua = new List<string>();
+
+            if (!baoCao.CoDuLieu)
+            {
+                ketQua.Add($"Kỳ {baoCao.Thang}/{baoCao.Nam} chưa có giao dịch hiệu lực — chưa đủ dữ liệu để phân tích. Chọn kỳ khác nhé.");
+                return ketQua;
+            }
+
+            // 1) So với tháng trước (trong cùng năm đang xem)
+            if (baoCao.Thang > 1)
+            {
+                var thangTruoc = baoCao.DoanhThuTheoThang.FirstOrDefault(x => x.Thang == baoCao.Thang - 1);
+                if (thangTruoc != null && thangTruoc.DoanhThu > 0)
+                {
+                    var chenhLech = baoCao.DoanhThuKy - thangTruoc.DoanhThu;
+                    var tyLe = Math.Round(chenhLech / thangTruoc.DoanhThu * 100, 1);
+                    var tu = chenhLech >= 0 ? "tăng" : "giảm";
+                    ketQua.Add($"So với tháng {baoCao.Thang - 1}, doanh thu {tu} {Math.Abs(tyLe)}% ({(chenhLech >= 0 ? "+" : "-")}{Math.Abs(chenhLech).ToString("N0", t)}₫).");
+                }
+                else
+                {
+                    ketQua.Add($"Doanh thu kỳ này {baoCao.DoanhThuKy.ToString("N0", t)}₫ từ {baoCao.SoLuotDat} lượt đặt (bình quân {(baoCao.SoLuotDat == 0 ? 0 : Math.Round(baoCao.DoanhThuKy / baoCao.SoLuotDat)).ToString("N0", t)}₫/lượt).");
+                }
+            }
+            else
+            {
+                ketQua.Add($"Tháng đầu năm đạt {baoCao.DoanhThuKy.ToString("N0", t)}₫ từ {baoCao.SoLuotDat} lượt đặt — làm bàn đạp cho cả năm.");
+            }
+
+            // 2) Hạng phòng chủ lực
+            var loaiThang = baoCao.DoanhThuTheoLoai.OrderByDescending(x => x.DoanhThu).FirstOrDefault();
+            if (loaiThang != null && loaiThang.DoanhThu > 0)
+            {
+                var tyLeLoai = Math.Round(loaiThang.DoanhThu / baoCao.DoanhThuKy * 100, 1);
+                ketQua.Add($"Hạng phòng chủ lực: \"{loaiThang.TenLoai}\" chiếm {tyLeLoai}% doanh thu kỳ ({loaiThang.DoanhThu.ToString("N0", t)}₫).");
+            }
+
+            // 3) Tỷ lệ hủy + gợi ý
+            var tongLuot = baoCao.SoLuotDat + baoCao.SoLuotHuy;
+            var tyLeHuy = tongLuot == 0 ? 0 : Math.Round((double)baoCao.SoLuotHuy / tongLuot * 100, 1);
+            if (tyLeHuy >= 30)
+            {
+                ketQua.Add($"⚠️ Tỷ lệ hủy {tyLeHuy}% — cao bất thường. Nên kiểm tra lý do hủy và gửi ưu đãi giữ chân khách.");
+            }
+            else
+            {
+                ketQua.Add($"Tỷ lệ hủy chỉ {tyLeHuy}% ({baoCao.SoLuotHuy}/{tongLuot} lượt) — tỷ lệ giữ đơn tốt, nên duy trì chính sách hiện tại.");
+            }
+
+            return ketQua;
         }
 
         // GET: ThongKe/ExportExcel
@@ -208,7 +267,7 @@ namespace QLyDatPhongKhachSan.Controllers
         }
 
         // Gom toàn bộ số liệu của một kỳ (tháng/năm) vào một chỗ để màn hình
-        // DoanhThu và hai chức năng xuất báo cáo luôn khớp số liệu với nhau.
+        // Doanh thu và hai chức năng xuất báo cáo luôn khớp số liệu với nhau.
         private async Task<DoanhThuBaoCaoViewModel> LayBaoCaoDoanhThu(int namChon, int thangChon)
         {
             int namHienTai = DateTime.Now.Year;
