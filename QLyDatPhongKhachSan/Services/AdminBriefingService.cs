@@ -87,54 +87,55 @@ namespace QLyDatPhongKhachSan.Services
                 PhongTrong = phongTrong
             };
 
-            vm.ThongDiep.Add($"🏨 Công suất: {phongCoKhach}/{phongChoThue} phòng đang có khách ({tyLe}%), còn {phongTrong} phòng trống{($", {phongBaoTri} phòng bảo trì")}.");
-            vm.ThongDiep.Add($"🛎️ Hôm nay: {denHomNay} đơn nhận phòng, {traChuaTra + traRoi} đơn trả phòng ({traRoi} đã trả, {traChuaTra} chưa).");
+            vm.ThongDiep.Add($"Công suất: {phongCoKhach}/{phongChoThue} phòng đang có khách ({tyLe}%), còn {phongTrong} phòng trống{($", {phongBaoTri} phòng bảo trì")}.");
+            vm.ThongDiep.Add($"Hôm nay: {denHomNay} đơn nhận phòng, {traChuaTra + traRoi} đơn trả phòng ({traRoi} đã trả, {traChuaTra} chưa).");
             vm.ThongDiep.Add(donChoXuLy > 0
-                ? $"📋 {donChoXuLy} đơn CHỜ XỬ LÝ{(choQua24h > 0 ? $" — trong đó {choQua24h} đơn chờ quá 24h, xử lý gấp nhé!" : ".")}"
-                : "✅ Không còn đơn chờ xử lý — quầy đang thông thoáng.");
-            vm.ThongDiep.Add($"💰 Doanh thu tháng này đến nay: {doanhThuThang.ToString("N0", t)}₫ từ {luotThang} lượt đặt.");
+                ? $"{donChoXuLy} đơn CHỜ XỬ LÝ{(choQua24h > 0 ? $" — trong đó {choQua24h} đơn chờ quá 24h, xử lý gấp nhé!" : ".")}"
+                : "Không còn đơn chờ xử lý — quầy đang thông thoáng.");
+            vm.ThongDiep.Add($"Doanh thu tháng này đến nay: {doanhThuThang.ToString("N0", t)}₫ từ {luotThang} lượt đặt.");
             if (donMoiHomNay > 0)
             {
-                vm.ThongDiep.Add($"🆕 Hôm nay đã tiếp nhận {donMoiHomNay} đơn mới.");
+                vm.ThongDiep.Add($"Hôm nay đã tiếp nhận {donMoiHomNay} đơn mới.");
             }
             if (phongTrong <= 2)
             {
-                vm.ThongDiep.Add($"⚠️ Chỉ còn {phongTrong} phòng trống — khách hỏi đặt sẽ nhanh hết, cân nhắc báo giá sớm.");
+                vm.ThongDiep.Add($"Chỉ còn {phongTrong} phòng trống — khách hỏi đặt sẽ nhanh hết, cân nhắc báo giá sớm.");
             }
 
             // ===== AI chốt việc ưu tiên: xếp theo mức độ khẩn, việc nào gấp nằm trên =====
             if (choQua24h > 0)
             {
-                vm.ViecUuTien.Add($"🔴 Chờ xử lý gấp: {choQua24h} đơn đặt quá 24h chưa xác nhận — khách dễ hủy, vào \"Tiếp nhận & trạng thái\" ngay.");
+                vm.ViecUuTien.Add($"Chờ xử lý gấp: {choQua24h} đơn đặt quá 24h chưa xác nhận — khách dễ hủy, vào \"Tiếp nhận & trạng thái\" ngay.");
             }
             var nhanHomNayChuaXacNhan = tatCa.Count(d => d.NgayNhan.Date == homNay && d.TrangThai is "ChoXuLy" or "DangXuLy");
             if (nhanHomNayChuaXacNhan > 0)
             {
-                vm.ViecUuTien.Add($"🟠 {nhanHomNayChuaXacNhan} đơn nhận phòng HÔM NAY chưa xác nhận — liên hệ khách trước giờ check-in 14:00.");
+                vm.ViecUuTien.Add($"{nhanHomNayChuaXacNhan} đơn nhận phòng HÔM NAY chưa xác nhận — liên hệ khách trước giờ check-in 14:00.");
             }
             var dgTieuCuc = await _danhGiaService.DemTieuCucChuaPhanHoiAsync();
             if (dgTieuCuc > 0)
             {
-                vm.ViecUuTien.Add($"🟠 {dgTieuCuc} đánh giá TIÊU CỰC còn nợ phản hồi — khách đang chờ, vào \"Đánh giá khách hàng\" trả lời ngay.");
+                vm.ViecUuTien.Add($"{dgTieuCuc} đánh giá TIÊU CỰC còn nợ phản hồi — khách đang chờ, vào \"Đánh giá khách hàng\" trả lời ngay.");
             }
             if (traChuaTra > 0)
             {
-                vm.ViecUuTien.Add($"🟡 {traChuaTra} phòng cần trả trước 12:00 — nhắc khách trả phòng để dọn dẹp.");
+                vm.ViecUuTien.Add($"{traChuaTra} phòng cần trả trước 12:00 — nhắc khách trả phòng để dọn dẹp.");
             }
             if (phongTrong == 0)
             {
-                vm.ViecUuTien.Add("🟢 Đã kín phòng — tập trung phục vụ khách hiện tại, chặn trùng lịch.");
+                vm.ViecUuTien.Add("Đã kín phòng — tập trung phục vụ khách hiện tại, chặn trùng lịch.");
             }
             else if (phongTrong <= 2)
             {
-                vm.ViecUuTien.Add($"🟢 Chỉ còn {phongTrong} phòng — chào giá ngay khi có khách hỏi để không lỡ đơn.");
+                vm.ViecUuTien.Add($"Chỉ còn {phongTrong} phòng — chào giá ngay khi có khách hỏi để không lỡ đơn.");
             }
             if (vm.ViecUuTien.Count == 0)
             {
-                vm.ViecUuTien.Add("✅ Không có việc gấp — vận hành ổn định, tranh thủ rà soát tuần này nhé.");
+                vm.ViecUuTien.Add("Không có việc gấp — vận hành ổn định, tranh thủ rà soát tuần này nhé.");
             }
 
             return vm;
         }
     }
 }
+
