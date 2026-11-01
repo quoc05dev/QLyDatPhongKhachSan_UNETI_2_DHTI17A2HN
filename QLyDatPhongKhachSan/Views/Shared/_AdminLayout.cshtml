@@ -132,6 +132,12 @@
                 });
             }
             if (scrim) scrim.addEventListener("click", closeSidebar);
+
+            // Resize lên desktop thì đóng drawer: tránh scrim .show còn sót
+            // làm hiện màng đen khi thu nhỏ lại.
+            window.addEventListener("resize", function () {
+                if (window.innerWidth > 820) closeSidebar();
+            });
         })();
     </script>
     @if (!isKhachHang)

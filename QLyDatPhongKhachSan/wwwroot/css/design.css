@@ -1710,6 +1710,12 @@ footer {
   cursor: pointer;
 }
 
+/* Hamburger chỉ có ý nghĩa ở chế độ drawer (<=820px); ẩn ở desktop để
+   không bấm nhầm gắn .show vào scrim rồi hiện màng đen khi thu nhỏ cửa sổ. */
+.admin-menu {
+  display: none;
+}
+
 .notification i {
   position: absolute;
   top: 6px;
@@ -2506,7 +2512,7 @@ footer {
     position: fixed;
     z-index: 25;
     inset: 0;
-    display: block;
+    display: none;
     border: 0;
     background: rgba(4, 15, 28, 0.55);
   }
