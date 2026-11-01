@@ -65,6 +65,60 @@ namespace QLyDatPhongKhachSan.Migrations
                     b.ToTable("ChiTietDatPhong");
                 });
 
+            modelBuilder.Entity("QLyDatPhongKhachSan.Models.DanhGia", b =>
+                {
+                    b.Property<int>("MaDanhGia")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhGia"));
+
+                    b.Property<string>("BinhLuan")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("DaPhanHoi")
+                        .HasColumnType("bit");
+
+                    b.Property<double>("DiemCamXuc")
+                        .HasColumnType("float");
+
+                    b.Property<string>("GoiYPhanHoi")
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<int>("MaDatPhong")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("NgayDanhGia")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PhanHoi")
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<int>("SoSao")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TenKhachHang")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TinhCam")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("MaDanhGia");
+
+                    b.HasIndex("MaDatPhong")
+                        .IsUnique();
+
+                    b.ToTable("DanhGia");
+                });
+
             modelBuilder.Entity("QLyDatPhongKhachSan.Models.DatPhong", b =>
                 {
                     b.Property<int>("MaDatPhong")
@@ -138,6 +192,50 @@ namespace QLyDatPhongKhachSan.Migrations
                     b.HasKey("MaDichVu");
 
                     b.ToTable("DichVu");
+                });
+
+            modelBuilder.Entity("QLyDatPhongKhachSan.Models.HoatDong", b =>
+                {
+                    b.Property<int>("MaHoatDong")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaHoatDong"));
+
+                    b.Property<bool>("DaDoc")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LaThongBao")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LoaiHoatDong")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int?>("MaLienQuan")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaTaiKhoan")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MoTa")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TenNguoiDung")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("ThoiGian")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MaHoatDong");
+
+                    b.HasIndex("MaLienQuan");
+
+                    b.ToTable("HoatDong");
                 });
 
             modelBuilder.Entity("QLyDatPhongKhachSan.Models.KhachHang", b =>
@@ -370,6 +468,17 @@ namespace QLyDatPhongKhachSan.Migrations
                     b.Navigation("Phong");
                 });
 
+            modelBuilder.Entity("QLyDatPhongKhachSan.Models.DanhGia", b =>
+                {
+                    b.HasOne("QLyDatPhongKhachSan.Models.DatPhong", "DatPhong")
+                        .WithOne()
+                        .HasForeignKey("QLyDatPhongKhachSan.Models.DanhGia", "MaDatPhong")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DatPhong");
+                });
+
             modelBuilder.Entity("QLyDatPhongKhachSan.Models.DatPhong", b =>
                 {
                     b.HasOne("QLyDatPhongKhachSan.Models.KhachHang", "KhachHang")
@@ -379,6 +488,14 @@ namespace QLyDatPhongKhachSan.Migrations
                         .IsRequired();
 
                     b.Navigation("KhachHang");
+                });
+
+            modelBuilder.Entity("QLyDatPhongKhachSan.Models.HoatDong", b =>
+                {
+                    b.HasOne("QLyDatPhongKhachSan.Models.DatPhong", null)
+                        .WithMany()
+                        .HasForeignKey("MaLienQuan")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("QLyDatPhongKhachSan.Models.KhachHang", b =>

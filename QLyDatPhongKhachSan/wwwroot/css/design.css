@@ -1,6 +1,6 @@
 /* Giao diện port từ DesignProjectWithSuggestions (Figma Make) - SV5, 2026.
    Bỏ @import "tailwindcss" vì dự án xây dựng bằng CSS thuần trên Razor. */
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap");
 
 :root {
   --navy-950: #071525;
@@ -183,7 +183,7 @@ input:focus-visible {
   place-items: center;
   border: 1px solid var(--gold-500);
   color: var(--gold-400);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 24px;
   clip-path: polygon(0 0, 100% 0, 100% 77%, 50% 100%, 0 77%);
 }
@@ -195,7 +195,7 @@ input:focus-visible {
 }
 
 .brand strong {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 16px;
   line-height: 1;
   letter-spacing: 0.08em;
@@ -324,7 +324,7 @@ input:focus-visible {
 .story-copy h2,
 .modal h2 {
   margin: 18px 0 22px;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-weight: 600;
   line-height: 1.06;
 }
@@ -385,7 +385,7 @@ input:focus-visible {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
 }
 
 .hero-index span {
@@ -444,7 +444,7 @@ input:focus-visible {
 
 .booking-heading strong {
   margin-top: 5px;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 15px;
   line-height: 1.2;
 }
@@ -663,7 +663,7 @@ input:focus-visible {
 
 .room-card h3 {
   margin: 7px 0 0;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 23px;
 }
 
@@ -716,7 +716,7 @@ input:focus-visible {
 }
 
 .price strong {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 18px;
 }
 
@@ -802,7 +802,7 @@ input:focus-visible {
 
 .experience-card h3 {
   margin: 8px 0 6px;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 28px;
 }
 
@@ -864,7 +864,7 @@ input:focus-visible {
 }
 
 .seal span {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 37px;
 }
 
@@ -879,7 +879,7 @@ input:focus-visible {
   max-width: 520px;
   margin: 32px 0 20px;
   color: var(--navy-800);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 20px;
   font-style: italic;
   line-height: 1.55;
@@ -909,7 +909,7 @@ input:focus-visible {
 
 .stats strong {
   color: var(--gold-500);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 28px;
 }
 
@@ -938,7 +938,7 @@ footer {
 
 .footer-main > div:first-child > p {
   margin: 22px 0 0;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 15px;
   line-height: 1.6;
 }
@@ -1513,7 +1513,7 @@ footer {
   place-items: center;
   border: 1px solid #c9a35d;
   color: #d9ba7c;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 22px;
   clip-path: polygon(0 0, 100% 0, 100% 77%, 50% 100%, 0 77%);
 }
@@ -1525,7 +1525,7 @@ footer {
 }
 
 .admin-brand strong {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 14px;
   letter-spacing: 0.08em;
 }
@@ -1585,7 +1585,7 @@ footer {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   color: #d9ba7c;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 12px;
   font-style: normal;
 }
@@ -1710,6 +1710,12 @@ footer {
   cursor: pointer;
 }
 
+/* Hamburger chỉ có ý nghĩa ở chế độ drawer (<=820px); ẩn ở desktop để
+   không bấm nhầm gắn .show vào scrim rồi hiện màng đen khi thu nhỏ cửa sổ. */
+.admin-menu {
+  display: none;
+}
+
 .notification i {
   position: absolute;
   top: 6px;
@@ -1787,7 +1793,7 @@ footer {
 
 .admin-title-row h1 {
   margin: 8px 0 7px;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: clamp(28px, 3vw, 38px);
   font-weight: 600;
 }
@@ -1911,7 +1917,7 @@ footer {
   display: block;
   margin: 18px 0 6px;
   color: #172433;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 29px;
 }
 
@@ -1955,7 +1961,7 @@ footer {
 
 .card-heading h2 {
   margin: 5px 0 0;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 17px;
 }
 
@@ -1967,7 +1973,7 @@ footer {
 }
 
 .revenue-summary strong {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 23px;
 }
 
@@ -2054,7 +2060,7 @@ footer {
 }
 
 .occupancy-ring strong {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 28px;
 }
 
@@ -2211,7 +2217,7 @@ footer {
   border-radius: 50%;
   color: #fff;
   background: #102943;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
 }
 
 .module-owner > div:nth-child(2) {
@@ -2314,7 +2320,7 @@ footer {
 
 .empty-table strong {
   color: #263442;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 17px;
 }
 
@@ -2350,7 +2356,7 @@ footer {
 .report-highlight strong {
   display: block;
   margin: 10px 0 7px;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 25px;
   color: #16202b;
 }
@@ -2506,7 +2512,7 @@ footer {
     position: fixed;
     z-index: 25;
     inset: 0;
-    display: block;
+    display: none;
     border: 0;
     background: rgba(4, 15, 28, 0.55);
   }
@@ -2603,7 +2609,7 @@ footer {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   color: #d9ba7c;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 12px;
   font-style: normal;
 }
@@ -2673,7 +2679,7 @@ a.back-to-site {
 }
 
 .room-media--placeholder .media-monogram {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 46px;
   line-height: 1;
 }
@@ -2742,3 +2748,11 @@ a.row-action {
 .hero {
   padding-top: 82px;
 }
+
+/* Khu quan tri dung font khong chan cho de doc; giao dien khach hang giu
+   Playfair Display goc. !important de thang cac rule tieu de serif dung chung. */
+.admin-app,
+.admin-app * {
+  font-family: "DM Sans", sans-serif !important;
+}
+

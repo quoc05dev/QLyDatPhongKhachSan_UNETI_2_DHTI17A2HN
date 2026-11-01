@@ -16,6 +16,8 @@ namespace QLyDatPhongKhachSan.Data
         public DbSet<DatPhong> DatPhongs { get; set; }
         public DbSet<ChiTietDatPhong> ChiTietDatPhongs { get; set; }
         public DbSet<DichVu> DichVus { get; set; }
+        public DbSet<HoatDong> HoatDongs { get; set; }
+        public DbSet<DanhGia> DanhGias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +73,26 @@ namespace QLyDatPhongKhachSan.Data
                       .WithMany(p => p.ChiTietDatPhongs)
                       .HasForeignKey(ct => ct.MaPhong)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // 6. DanhGia: mỗi đơn đúng 1 đánh giá
+            modelBuilder.Entity<DanhGia>(entity =>
+            {
+                entity.HasIndex(e => e.MaDatPhong).IsUnique();
+
+                entity.HasOne(dg => dg.DatPhong)
+                      .WithOne()
+                      .HasForeignKey<DanhGia>(dg => dg.MaDatPhong)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // 7. HoatDong: không cascade từ TaiKhoan (giữ log khi xóa tài khoản)
+            modelBuilder.Entity<HoatDong>(entity =>
+            {
+                entity.HasOne<DatPhong>()
+                      .WithMany()
+                      .HasForeignKey(hd => hd.MaLienQuan)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

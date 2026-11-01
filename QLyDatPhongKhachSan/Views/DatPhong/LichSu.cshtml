@@ -118,16 +118,28 @@
                             </td>
                             <td><partial name="_TrangThaiBadge" model="@item.TrangThai" /></td>
                             <td style="text-align:right;">
-                                <div style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaDatPhong">Chi tiết</a>
+                                <div style="display:inline-flex;gap:8px;flex-wrap:nowrap;justify-content:flex-end;align-items:center;">
+                                    <a class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;white-space:nowrap;text-decoration:none;" asp-action="Details" asp-route-id="@item.MaDatPhong">Chi tiết</a>
+                                    @if (item.TrangThai == "HoanThanh")
+                                    {
+                                        var daDanhGia = (List<int>?)ViewBag.DaDanhGiaIds;
+                                        if (daDanhGia != null && daDanhGia.Contains(item.MaDatPhong))
+                                        {
+                                            <span style="min-height:32px;padding:0 10px;font-size:11px;display:inline-flex;align-items:center;color:#b28c49;white-space:nowrap;">★ Đã đánh giá</span>
+                                        }
+                                        else
+                                        {
+                                            <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;white-space:nowrap;text-decoration:none;" asp-controller="DanhGia" asp-action="Tao" asp-route-maDatPhong="@item.MaDatPhong">★ Đánh giá</a>
+                                        }
+                                    }
                                     @if (item.TongTien - item.TienCoc > 0)
                                     {
-                                        <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;text-decoration:none;" asp-action="ThanhToan" asp-route-id="@item.MaDatPhong">Thanh toán</a>
+                                        <a class="admin-primary" style="min-height:32px;padding:0 10px;font-size: 11px;white-space:nowrap;text-decoration:none;" asp-action="ThanhToan" asp-route-id="@item.MaDatPhong">Thanh toán</a>
                                     }
                                     @if (item.CoTheHuy)
                                     {
                                         <form asp-action="Cancel" asp-route-id="@item.MaDatPhong" method="post" style="display:inline;">
-                                            <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;color:#c0392b;border-color:#f5c6cb;"
+                                            <button type="submit" class="admin-secondary" style="min-height:32px;padding:0 10px;font-size: 11px;white-space:nowrap;color:#c0392b;border-color:#f5c6cb;"
                                                     onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng #@item.MaDatPhong.ToString("D4") (Phòng @item.SoPhong)?');">
                                                 Hủy
                                             </button>
@@ -158,3 +170,5 @@
         }
     }
 </article>
+
+
