@@ -46,7 +46,7 @@ namespace QLyDatPhongKhachSan.Controllers
             if (HttpContext.Session.IsLoggedIn())
             {
                 var role = HttpContext.Session.GetVaiTro();
-                if (role == "Admin") return RedirectToAction("Index", "TaiKhoan");
+                if (role == "Admin") return RedirectToAction("Dashboard", "ThongKe");
                 return RedirectToAction("Index", "Home");
             }
 
@@ -102,10 +102,10 @@ namespace QLyDatPhongKhachSan.Controllers
                 return Redirect(returnUrl);
             }
 
-            // Phân hướng giao diện theo Vai Trò
+            // Phân hướng giao diện theo Vai Trò — Admin vào thẳng Tổng quan.
             if (taiKhoan.VaiTro == "Admin")
             {
-                return RedirectToAction("Index", "TaiKhoan");
+                return RedirectToAction("Dashboard", "ThongKe");
             }
             else if (taiKhoan.VaiTro == "NhanVien")
             {
@@ -388,6 +388,11 @@ namespace QLyDatPhongKhachSan.Controllers
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
+            }
+
+            if (taiKhoan.VaiTro == "Admin")
+            {
+                return RedirectToAction("Dashboard", "ThongKe");
             }
 
             return RedirectToAction("Index", "Home");

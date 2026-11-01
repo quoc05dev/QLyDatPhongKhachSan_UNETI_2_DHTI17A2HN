@@ -15,6 +15,10 @@
         display: flex; align-items: center; justify-content: center;
     }
     #cb-fab:hover { background: #b28c49; }
+    #cb-fab-dot {
+        position: absolute; top: 4px; right: 4px; width: 12px; height: 12px;
+        background: #c0392b; border: 2px solid #fff; border-radius: 50%; display: none;
+    }
     #cb-panel {
         position: fixed; right: 22px; bottom: 88px; z-index: 9000;
         width: 340px; max-width: calc(100vw - 44px); height: 460px; max-height: calc(100vh - 130px);
@@ -44,7 +48,7 @@
     .cb-input button:disabled { opacity: .5; cursor: default; }
 </style>
 
-<button id="cb-fab" type="button" title="Hỏi đáp cùng trợ lý ảo" aria-label="Mở chatbot">💬</button>
+<button id="cb-fab" type="button" title="Hỏi đáp cùng trợ lý ảo" aria-label="Mở chatbot">💬<i id="cb-fab-dot"></i></button>
 
 <div id="cb-panel" role="dialog" aria-label="Trợ lý ảo UNETI Grand">
     <div class="cb-head">
@@ -128,5 +132,36 @@
         chips.addEventListener("click", function (e) {
             if (e.target.tagName === "BUTTON") ask(e.target.textContent);
         });
+
+        // Nhân viên: poll thông báo mới -> bot chủ động nhắn vào ô chat + chấm đỏ.
+        var laNhanVien = @Json.Serialize(laNhanVien);
+        if (laNhanVien) {
+            var seen = {};
+            var lanDau = true;
+            var fabDot = document.getElementById("cb-fab-dot");
+            loadThongBao();
+            setInterval(loadThongBao, 15000);
+
+            function loadThongBao() {
+                fetch("@Url.Action("ThongBao", "HoatDong")", { credentials: "same-origin" })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) {
+                        if (!d || !d.danhSach) return;
+                        var moi = d.danhSach.filter(function (h) { return !seen[h.maHoatDong]; });
+                        moi.forEach(function (h) { seen[h.maHoatDong] = true; });
+                        if (lanDau) { lanDau = false; return; }
+                        if (moi.length > 0) {
+                            moi.slice().reverse().forEach(function (h) {
+                                var tien = h.loai === "DatPhong" ? "🔔 ĐẶT PHÒNG MỚI: " : h.loai === "DanhGia" ? "⭐ ĐÁNH GIÁ MỚI: " : "🔔 ";
+                                addMsg(tien + h.moTa, "cb-bot");
+                            });
+                            addMsg("Bạn hỏi \"hôm nay có gì?\" để xem bản tin và việc ưu tiên nhé.", "cb-bot");
+                            fabDot.style.display = "block";
+                        }
+                    })
+                    .catch(function () { });
+            }
+            fab.addEventListener("click", function () { if (panel.classList.contains("open")) fabDot.style.display = "none"; });
+        }
     })();
 </script>

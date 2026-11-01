@@ -7,6 +7,7 @@ namespace QLyDatPhongKhachSan.Services
     {
         public string LoiChao { get; set; } = string.Empty;
         public List<string> ThongDiep { get; set; } = new();
+        public List<string> ViecUuTien { get; set; } = new();
         public int DonChoXuLy { get; set; }
         public int PhongTrong { get; set; }
     }
@@ -26,15 +27,18 @@ namespace QLyDatPhongKhachSan.Services
         private readonly IDatPhongRepository _datPhongRepository;
         private readonly IPhongRepository _phongRepository;
         private readonly IChiTietDatPhongRepository _chiTietDatPhongRepository;
+        private readonly IDanhGiaService _danhGiaService;
 
         public AdminBriefingService(
             IDatPhongRepository datPhongRepository,
             IPhongRepository phongRepository,
-            IChiTietDatPhongRepository chiTietDatPhongRepository)
+            IChiTietDatPhongRepository chiTietDatPhongRepository,
+            IDanhGiaService danhGiaService)
         {
             _datPhongRepository = datPhongRepository;
             _phongRepository = phongRepository;
             _chiTietDatPhongRepository = chiTietDatPhongRepository;
+            _danhGiaService = danhGiaService;
         }
 
         public async Task<AdminBriefingViewModel> TaoBriefingAsync(string? tenNguoiDung)
@@ -96,6 +100,38 @@ namespace QLyDatPhongKhachSan.Services
             if (phongTrong <= 2)
             {
                 vm.ThongDiep.Add($"⚠️ Chỉ còn {phongTrong} phòng trống — khách hỏi đặt sẽ nhanh hết, cân nhắc báo giá sớm.");
+            }
+
+            // ===== AI chốt việc ưu tiên: xếp theo mức độ khẩn, việc nào gấp nằm trên =====
+            if (choQua24h > 0)
+            {
+                vm.ViecUuTien.Add($"🔴 Chờ xử lý gấp: {choQua24h} đơn đặt quá 24h chưa xác nhận — khách dễ hủy, vào \"Tiếp nhận & trạng thái\" ngay.");
+            }
+            var nhanHomNayChuaXacNhan = tatCa.Count(d => d.NgayNhan.Date == homNay && d.TrangThai is "ChoXuLy" or "DangXuLy");
+            if (nhanHomNayChuaXacNhan > 0)
+            {
+                vm.ViecUuTien.Add($"🟠 {nhanHomNayChuaXacNhan} đơn nhận phòng HÔM NAY chưa xác nhận — liên hệ khách trước giờ check-in 14:00.");
+            }
+            var dgTieuCuc = await _danhGiaService.DemTieuCucChuaPhanHoiAsync();
+            if (dgTieuCuc > 0)
+            {
+                vm.ViecUuTien.Add($"🟠 {dgTieuCuc} đánh giá TIÊU CỰC còn nợ phản hồi — khách đang chờ, vào \"Đánh giá khách hàng\" trả lời ngay.");
+            }
+            if (traChuaTra > 0)
+            {
+                vm.ViecUuTien.Add($"🟡 {traChuaTra} phòng cần trả trước 12:00 — nhắc khách trả phòng để dọn dẹp.");
+            }
+            if (phongTrong == 0)
+            {
+                vm.ViecUuTien.Add("🟢 Đã kín phòng — tập trung phục vụ khách hiện tại, chặn trùng lịch.");
+            }
+            else if (phongTrong <= 2)
+            {
+                vm.ViecUuTien.Add($"🟢 Chỉ còn {phongTrong} phòng — chào giá ngay khi có khách hỏi để không lỡ đơn.");
+            }
+            if (vm.ViecUuTien.Count == 0)
+            {
+                vm.ViecUuTien.Add("✅ Không có việc gấp — vận hành ổn định, tranh thủ rà soát tuần này nhé.");
             }
 
             return vm;

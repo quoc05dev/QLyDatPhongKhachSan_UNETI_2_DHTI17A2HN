@@ -14,6 +14,7 @@ namespace QLyDatPhongKhachSan.Services
         Task<DanhGia?> LayTheoMaDatPhongAsync(int maDatPhong);
         Task<List<int>> LayCacDonDaDanhGiaAsync(List<int> maDatPhongs);
         Task<List<DanhGia>> LayTatCaAsync(int soLuongToiDa = 200);
+        Task<int> DemTieuCucChuaPhanHoiAsync();
         Task CapNhatPhanHoiAsync(int maDanhGia, string phanHoi);
     }
 
@@ -83,6 +84,9 @@ namespace QLyDatPhongKhachSan.Services
             await _db.DanhGias.OrderByDescending(dg => dg.NgayDanhGia)
                 .Take(soLuongToiDa)
                 .ToListAsync();
+
+        public Task<int> DemTieuCucChuaPhanHoiAsync() =>
+            _db.DanhGias.CountAsync(dg => dg.TinhCam == "TieuCuc" && !dg.DaPhanHoi);
 
         public async Task CapNhatPhanHoiAsync(int maDanhGia, string phanHoi)
         {

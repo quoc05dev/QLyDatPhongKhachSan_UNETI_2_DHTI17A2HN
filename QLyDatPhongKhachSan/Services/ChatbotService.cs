@@ -43,10 +43,11 @@ namespace QLyDatPhongKhachSan.Services
             // 0) Trợ lý vận hành (chỉ Admin/Nhân viên): bản tin mới nhất của hệ thống
             if (laNhanVien && (t.Contains("tinh hinh") || t.Contains("hom nay") || t.Contains("bao cao")
                 || t.Contains("tong quan") || t.Contains("cong viec") || t.Contains("cho xu ly")
-                || t.Contains("tin moi") || t.Contains("hien trang") || t.Contains("viec gi")))
+                || t.Contains("tin moi") || t.Contains("hien trang") || t.Contains("viec gi")
+                || t.Contains("uu tien") || t.Contains("lam truoc")))
             {
                 var briefing = await _adminBriefingService.TaoBriefingAsync(hoTen);
-                return briefing.LoiChao + "\n" + string.Join("\n", briefing.ThongDiep.Select(d => "• " + d));
+                return DinhDangBriefing(briefing);
             }
 
             // 1) Truy vấn đơn đặt phòng theo mã (chỉ chủ đơn mới xem được)
@@ -137,7 +138,7 @@ namespace QLyDatPhongKhachSan.Services
                 if (laNhanVien)
                 {
                     var briefing = await _adminBriefingService.TaoBriefingAsync(hoTen);
-                    return briefing.LoiChao + "\n" + string.Join("\n", briefing.ThongDiep.Select(d => "• " + d))
+                    return DinhDangBriefing(briefing)
                          + "\n\nBạn hỏi thêm \"hôm nay có gì\" để cập nhật mới nhất nhé!";
                 }
                 return "Xin chào! Mình là trợ lý ảo của UNETI Grand. Bạn hỏi mình về giá phòng, phòng trống, dịch vụ, chính sách hay đơn đặt phòng nhé!";
@@ -153,6 +154,13 @@ namespace QLyDatPhongKhachSan.Services
             return "Mình chưa hiểu câu hỏi 😅 Bạn thử một trong các chủ đề sau:\n"
                  + "• \"Giá phòng bao nhiêu?\"\n• \"Còn phòng trống không?\"\n• \"Có dịch vụ gì?\"\n"
                  + "• \"Chính sách hủy thế nào?\"\n• \"Đơn #2031 của tôi tới đâu?\"";
+        }
+
+        private static string DinhDangBriefing(AdminBriefingViewModel b)
+        {
+            return b.LoiChao
+                 + "\n\n📌 Việc cần làm trước:\n" + string.Join("\n", b.ViecUuTien.Select(v => "  " + v))
+                 + "\n\n📊 Tình hình:\n" + string.Join("\n", b.ThongDiep.Select(d => "  • " + d));
         }
 
         private async Task<string> XemDonAsync(int maDatPhong, int? maTaiKhoan)

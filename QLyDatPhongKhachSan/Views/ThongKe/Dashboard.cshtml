@@ -86,6 +86,18 @@
                 <li>@d</li>
             }
         </ul>
+        @if (b.ViecUuTien.Any())
+        {
+            <div style="margin-top:12px;padding:10px 14px;background:#fbf8f1;border-radius:6px;">
+                <strong style="font-size:12px;color:#b28c49;">📌 Việc cần làm trước</strong>
+                <ul style="margin:6px 0 0;padding-left:18px;color:#3f4a55;font-size:13px;line-height:1.7;">
+                    @foreach (var v in b.ViecUuTien)
+                    {
+                        <li>@v</li>
+                    }
+                </ul>
+            </div>
+        }
         <small style="display:block;margin-top:10px;color:#8a93a0;font-size:11px;">
             Hỏi chatbot 💬 "hôm nay có gì?" để cập nhật bản tin mới nhất mọi lúc.
         </small>
