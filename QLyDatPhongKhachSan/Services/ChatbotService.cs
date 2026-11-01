@@ -159,8 +159,8 @@ namespace QLyDatPhongKhachSan.Services
         private static string DinhDangBriefing(AdminBriefingViewModel b)
         {
             return b.LoiChao
-                 + "\n\nViệc cần làm trước:\n" + string.Join("\n", b.ViecUuTien.Select(v => "  " + v))
-                 + "\n\nTình hình:\n" + string.Join("\n", b.ThongDiep.Select(d => "  • " + d));
+                 + "\n\nViệc cần làm trước:\n" + string.Join("\n", b.ViecUuTien.Select(v => "  " + v.NoiDung))
+                 + "\n\nTình hình:\n" + string.Join("\n", b.ThongDiep.Select(d => "  • " + d.NoiDung));
         }
 
         private async Task<string> XemDonAsync(int maDatPhong, int? maTaiKhoan)
@@ -217,4 +217,5 @@ namespace QLyDatPhongKhachSan.Services
         }
     }
 }
+
 

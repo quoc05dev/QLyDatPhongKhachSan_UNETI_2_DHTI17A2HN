@@ -83,7 +83,16 @@
         <ul style="margin:0;padding-left:18px;color:#3f4a55;font-size:13px;line-height:1.8;">
             @foreach (var d in b.ThongDiep)
             {
-                <li>@d</li>
+                <li>
+                    @if (d.Url != null)
+                    {
+                        <a href="@d.Url" style="color:#1f3a5f;text-decoration:none;border-bottom:1px dashed #c9b07a;">@d.NoiDung</a>
+                    }
+                    else
+                    {
+                        @d.NoiDung
+                    }
+                </li>
             }
         </ul>
         @if (b.ViecUuTien.Any())
@@ -93,7 +102,16 @@
                 <ul style="margin:6px 0 0;padding-left:18px;color:#3f4a55;font-size:13px;line-height:1.7;">
                     @foreach (var v in b.ViecUuTien)
                     {
-                        <li>@v</li>
+                        <li>
+                            @if (v.Url != null)
+                            {
+                                <a href="@v.Url" style="color:#1f3a5f;text-decoration:none;border-bottom:1px dashed #c9b07a;">@v.NoiDung</a>
+                            }
+                            else
+                            {
+                                @v.NoiDung
+                            }
+                        </li>
                     }
                 </ul>
             </div>
