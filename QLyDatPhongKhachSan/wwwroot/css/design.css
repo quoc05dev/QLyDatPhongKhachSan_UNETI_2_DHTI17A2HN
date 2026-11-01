@@ -2748,3 +2748,10 @@ a.row-action {
 .hero {
   padding-top: 82px;
 }
+
+/* Khu quan tri dung font khong chan cho de doc; giao dien khach hang giu
+   Playfair Display goc. !important de thang cac rule tieu de serif dung chung. */
+.admin-app,
+.admin-app * {
+  font-family: "DM Sans", sans-serif !important;
+}
