@@ -36,6 +36,8 @@ builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IChatbotService, ChatbotService>();
     builder.Services.AddScoped<IAdminBriefingService, AdminBriefingService>();
+    builder.Services.AddScoped<IHoatDongService, HoatDongService>();
+    builder.Services.AddScoped<IDanhGiaService, DanhGiaService>();
 
 // 1e. Giới hạn tần suất đăng nhập / đăng ký / đổi mật khẩu theo IP.
 builder.Services.AddRateLimiter(options =>

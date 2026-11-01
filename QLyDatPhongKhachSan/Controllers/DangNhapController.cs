@@ -21,15 +21,18 @@ namespace QLyDatPhongKhachSan.Controllers
         private readonly ITaiKhoanRepository _taiKhoanRepository;
         private readonly IKhachHangRepository _khachHangRepository;
         private readonly IConfiguration _configuration;
+        private readonly Services.IHoatDongService _hoatDongService;
 
         public DangNhapController(
             ITaiKhoanRepository taiKhoanRepository,
             IKhachHangRepository khachHangRepository,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            Services.IHoatDongService hoatDongService)
         {
             _taiKhoanRepository = taiKhoanRepository;
             _khachHangRepository = khachHangRepository;
             _configuration = configuration;
+            _hoatDongService = hoatDongService;
         }
 
         private bool GoogleEnabled =>
@@ -84,6 +87,13 @@ namespace QLyDatPhongKhachSan.Controllers
 
             // 3. Lưu thông tin vào Session khi đăng nhập thành công
             HttpContext.Session.SetUserSession(taiKhoan.MaTaiKhoan, taiKhoan.TenDangNhap, taiKhoan.HoTen, taiKhoan.VaiTro);
+
+            try
+            {
+                await _hoatDongService.GhiAsync("DangNhap", "Đăng nhập vào hệ thống.",
+                    maTaiKhoan: taiKhoan.MaTaiKhoan, tenNguoiDung: taiKhoan.HoTen);
+            }
+            catch { }
 
             TempData["SuccessMessage"] = $"Chào mừng {taiKhoan.HoTen} đã đăng nhập thành công!";
 
@@ -363,6 +373,13 @@ namespace QLyDatPhongKhachSan.Controllers
             }
 
             HttpContext.Session.SetUserSession(taiKhoan.MaTaiKhoan, taiKhoan.TenDangNhap, taiKhoan.HoTen, taiKhoan.VaiTro);
+
+            try
+            {
+                await _hoatDongService.GhiAsync("DangNhap", "Đăng nhập bằng Google.",
+                    maTaiKhoan: taiKhoan.MaTaiKhoan, tenNguoiDung: taiKhoan.HoTen);
+            }
+            catch { }
 
             TempData["SuccessMessage"] = laTaiKhoanMoi
                 ? $"Đăng ký bằng Google thành công! Chào mừng {taiKhoan.HoTen}."

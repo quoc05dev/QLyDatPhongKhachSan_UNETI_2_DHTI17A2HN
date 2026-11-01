@@ -24,6 +24,8 @@ namespace QLyDatPhongKhachSan.Controllers
         private readonly ITaiKhoanRepository _taiKhoanRepository;
         private readonly IWebHostEnvironment _env;
         private readonly Services.IEmailService _emailService;
+        private readonly Services.IHoatDongService _hoatDongService;
+        private readonly Services.IDanhGiaService _danhGiaService;
 
         public DatPhongController(
             IDatPhongRepository datPhongRepository,
@@ -33,7 +35,9 @@ namespace QLyDatPhongKhachSan.Controllers
             IKhachHangRepository khachHangRepository,
             ITaiKhoanRepository taiKhoanRepository,
             IWebHostEnvironment env,
-            Services.IEmailService emailService)
+            Services.IEmailService emailService,
+            Services.IHoatDongService hoatDongService,
+            Services.IDanhGiaService danhGiaService)
         {
             _datPhongRepository = datPhongRepository;
             _chiTietDatPhongRepository = chiTietDatPhongRepository;
@@ -43,6 +47,8 @@ namespace QLyDatPhongKhachSan.Controllers
             _taiKhoanRepository = taiKhoanRepository;
             _env = env;
             _emailService = emailService;
+            _hoatDongService = hoatDongService;
+            _danhGiaService = danhGiaService;
         }
 
         #region Helper: Quản lý Session & Khách hàng
@@ -308,6 +314,19 @@ namespace QLyDatPhongKhachSan.Controllers
             }
             catch { }
 
+            // Bắn thông báo lên chuông trang quản trị + log hành vi đặt phòng.
+            try
+            {
+                await _hoatDongService.GhiAsync(
+                    "DatPhong",
+                    $"Khách {khachHang.HoTen} vừa đặt phòng {phong.SoPhong} ({model.NgayNhan:dd/MM} - {model.NgayTraDuKien:dd/MM}).",
+                    maTaiKhoan: maTaiKhoan,
+                    tenNguoiDung: khachHang.HoTen,
+                    maLienQuan: datPhong.MaDatPhong,
+                    laThongBao: true);
+            }
+            catch { }
+
             TempData["SuccessMessage"] = $"Đặt phòng {phong.SoPhong} thành công! Đơn đặt phòng #{datPhong.MaDatPhong:D4} đã được gửi tới bộ phận Lễ tân xử lý. Vui lòng kiểm tra email để xem xác nhận.";
             return RedirectToAction(nameof(Details), new { id = datPhong.MaDatPhong });
         }
@@ -515,6 +534,9 @@ namespace QLyDatPhongKhachSan.Controllers
 
             var list = await _datPhongRepository.LayLichSuCuaKhachHangAsync(khachHang.MaKhachHang, trangThaiFilter, sortOrder, (page - 1) * pageSize, pageSize);
 
+            // Đánh dấu đơn nào đã đánh giá để cột thao tác hiển thị đúng nút.
+            ViewBag.DaDanhGiaIds = await _danhGiaService.LayCacDonDaDanhGiaAsync(list.Select(d => d.MaDatPhong).ToList());
+
             var viewModel = new DatPhongLichSuViewModel
             {
                 DanhSachDon = list,
@@ -621,6 +643,17 @@ namespace QLyDatPhongKhachSan.Controllers
                 DanhSachAnh = AnhPhongHelper.LayDanhSachAnh(phong, _env.WebRootPath),
                 MoTa = AnhPhongHelper.LayMoTa(phong.LoaiPhong)
             };
+
+            // Log hành vi: khách đang quan tâm phòng nào (dữ liệu phân tích hành vi).
+            try
+            {
+                await _hoatDongService.GhiAsync(
+                    "XemPhong",
+                    $"Xem chi tiết phòng {phong.SoPhong}.",
+                    maTaiKhoan: maTaiKhoan,
+                    tenNguoiDung: HttpContext.Session.GetHoTen());
+            }
+            catch { }
 
             return View(model);
         }

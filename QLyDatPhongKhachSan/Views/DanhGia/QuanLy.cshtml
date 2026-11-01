@@ -1,0 +1,85 @@
+@*
+    Họ và tên: Đặng Minh Quốc
+    Mã sinh viên: 23103100069
+    Nội dung: Quản lý đánh giá khách hàng — AI phân tích cảm xúc + nháp phản hồi.
+*@
+@model List<QLyDatPhongKhachSan.Models.DanhGia>
+@using QLyDatPhongKhachSan.Services
+@{
+    ViewData["Title"] = "Đánh giá khách hàng";
+    Layout = "_AdminLayout";
+    ViewData["AdminActive"] = "reviews";
+}
+
+<div class="admin-title-row">
+    <div>
+        <span class="admin-overline">Module 5 · Khách hàng</span>
+        <h1>Đánh giá khách hàng</h1>
+        <p>AI phân tích cảm xúc mỗi đánh giá và soạn nháp phản hồi cho lễ tân.</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background:#e8f6ef;border-left:3px solid #4f8068;padding:10px 14px;font-size:13px;margin-bottom:14px;">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="background:#fdecea;border-left:3px solid #c0392b;padding:10px 14px;font-size:13px;margin-bottom:14px;">@TempData["ErrorMessage"]</div>
+}
+
+@if (!Model.Any())
+{
+    <article class="dashboard-card" style="padding:26px;text-align:center;color:#8a93a0;">
+        Chưa có đánh giá nào. Khách hàng đánh giá sau khi trả phòng sẽ xuất hiện ở đây.
+    </article>
+}
+
+@foreach (var dg in Model)
+{
+    var mauCamXuc = dg.TinhCam switch
+    {
+        "TichCuc" => ("#e8f6ef", "#4f8068"),
+        "TieuCuc" => ("#fdecea", "#c0392b"),
+        _ => ("#f4f6f8", "#59636d")
+    };
+    var sao = new string('★', dg.SoSao) + new string('☆', 5 - dg.SoSao);
+
+    <article class="dashboard-card" style="padding:18px 22px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+            <div>
+                <strong style="font-size:14px;">@dg.TenKhachHang</strong>
+                <span style="color:#b28c49;font-size:14px;margin-left:8px;">@sao</span>
+                <span style="margin-left:8px;font-size:11px;color:@mauCamXuc.Item2;background:@mauCamXuc.Item1;padding:2px 8px;border-radius:10px;">
+                    @DanhGiaService.TenTinhCam(dg.TinhCam) (@dg.DiemCamXuc)
+                </span>
+            </div>
+            <div style="font-size:11px;color:#8a93a0;">
+                Đơn <a asp-controller="QuanLyDatPhong" asp-action="ChiTiet" asp-route-id="@dg.MaDatPhong" style="color:#1f3a5f;">#@dg.MaDatPhong.ToString("D4")</a>
+                · @dg.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+
+        <p style="font-size:13px;color:#3f4a55;margin:10px 0 0;line-height:1.6;">@dg.BinhLuan</p>
+
+        @if (dg.DaPhanHoi)
+        {
+            <div style="margin-top:12px;background:#f4f6f8;border-left:3px solid #b28c49;padding:10px 14px;font-size:12px;color:#3f4a55;">
+                <strong>Đã phản hồi:</strong> @dg.PhanHoi
+            </div>
+        }
+        else
+        {
+            <form asp-action="PhanHoi" method="post" style="margin-top:12px;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maDanhGia" value="@dg.MaDanhGia" />
+                <label style="font-size:12px;font-weight:600;color:#1f3a5f;">Gợi ý trả lời từ AI:</label>
+                <textarea name="phanHoi" rows="2" style="width:100%;border:1px solid #e4e7e9;border-radius:6px;padding:10px;font-size:12px;font-family:inherit;margin-top:4px;">@dg.GoiYPhanHoi</textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button type="submit" class="admin-primary" style="border:none;cursor:pointer;min-height:32px;font-size:11px;">Gửi phản hồi</button>
+                    <button type="button" class="admin-secondary" style="min-height:32px;font-size:11px;" onclick="navigator.clipboard.writeText(this.form.phanHoi.value);this.textContent='Đã sao chép!';">Sao chép</button>
+                </div>
+            </form>
+        }
+    </article>
+}
