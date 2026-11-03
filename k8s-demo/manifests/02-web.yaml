@@ -106,16 +106,22 @@ spec:
             # - name: Authentication__Google__ClientSecret
             #   valueFrom:
             #     secretKeyRef: { name: qldpkh-secrets, key: google-client-secret }
-            # Chatbot LLM: chỉ cần key là bật (thiếu key => tự rơi về rule-based).
-            # Thêm key vào secret: kubectl -n k8s-hoteluneti create secret generic qldpkh-secrets \
-            #   --from-literal=chatbot-ai-key=sk-... --dry-run=client -o yaml | kubectl apply -f -
-            # - name: ChatbotAi__ApiKey
-            #   valueFrom:
-            #     secretKeyRef: { name: qldpkh-secrets, key: chatbot-ai-key }
-            # - name: ChatbotAi__BaseUrl
-            #   value: "https://api.openai.com/v1"
-            # - name: ChatbotAi__Model
-            #   value: "gpt-4o-mini"
+            # Chatbot LLM: có key thì bật, thiếu key thì app tự rơi về rule-based
+            # (optional: true => thiếu key KHÔNG làm pod crash).
+            # Nạp key (PATCH để giữ nguyên các key khác, KHÔNG dùng create...|apply):
+            #   kubectl -n k8s-hoteluneti patch secret qldpkh-secrets --type merge \
+            #     -p '{"stringData":{"chatbot-ai-key":"<key-gemini>"}}'
+            # Sau đó: kubectl -n k8s-hoteluneti rollout restart deploy/qldpkh-web
+            - name: ChatbotAi__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: chatbot-ai-key
+                  optional: true
+            - name: ChatbotAi__BaseUrl
+              value: "https://generativelanguage.googleapis.com/v1beta/openai/"
+            - name: ChatbotAi__Model
+              value: "gemini-3.5-flash-lite"
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
