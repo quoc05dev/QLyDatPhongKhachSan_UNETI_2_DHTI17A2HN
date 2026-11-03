@@ -35,7 +35,14 @@ namespace QLyDatPhongKhachSan.Services
             _adminBriefingService = adminBriefingService;
         }
 
-        public async Task<string> HoiAsync(string cauHoi, int? maTaiKhoan, string? vaiTro = null, string? hoTen = null)
+        public bool DangDungAi => false;
+
+        public async Task<string> HoiAsync(
+            string cauHoi,
+            int? maTaiKhoan,
+            string? vaiTro = null,
+            string? hoTen = null,
+            IReadOnlyList<ChatLuot>? lichSu = null)
         {
             var t = BoDau(BoDauMoi(cauHoi)).ToLowerInvariant();
             var laNhanVien = vaiTro is "Admin" or "NhanVien";
@@ -154,6 +161,53 @@ namespace QLyDatPhongKhachSan.Services
             return "Mình chưa hiểu câu hỏi 😅 Bạn thử một trong các chủ đề sau:\n"
                  + "• \"Giá phòng bao nhiêu?\"\n• \"Còn phòng trống không?\"\n• \"Có dịch vụ gì?\"\n"
                  + "• \"Chính sách hủy thế nào?\"\n• \"Đơn #2031 của tôi tới đâu?\"";
+        }
+
+        public async Task<string> TaoDuKienAsync(int? maTaiKhoan, string? vaiTro = null, string? hoTen = null)
+        {
+            var vn = CultureInfo.GetCultureInfo("vi-VN");
+            var sb = new StringBuilder();
+            sb.AppendLine($"Hôm nay: {DateTime.Now:dd/MM/yyyy HH:mm}.");
+
+            var loais = await _loaiPhongRepository.LayTatCaHoatDongAsync();
+            if (loais.Any())
+            {
+                sb.AppendLine("Giá phòng: " + string.Join("; ", loais.Select(l =>
+                    $"{l.TenLoai} {l.DonGiaNgay.ToString("N0", vn)}đ/đêm (tối đa {l.SoNguoiToiDa} khách)")) + ".");
+            }
+
+            var phongs = await _phongRepository.LayDanhSachPhongTrongAsync();
+            sb.AppendLine($"Phòng đang trống: {phongs.Count}.");
+
+            var dichVus = (await _dichVuRepository.TimKiem(null)).Where(d => d.TrangThai).ToList();
+            if (dichVus.Any())
+            {
+                sb.AppendLine("Dịch vụ: " + string.Join("; ", dichVus.Take(8).Select(d =>
+                    $"{d.TenDichVu} {d.Gia.ToString("N0", vn)}đ")) + ".");
+            }
+
+            sb.AppendLine("Địa chỉ: UNETI Grand Hotel & Spa, Hà Nội. Hotline 1900 6068, email support@uhotel.click.");
+            sb.AppendLine("Check-in từ 14:00, check-out trước 12:00. Hủy miễn phí trước 24 giờ, hủy muộn phí 1 đêm đầu; đổi phòng cùng loại miễn phí nếu còn trống.");
+
+            if (vaiTro is "Admin" or "NhanVien")
+            {
+                var briefing = await _adminBriefingService.TaoBriefingAsync(hoTen);
+                sb.AppendLine("Bản tin vận hành cho nhân viên:");
+                foreach (var muc in briefing.ViecUuTien.Concat(briefing.ThongDiep))
+                {
+                    sb.AppendLine("- " + muc.NoiDung);
+                }
+            }
+            else if (maTaiKhoan is not null)
+            {
+                sb.AppendLine("Khách đã đăng nhập; được phép tra cứu đơn đặt phòng của chính khách này.");
+            }
+            else
+            {
+                sb.AppendLine("Khách chưa đăng nhập; không được tra cứu đơn đặt phòng.");
+            }
+
+            return sb.ToString();
         }
 
         private static string DinhDangBriefing(AdminBriefingViewModel b)
