@@ -106,6 +106,16 @@ spec:
             # - name: Authentication__Google__ClientSecret
             #   valueFrom:
             #     secretKeyRef: { name: qldpkh-secrets, key: google-client-secret }
+            # Chatbot LLM: chỉ cần key là bật (thiếu key => tự rơi về rule-based).
+            # Thêm key vào secret: kubectl -n k8s-hoteluneti create secret generic qldpkh-secrets \
+            #   --from-literal=chatbot-ai-key=sk-... --dry-run=client -o yaml | kubectl apply -f -
+            # - name: ChatbotAi__ApiKey
+            #   valueFrom:
+            #     secretKeyRef: { name: qldpkh-secrets, key: chatbot-ai-key }
+            # - name: ChatbotAi__BaseUrl
+            #   value: "https://api.openai.com/v1"
+            # - name: ChatbotAi__Model
+            #   value: "gpt-4o-mini"
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
