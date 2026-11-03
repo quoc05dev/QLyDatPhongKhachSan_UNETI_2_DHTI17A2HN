@@ -1,63 +1,157 @@
 @*
-    Chatbot CSKH — widget nổi góc phải dưới.
-    Tự chứa (CSS/JS inline) để gắn vào bất kỳ layout nào không mất style.
+    Chatbot CSKH - widget noi goc phai duoi, dong bo voi vibe navy/gold cua design.css.
+    Tu chua CSS/JS de gan vao bat ky layout nao khong mat style.
 *@
 @using QLyDatPhongKhachSan.Helpers
+@using QLyDatPhongKhachSan.Services
+@inject IChatbotService Chatbot
 @{
     var laNhanVien = Context.Session.GetVaiTro() is "Admin" or "NhanVien";
+    var dungAi = Chatbot.DangDungAi;
 }
 <style>
     #cb-fab {
         position: fixed; right: 22px; bottom: 22px; z-index: 9000;
-        width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
-        background: #1f3a5f; color: #fff; font-size: 22px;
-        box-shadow: 0 8px 24px rgba(31, 58, 95, .35);
+        width: 56px; height: 56px; border-radius: 50%; cursor: pointer;
+        border: 1px solid rgba(201, 163, 93, .65);
+        background: var(--navy-900, #0b1b2e); color: var(--gold-400, #d9ba7c);
+        box-shadow: 0 10px 26px rgba(7, 21, 37, .35);
         display: flex; align-items: center; justify-content: center;
+        transition: transform 180ms ease, background 180ms ease, color 180ms ease;
     }
-    #cb-fab:hover { background: #b28c49; }
+    #cb-fab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    #cb-fab:hover { background: var(--gold-500, #c9a35d); color: var(--navy-950, #071525); transform: translateY(-2px); }
+    #cb-fab:focus-visible { outline: 2px solid var(--gold-500, #c9a35d); outline-offset: 3px; }
     #cb-fab-dot {
-        position: absolute; top: 4px; right: 4px; width: 12px; height: 12px;
-        background: #c0392b; border: 2px solid #fff; border-radius: 50%; display: none;
+        position: absolute; top: 5px; right: 5px; width: 11px; height: 11px;
+        background: #b3402f; border: 2px solid var(--paper, #fffdf9); border-radius: 50%; display: none;
     }
+
     #cb-panel {
-        position: fixed; right: 22px; bottom: 88px; z-index: 9000;
-        width: 340px; max-width: calc(100vw - 44px); height: 460px; max-height: calc(100vh - 130px);
-        background: #fff; border: 1px solid #e4e7e9; border-radius: 14px;
-        box-shadow: 0 18px 48px rgba(23, 36, 51, .22);
+        position: fixed; right: 22px; bottom: 90px; z-index: 9000;
+        width: 372px; max-width: calc(100vw - 32px);
+        height: 540px; max-height: calc(100vh - 130px);
+        background: var(--paper, #fffdf9);
+        border: 1px solid rgba(201, 163, 93, .35); border-radius: 18px;
+        box-shadow: 0 26px 70px rgba(7, 21, 37, .28);
         display: none; flex-direction: column; overflow: hidden;
-        font-family: "DM Sans", sans-serif;
+        font-family: "DM Sans", sans-serif; color: var(--ink, #101b27);
     }
-    #cb-panel.open { display: flex; }
-    .cb-head { background: #1f3a5f; color: #fff; padding: 13px 16px; }
-    .cb-head strong { display: block; font-size: 14px; }
-    .cb-head small { opacity: .75; font-size: 11px; }
-    .cb-msgs { flex: 1; overflow-y: auto; padding: 12px; background: #f7f9fa; }
-    .cb-msg { max-width: 88%; margin-bottom: 8px; padding: 9px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45; white-space: pre-line; }
-    .cb-bot { background: #fff; border: 1px solid #e4e7e9; color: #26333f; border-bottom-left-radius: 3px; }
-    .cb-user { background: #1f3a5f; color: #fff; margin-left: auto; border-bottom-right-radius: 3px; }
-    .cb-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 10px; background: #f7f9fa; }
+    #cb-panel.open { display: flex; animation: cb-rise 220ms ease-out; }
+    @@keyframes cb-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    .cb-head {
+        display: flex; align-items: center; gap: 12px;
+        padding: 14px 16px 13px;
+        background: linear-gradient(160deg, var(--navy-900, #0b1b2e), var(--navy-800, #102943));
+        border-bottom: 1px solid rgba(201, 163, 93, .45);
+        color: var(--white, #fff);
+    }
+    .cb-avatar {
+        flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%;
+        border: 1px solid rgba(201, 163, 93, .7); color: var(--gold-400, #d9ba7c);
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Playfair Display", serif; font-size: 13px; letter-spacing: .04em;
+    }
+    .cb-head-text { flex: 1; min-width: 0; }
+    .cb-head-text strong {
+        display: block; font-family: "Playfair Display", serif; font-weight: 600;
+        font-size: 16px; line-height: 1.25; letter-spacing: .01em;
+    }
+    .cb-status {
+        display: inline-flex; align-items: center; gap: 6px; margin-top: 3px;
+        font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+        color: var(--gold-400, #d9ba7c); opacity: .9;
+    }
+    .cb-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--gold-400, #d9ba7c); }
+    .cb-status.ai i { background: #4c9b76; }
+    .cb-close {
+        flex: 0 0 auto; width: 28px; height: 28px; border-radius: 9px;
+        border: 1px solid rgba(255, 255, 255, .22); background: transparent;
+        color: rgba(255, 255, 255, .8); font-size: 16px; line-height: 1; cursor: pointer;
+    }
+    .cb-close:hover { background: rgba(255, 255, 255, .1); color: var(--white, #fff); }
+
+    .cb-msgs { flex: 1; overflow-y: auto; padding: 16px 14px 8px; background: var(--ivory, #f7f5f0); }
+    .cb-msg {
+        max-width: 88%; margin-bottom: 10px; padding: 10px 13px;
+        border-radius: 14px; font-size: 13.5px; line-height: 1.55; white-space: pre-line;
+    }
+    .cb-bot {
+        background: var(--paper, #fffdf9); border: 1px solid var(--line, #dedbd3);
+        border-left: 2px solid var(--gold-500, #c9a35d); color: var(--ink, #101b27);
+    }
+    .cb-user {
+        margin-left: auto; background: var(--navy-900, #0b1b2e); color: var(--white, #fff);
+    }
+    .cb-typing { display: inline-flex; gap: 4px; align-items: center; padding: 12px 14px; }
+    .cb-typing span {
+        width: 5px; height: 5px; border-radius: 50%; background: var(--gold-500, #c9a35d);
+        animation: cb-blink 1.1s infinite ease-in-out;
+    }
+    .cb-typing span:nth-child(2) { animation-delay: .15s; }
+    .cb-typing span:nth-child(3) { animation-delay: .3s; }
+    @@keyframes cb-blink { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-2px); } }
+
+    .cb-chips {
+        display: flex; flex-wrap: wrap; gap: 6px;
+        padding: 8px 14px 10px; background: var(--ivory, #f7f5f0);
+        border-top: 1px dashed var(--line, #dedbd3);
+    }
     .cb-chips button {
-        border: 1px solid #d9c08a; background: #fff; color: #8a6d33;
-        border-radius: 999px; padding: 5px 11px; font-size: 11px; cursor: pointer;
+        border: 1px solid rgba(201, 163, 93, .55); background: var(--paper, #fffdf9);
+        color: var(--navy-800, #102943); border-radius: 999px; padding: 7px 13px;
+        font-size: 9.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+        cursor: pointer; transition: background 160ms ease, border-color 160ms ease;
     }
-    .cb-chips button:hover { background: #faf4e6; }
-    .cb-input { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e4e7e9; background: #fff; }
-    .cb-input input { flex: 1; border: 1px solid #dce0e3; border-radius: 8px; padding: 9px 12px; font-size: 13px; outline: none; }
-    .cb-input input:focus { border-color: #b28c49; }
-    .cb-input button { border: none; background: #b28c49; color: #fff; border-radius: 8px; padding: 0 16px; cursor: pointer; font-size: 13px; }
-    .cb-input button:disabled { opacity: .5; cursor: default; }
+    .cb-chips button:hover { background: #f6efe1; border-color: var(--gold-500, #c9a35d); }
+
+    .cb-input {
+        display: flex; gap: 8px; padding: 10px; background: var(--paper, #fffdf9);
+        border-top: 1px solid var(--line, #dedbd3);
+    }
+    .cb-input input {
+        flex: 1; min-width: 0; border: 1px solid var(--line, #dedbd3); border-radius: 12px;
+        background: var(--white, #fff); padding: 10px 12px; font-size: 13px; color: var(--ink, #101b27);
+        outline: none; transition: border-color 160ms ease;
+    }
+    .cb-input input::placeholder { color: var(--muted, #69737d); }
+    .cb-input input:focus { border-color: var(--gold-500, #c9a35d); }
+    .cb-input button {
+        flex: 0 0 auto; width: 42px; border: 1px solid transparent; border-radius: 12px;
+        background: var(--gold-500, #c9a35d); color: var(--navy-950, #071525); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 160ms ease;
+    }
+    .cb-input button:hover:not(:disabled) { background: var(--gold-400, #d9ba7c); }
+    .cb-input button:disabled { opacity: .45; cursor: default; }
+    .cb-input button svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+    @@media (max-width: 560px) {
+        #cb-fab { right: 14px; bottom: 14px; }
+        #cb-panel { right: 10px; left: 10px; width: auto; bottom: 78px; height: min(72vh, 540px); }
+    }
 </style>
 
-<button id="cb-fab" type="button" title="Hỏi đáp cùng trợ lý ảo" aria-label="Mở chatbot">💬<i id="cb-fab-dot"></i></button>
+<button id="cb-fab" type="button" aria-label="Mở trợ lý ảo" aria-expanded="false" aria-controls="cb-panel">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v10H11l-4.5 3.5V16H4z" /><path d="M8 11h8" /></svg>
+    <i id="cb-fab-dot"></i>
+</button>
 
 <div id="cb-panel" role="dialog" aria-label="Trợ lý ảo UNETI Grand">
-    <div class="cb-head">
-        <strong>Trợ lý ảo UNETI Grand</strong>
-        <small>Hỏi giá phòng, phòng trống, dịch vụ, đơn đặt...</small>
+    <header class="cb-head">
+        <div class="cb-avatar" aria-hidden="true">UG</div>
+        <div class="cb-head-text">
+            <strong>Trợ lý UNETI Grand</strong>
+            <span class="cb-status @(dungAi ? "ai" : "")"><i></i>@(dungAi ? "AI trực tuyến" : "Trợ lý tự động")</span>
+        </div>
+        <button type="button" class="cb-close" id="cb-close" aria-label="Đóng trợ lý">×</button>
+    </header>
+
+    <div class="cb-msgs" id="cb-msgs" aria-live="polite">
+        <div class="cb-msg cb-bot">Xin chào, mình là trợ lý của UNETI Grand. Bạn cần hỏi về giá phòng, phòng trống, dịch vụ hay đơn đặt phòng cứ nhắn mình nhé.</div>
     </div>
-    <div class="cb-msgs" id="cb-msgs">
-        <div class="cb-msg cb-bot">Xin chào! Mình có thể hỗ trợ bạn về giá phòng, phòng trống, dịch vụ và theo dõi đơn đặt phòng.</div>
-    </div>
+
     <div class="cb-chips" id="cb-chips">
         @if (laNhanVien)
         {
@@ -68,9 +162,12 @@
         <button type="button">Có dịch vụ gì?</button>
         <button type="button">Chính sách hủy thế nào?</button>
     </div>
+
     <form class="cb-input" id="cb-form">
-        <input id="cb-text" type="text" placeholder="Nhập câu hỏi..." maxlength="300" autocomplete="off" />
-        <button id="cb-send" type="submit">Gửi</button>
+        <input id="cb-text" type="text" placeholder="Nhập câu hỏi của bạn..." maxlength="300" autocomplete="off" aria-label="Câu hỏi" />
+        <button id="cb-send" type="submit" aria-label="Gửi câu hỏi">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15" /><path d="M13 6l6 6-6 6" /></svg>
+        </button>
     </form>
 </div>
 
@@ -83,11 +180,26 @@
         var input = document.getElementById("cb-text");
         var send = document.getElementById("cb-send");
         var chips = document.getElementById("cb-chips");
+        var closeBtn = document.getElementById("cb-close");
         var busy = false;
 
+        function mo() {
+            panel.classList.add("open");
+            fab.setAttribute("aria-expanded", "true");
+            input.focus();
+        }
+        function dong() {
+            panel.classList.remove("open");
+            fab.setAttribute("aria-expanded", "false");
+        }
+
         fab.addEventListener("click", function () {
-            panel.classList.toggle("open");
-            if (panel.classList.contains("open")) input.focus();
+            if (panel.classList.contains("open")) { dong(); } else { mo(); }
+            document.getElementById("cb-fab-dot").style.display = "none";
+        });
+        closeBtn.addEventListener("click", function () { dong(); fab.focus(); });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && panel.classList.contains("open")) { dong(); fab.focus(); }
         });
 
         function addMsg(text, cls) {
@@ -96,13 +208,26 @@
             div.textContent = text;
             msgs.appendChild(div);
             msgs.scrollTop = msgs.scrollHeight;
+            return div;
+        }
+
+        function addTyping() {
+            var div = document.createElement("div");
+            div.className = "cb-msg cb-bot cb-typing";
+            div.innerHTML = "<span></span><span></span><span></span>";
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+            return div;
         }
 
         function ask(question) {
             if (busy || !question) return;
             busy = true;
             send.disabled = true;
+            input.value = "";
             addMsg(question, "cb-user");
+            var typing = addTyping();
+
             fetch("@Url.Action("Hoi", "Chatbot")", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -116,6 +241,7 @@
                     addMsg("Không kết nối được máy chủ. Bạn thử lại sau nhé.", "cb-bot");
                 })
                 .finally(function () {
+                    typing.remove();
                     busy = false;
                     send.disabled = false;
                     input.focus();
@@ -124,13 +250,11 @@
 
         form.addEventListener("submit", function (e) {
             e.preventDefault();
-            var q = input.value.trim();
-            input.value = "";
-            ask(q);
+            ask(input.value.trim());
         });
 
         chips.addEventListener("click", function (e) {
-            if (e.target.tagName === "BUTTON") ask(e.target.textContent);
+            if (e.target.tagName === "BUTTON") ask(e.target.textContent.trim());
         });
 
         // Nhân viên: poll thông báo mới -> bot chủ động nhắn vào ô chat + chấm đỏ.
@@ -152,7 +276,7 @@
                         if (lanDau) { lanDau = false; return; }
                         if (moi.length > 0) {
                             moi.slice().reverse().forEach(function (h) {
-                                var tien = h.loai === "DatPhong" ? "🔔 ĐẶT PHÒNG MỚI: " : h.loai === "DanhGia" ? "⭐ ĐÁNH GIÁ MỚI: " : "🔔 ";
+                                var tien = h.loai === "DatPhong" ? "Đơn đặt phòng mới: " : h.loai === "DanhGia" ? "Đánh giá mới: " : "";
                                 addMsg(tien + h.moTa, "cb-bot");
                             });
                             addMsg("Bạn hỏi \"hôm nay có gì?\" để xem bản tin và việc ưu tiên nhé.", "cb-bot");
@@ -161,7 +285,6 @@
                     })
                     .catch(function () { });
             }
-            fab.addEventListener("click", function () { if (panel.classList.contains("open")) fabDot.style.display = "none"; });
         }
     })();
 </script>

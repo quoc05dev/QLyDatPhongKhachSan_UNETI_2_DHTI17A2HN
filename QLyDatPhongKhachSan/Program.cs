@@ -34,7 +34,11 @@ builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 
     // 1d. Đăng ký dịch vụ
     builder.Services.AddScoped<IEmailService, EmailService>();
-    builder.Services.AddScoped<IChatbotService, ChatbotService>();
+    // Chatbot: LLM ben ngoai khi co ChatbotAi:ApiKey, khong co thi tu roi ve rule-based.
+    builder.Services.Configure<ChatbotAiOptions>(builder.Configuration.GetSection("ChatbotAi"));
+    builder.Services.AddHttpClient();
+    builder.Services.AddScoped<ChatbotService>();
+    builder.Services.AddScoped<IChatbotService, LlmChatbotService>();
     builder.Services.AddScoped<IAdminBriefingService, AdminBriefingService>();
     builder.Services.AddScoped<IHoatDongService, HoatDongService>();
     builder.Services.AddScoped<IDanhGiaService, DanhGiaService>();
