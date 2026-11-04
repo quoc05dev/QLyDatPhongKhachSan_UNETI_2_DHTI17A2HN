@@ -26,6 +26,7 @@ namespace QLyDatPhongKhachSan.Controllers
         private readonly Services.IEmailService _emailService;
         private readonly Services.IHoatDongService _hoatDongService;
         private readonly Services.IDanhGiaService _danhGiaService;
+        private readonly Services.IZaloNotifier _zaloNotifier;
 
         public DatPhongController(
             IDatPhongRepository datPhongRepository,
@@ -37,7 +38,8 @@ namespace QLyDatPhongKhachSan.Controllers
             IWebHostEnvironment env,
             Services.IEmailService emailService,
             Services.IHoatDongService hoatDongService,
-            Services.IDanhGiaService danhGiaService)
+            Services.IDanhGiaService danhGiaService,
+            Services.IZaloNotifier zaloNotifier)
         {
             _datPhongRepository = datPhongRepository;
             _chiTietDatPhongRepository = chiTietDatPhongRepository;
@@ -49,6 +51,7 @@ namespace QLyDatPhongKhachSan.Controllers
             _emailService = emailService;
             _hoatDongService = hoatDongService;
             _danhGiaService = danhGiaService;
+            _zaloNotifier = zaloNotifier;
         }
 
         #region Helper: Quản lý Session & Khách hàng
@@ -326,6 +329,15 @@ namespace QLyDatPhongKhachSan.Controllers
                     laThongBao: true);
             }
             catch { }
+
+            // Tin Zalo cho le tan, chay nen de khong lam cham dat phong.
+            if (_zaloNotifier.DangBat)
+            {
+                var tinZalo = $"[Đơn mới #{datPhong.MaDatPhong:D4}] {khachHang.HoTen} - phòng {phong.SoPhong}"
+                    + $" - {model.NgayNhan:dd/MM} đến {model.NgayTraDuKien:dd/MM}"
+                    + $" - {model.SoNguoi} khách - {tongTien:N0}đ";
+                _ = Task.Run(() => _zaloNotifier.GuiTinAsync(tinZalo));
+            }
 
             TempData["SuccessMessage"] = $"Đặt phòng {phong.SoPhong} thành công! Đơn đặt phòng #{datPhong.MaDatPhong:D4} đã được gửi tới bộ phận Lễ tân xử lý. Vui lòng kiểm tra email để xem xác nhận.";
             return RedirectToAction(nameof(Details), new { id = datPhong.MaDatPhong });
