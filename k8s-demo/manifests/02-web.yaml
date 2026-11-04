@@ -122,6 +122,38 @@ spec:
               value: "https://generativelanguage.googleapis.com/v1beta/openai/"
             - name: ChatbotAi__Model
               value: "gemini-3.5-flash-lite"
+            # Zalo OA (tùy chọn): thiếu key nào cũng KHÔNG crash, app chỉ không gửi tin.
+            # Nạp key bằng PATCH (giữ nguyên các key khác):
+            #   kubectl -n k8s-hoteluneti patch secret qldpkh-secrets --type merge \
+            #     -p '{"stringData":{"zalo-app-id":"...","zalo-secret-key":"...","zalo-refresh-token":"...","zalo-user-id":"..."}}'
+            # Lấy user_id: nhắn 1 tin cho OA rồi xem log pod với "ZALO_USER_ID".
+            # Refresh token mới được lưu vào PVC nên sống qua restart/deploy.
+            - name: Zalo__AppId
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: zalo-app-id
+                  optional: true
+            - name: Zalo__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: zalo-secret-key
+                  optional: true
+            - name: Zalo__RefreshToken
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: zalo-refresh-token
+                  optional: true
+            - name: Zalo__UserId
+              valueFrom:
+                secretKeyRef:
+                  name: qldpkh-secrets
+                  key: zalo-user-id
+                  optional: true
+            - name: Zalo__TokenFile
+              value: "/data/dataprotection/zalo-token.json"
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:

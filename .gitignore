@@ -489,3 +489,6 @@ $RECYCLE.BIN/
 
 # Kubernetes secrets (chứa password - không commit)
 k8s-demo/00-secret.yaml
+
+# Zalo OA token (refresh token chi dung 1 lan - chua bi mat)
+QLyDatPhongKhachSan/Data/zalo-token.json

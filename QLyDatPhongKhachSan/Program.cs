@@ -40,6 +40,9 @@ builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
     builder.Services.AddScoped<ChatbotService>();
     builder.Services.AddScoped<IChatbotService, LlmChatbotService>();
     builder.Services.AddScoped<IAdminBriefingService, AdminBriefingService>();
+    // Zalo OA: thieu cau hinh => DangBat = false, khong gui tin, khong anh huong dat phong.
+    builder.Services.Configure<ZaloOptions>(builder.Configuration.GetSection("Zalo"));
+    builder.Services.AddSingleton<IZaloNotifier, ZaloNotifier>();
     builder.Services.AddScoped<IHoatDongService, HoatDongService>();
     builder.Services.AddScoped<IDanhGiaService, DanhGiaService>();
 
