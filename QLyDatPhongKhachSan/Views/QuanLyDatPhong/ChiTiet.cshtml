@@ -193,8 +193,8 @@
         <article class="dashboard-card" style="padding: 24px;">
             <div class="card-heading" style="margin-bottom: 20px;">
                 <div>
-                    <span>Thao tác đổi phòng</span>
-                    <h2>Đổi phòng cùng loại</h2>
+                    <span>Thao tác đổi / nâng hạng phòng</span>
+                    <h2>Đổi hoặc nâng hạng phòng</h2>
                 </div>
             </div>
 
@@ -217,14 +217,15 @@
                         </div>
 
                         <select name="maPhongMoi" required style="min-height:42px; padding:0 12px; border:1px solid #dce0e3; border-radius:2px; font-size: 12px;">
-                            <option value="">-- Chọn phòng trống cùng loại --</option>
+                            <option value="">-- Chọn phòng cùng loại hoặc hạng cao hơn --</option>
                             @foreach (var p in phongConTrongCungLoai)
                             {
-                                <option value="@p.MaPhong">Phòng @p.SoPhong • Tầng @p.Tang • @p.DonGia.ToString("N0")₫/đêm</option>
+                                <option value="@p.MaPhong">Phòng @p.SoPhong - @(p.LoaiPhong?.TenLoai ?? "-") - tầng @p.Tang - @p.DonGia.ToString("N0")đ/đêm@(p.DonGia > ct.DonGia ? $" (+{(p.DonGia - ct.DonGia):N0}đ/đêm)" : "")</option>
                             }
                         </select>
+                        <small style="color:#6b7480;">Chênh lệch khi nâng hạng được cộng vào tổng tiền; thu tại quầy hoặc thanh toán khi trả phòng.</small>
 
-                        <button type="submit" class="admin-primary" style="align-self:flex-start; min-height:38px; padding:0 16px;">Đổi phòng</button>
+                        <button type="submit" class="admin-primary" style="align-self:flex-start; min-height:38px; padding:0 16px;">Đổi / nâng hạng</button>
                     </div>
                 </form>
             }

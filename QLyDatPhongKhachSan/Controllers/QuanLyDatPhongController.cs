@@ -112,7 +112,17 @@ namespace QLyDatPhongKhachSan.Controllers
                         // Lấy các phòng cùng loại, không bảo trì, không bị trùng lịch và khác các phòng đã chọn trong đơn
                         var phongTrongCungLoai = await _phongRepository.LayPhongTrongCungLoaiAsync(maLoai, phongDaChonTrongDon, phongBanIds);
 
-                        phongDoiKhaDung[ct.MaChiTiet] = phongTrongCungLoai;
+                        // Bổ sung phòng hạng cao hơn (giá >= phòng hiện tại) để nâng hạng.
+                        var phongNangHang = await _phongRepository.LayPhongNangHangKhaDungAsync(
+                            ct.DonGia, datPhong.NgayNhan, datPhong.NgayTraDuKien, phongDaChonTrongDon);
+
+                        phongDoiKhaDung[ct.MaChiTiet] = phongTrongCungLoai
+                            .Concat(phongNangHang)
+                            .GroupBy(p => p.MaPhong)
+                            .Select(g => g.First())
+                            .OrderBy(p => p.DonGia)
+                            .ThenBy(p => p.SoPhong)
+                            .ToList();
                     }
                 }
             }
@@ -446,15 +456,16 @@ namespace QLyDatPhongKhachSan.Controllers
                 return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
             }
 
-            if (phongMoi.MaLoaiPhong != phongCu.MaLoaiPhong)
+            // Cho phép đổi cùng loại hoặc nâng hạng (giá >= giá đang ở), không hạ hạng.
+            if (phongMoi.DonGia < chiTiet.DonGia)
             {
-                TempData["Error"] = "Chỉ được phép đổi sang phòng cùng Loại phòng!";
+                TempData["Error"] = "Chỉ được đổi sang phòng cùng giá hoặc hạng cao hơn!";
                 return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
             }
 
-            if (phongMoi.TrangThai == "BaoTri")
+            if (phongMoi.TrangThai != "Trong")
             {
-                TempData["Error"] = $"Phòng {phongMoi.SoPhong} đang trong trạng thái bảo trì, không thể đổi!";
+                TempData["Error"] = $"Phòng {phongMoi.SoPhong} hiện không trống (trạng thái: {phongMoi.TrangThai}), không thể đổi!";
                 return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
             }
 
@@ -482,18 +493,29 @@ namespace QLyDatPhongKhachSan.Controllers
                 phongMoi.TrangThai = "DaDat";
             }
 
+            decimal tongTienCu = datPhong.TongTien;
+            bool laNangHang = phongMoi.DonGia > chiTiet.DonGia;
+
             string soPhongCu = phongCu.SoPhong;
             chiTiet.MaPhong = maPhongMoi;
             chiTiet.Phong = phongMoi;
             chiTiet.DonGia = phongMoi.DonGia;
+            chiTiet.ThanhTien = chiTiet.SoNgay * phongMoi.DonGia;
+            datPhong.TongTien = datPhong.ChiTietDatPhongs.Sum(c => c.ThanhTien);
 
-            // Ghi nhật ký đổi phòng vào GhiChu
+            // Ghi nhật ký đổi/nâng hạng phòng vào GhiChu
             var nguoiThucHien = HttpContext.Session.GetString("TenDangNhap") ?? "Lễ tân";
-            string logDoi = $"Đổi từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong} bởi {nguoiThucHien} lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
+            string hanhDong = laNangHang ? "Nâng hạng" : "Đổi";
+            string logDoi = $"{hanhDong} từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong} bởi {nguoiThucHien} lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
             datPhong.GhiChu = string.IsNullOrEmpty(datPhong.GhiChu) ? logDoi : $"{datPhong.GhiChu} | {logDoi}";
 
             await _datPhongRepository.CapNhatAsync(datPhong);
-            TempData["Success"] = $"Đã đổi thành công từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong}!";
+
+            decimal chenhLech = datPhong.TongTien - tongTienCu;
+            decimal conLai = datPhong.TongTien - datPhong.TienCoc;
+            TempData["Success"] = laNangHang
+                ? $"Đã nâng hạng từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong}: tổng tiền tăng {chenhLech:N0}đ, còn lại {conLai:N0}đ (thu tại quầy hoặc khi trả phòng)."
+                : $"Đã đổi thành công từ phòng {soPhongCu} sang phòng {phongMoi.SoPhong}!";
             return RedirectToAction(nameof(ChiTiet), new { id = maDatPhong });
         }
     }

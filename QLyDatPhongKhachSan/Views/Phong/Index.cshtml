@@ -127,9 +127,16 @@
                                 </span>
                             </td>
                             <td>
-                                @if (item.NgayBaoTri.HasValue)
+                                @if (item.NgayBaoTri.HasValue || item.NgayHoanThanhBaoTri.HasValue)
                                 {
-                                    <span>@item.NgayBaoTri.Value.ToString("dd/MM/yyyy")</span>
+                                    @if (item.NgayBaoTri.HasValue)
+                                    {
+                                        <span>Bắt đầu @item.NgayBaoTri.Value.ToString("dd/MM/yyyy")</span>
+                                    }
+                                    @if (item.NgayHoanThanhBaoTri.HasValue)
+                                    {
+                                        <span style="display:block;color:#b9770e;">Dự kiến xong @item.NgayHoanThanhBaoTri.Value.ToString("dd/MM/yyyy")</span>
+                                    }
                                     @if (!string.IsNullOrWhiteSpace(item.GhiChuBaoTri))
                                     {
                                         <small style="display:block;color:#6b7480;">@item.GhiChuBaoTri</small>

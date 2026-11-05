@@ -227,14 +227,7 @@ namespace QLyDatPhongKhachSan.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.DanhSachPhongTrong = await _phongRepository.LayDanhSachPhongTrongAsync();
-
-                model.SoPhong = phong.SoPhong;
-                model.TenLoaiPhong = phong.LoaiPhong?.TenLoai ?? "Tiêu chuẩn";
-                model.DonGia = phong.DonGia;
-                model.SoNguoiToiDa = phong.LoaiPhong?.SoNguoiToiDa ?? 2;
-                model.TienNghi = phong.TienNghi;
-                model.HuongPhong = phong.HuongPhong;
-                model.Tang = phong.Tang;
+                DienLaiThongTinPhong(model, phong);
                 return View(model);
             }
 
@@ -280,7 +273,8 @@ namespace QLyDatPhongKhachSan.Controllers
             decimal tongTien = soNgay * phong.DonGia;
             decimal tienCoc = model.TienCoc > tongTien ? tongTien : Math.Max(0, model.TienCoc);
 
-            // 1. Tạo đơn đặt phòng chính (DatPhong)
+            // 1 + 2. Tạo đơn + chi tiết trong cùng transaction, khoá phòng để chặn
+            // 2 khách cùng đặt một phòng tại cùng thời điểm.
             var datPhong = new DatPhong
             {
                 MaKhachHang = khachHang.MaKhachHang,
@@ -294,12 +288,8 @@ namespace QLyDatPhongKhachSan.Controllers
                 GhiChu = model.GhiChu?.Trim()
             };
 
-            await _datPhongRepository.ThemAsync(datPhong);
-
-            // 2. Tạo chi tiết đặt phòng (ChiTietDatPhong) liên kết với phòng đã chọn
             var chiTiet = new ChiTietDatPhong
             {
-                MaDatPhong = datPhong.MaDatPhong,
                 MaPhong = phong.MaPhong,
                 NgayNhan = model.NgayNhan.Date,
                 NgayTra = model.NgayTraDuKien.Date,
@@ -309,7 +299,14 @@ namespace QLyDatPhongKhachSan.Controllers
                 TrangThai = "ChoNhan"
             };
 
-            await _chiTietDatPhongRepository.ThemAsync(chiTiet);
+            if (!await _datPhongRepository.ThemDonChongTrungAsync(datPhong, chiTiet))
+            {
+                ModelState.AddModelError(string.Empty,
+                    $"Phòng {phong.SoPhong} vừa được người khác đặt trong khoảng thời gian này. Vui lòng chọn phòng hoặc ngày khác.");
+                ViewBag.DanhSachPhongTrong = await _phongRepository.LayDanhSachPhongTrongAsync();
+                DienLaiThongTinPhong(model, phong);
+                return View(model);
+            }
 
             try
             {
@@ -341,6 +338,18 @@ namespace QLyDatPhongKhachSan.Controllers
 
             TempData["SuccessMessage"] = $"Đặt phòng {phong.SoPhong} thành công! Đơn đặt phòng #{datPhong.MaDatPhong:D4} đã được gửi tới bộ phận Lễ tân xử lý. Vui lòng kiểm tra email để xem xác nhận.";
             return RedirectToAction(nameof(Details), new { id = datPhong.MaDatPhong });
+        }
+
+        // Điền lại thông tin phòng khi form phải hiển thị lại (lỗi hoặc phòng vừa bị đặt).
+        private static void DienLaiThongTinPhong(DatPhongCreateViewModel model, Phong phong)
+        {
+            model.SoPhong = phong.SoPhong;
+            model.TenLoaiPhong = phong.LoaiPhong?.TenLoai ?? "Tiêu chuẩn";
+            model.DonGia = phong.DonGia;
+            model.SoNguoiToiDa = phong.LoaiPhong?.SoNguoiToiDa ?? 2;
+            model.TienNghi = phong.TienNghi;
+            model.HuongPhong = phong.HuongPhong;
+            model.Tang = phong.Tang;
         }
 
         // =====================================================================

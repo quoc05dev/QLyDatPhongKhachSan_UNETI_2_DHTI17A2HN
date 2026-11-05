@@ -362,6 +362,9 @@ namespace QLyDatPhongKhachSan.Migrations
                     b.Property<DateTime?>("NgayBaoTri")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("NgayHoanThanhBaoTri")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("SoPhong")
                         .IsRequired()
                         .HasMaxLength(20)
