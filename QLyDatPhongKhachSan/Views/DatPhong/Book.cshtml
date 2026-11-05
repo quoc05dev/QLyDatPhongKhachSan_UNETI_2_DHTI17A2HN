@@ -6,6 +6,7 @@
 // ==========================================
 *@
 
+@using QLyDatPhongKhachSan.Helpers
 @model QLyDatPhongKhachSan.ViewModels.DatPhongCreateViewModel
 @{
     ViewData["Title"] = $"Đặt phòng {Model.SoPhong}";
@@ -272,7 +273,7 @@
 
 <div class="book-wrap">
     <nav class="book-topbar">
-        <a href="/" class="book-brand">
+        <a href="@((Context.Session.GetVaiTro() is "Admin" or "NhanVien") ? Url.Action("Dashboard", "ThongKe") : Url.Action("Index", "Home"))" class="book-brand">
             <span class="book-brand-emblem">U</span>
             <span class="book-brand-text">
                 <strong>UNETI GRAND</strong>

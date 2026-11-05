@@ -4,6 +4,9 @@
     Nội dung thực hiện: Giao diện Layout chung tích hợp Bootstrap Icons, Navbar phẫn quyền & Session.
 *@
 @using QLyDatPhongKhachSan.Helpers
+@{
+    var laQuanTri = Context.Session.GetVaiTro() is "Admin" or "NhanVien";
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -19,7 +22,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-3">
             <div class="container-fluid px-4">
-                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="@(laQuanTri ? "ThongKe" : "Home")" asp-action="@(laQuanTri ? "Dashboard" : "Index")">
                     <i class="bi bi-building me-2"></i>UNETI HOTEL
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"

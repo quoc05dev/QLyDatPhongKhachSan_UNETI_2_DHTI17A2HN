@@ -20,7 +20,7 @@
 <main id="top">
     <header class="site-header">
         <div class="container nav-wrap">
-            <a class="brand" href="#top" aria-label="UNETI Grand Hotel trang chủ">
+            <a class="brand" href="@(isNhanVien ? Url.Action("Dashboard", "ThongKe") : "#top")" aria-label="UNETI Grand Hotel trang chủ">
                 <span class="brand-mark">U</span>
                 <span>
                     <strong>UNETI GRAND</strong>
