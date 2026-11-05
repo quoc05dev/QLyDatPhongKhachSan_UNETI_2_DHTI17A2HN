@@ -155,10 +155,13 @@ input:focus-visible {
 }
 
 .site-header {
-  position: absolute;
+  position: sticky;
   z-index: 20;
   top: 0;
   width: 100%;
+  margin-bottom: -82px;
+  backdrop-filter: blur(10px);
+  background: transparent;
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   color: var(--white);
 }
@@ -2712,7 +2715,7 @@ a.row-action {
 
 /* 1) Header: tách khỏi ảnh hero để logo + menu luôn đọc rõ, không bị trộn với nội dung hero */
 .site-header {
-  background: linear-gradient(180deg, rgba(4, 15, 28, 0.9) 0%, rgba(4, 15, 28, 0.55) 75%, transparent 100%);
+  background: transparent;
 }
 
 /* 1) Logo: tagline nằm đúng dòng riêng, không bao giờ đè lên tên thương hiệu */
