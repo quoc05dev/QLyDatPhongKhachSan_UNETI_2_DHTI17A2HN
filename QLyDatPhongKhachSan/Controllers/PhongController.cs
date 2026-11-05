@@ -222,7 +222,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Admin", "NhanVien")]
-        public async Task<IActionResult> Create([Bind("SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,GhiChuBaoTri")] Phong phong)
+        public async Task<IActionResult> Create([Bind("SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,NgayHoanThanhBaoTri,GhiChuBaoTri")] Phong phong)
         {
             if (ModelState.IsValid)
             {
@@ -263,7 +263,7 @@ namespace QLyDatPhongKhachSan.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Admin", "NhanVien")]
-        public async Task<IActionResult> Edit(int id, [Bind("MaPhong,SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,GhiChuBaoTri")] Phong phong)
+        public async Task<IActionResult> Edit(int id, [Bind("MaPhong,SoPhong,MaLoaiPhong,Tang,HuongPhong,TienNghi,DonGia,TrangThai,GhiChu,NgayBaoTri,NgayHoanThanhBaoTri,GhiChuBaoTri")] Phong phong)
         {
             if (id != phong.MaPhong)
             {

@@ -83,6 +83,12 @@
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;">
+                <label asp-for="NgayHoanThanhBaoTri" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Dự kiến sửa xong</label>
+                <input asp-for="NgayHoanThanhBaoTri" type="date" style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
+                <span asp-validation-for="NgayHoanThanhBaoTri" style="color:#c0392b;font-size: 12px;"></span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
                 <label asp-for="GhiChuBaoTri" style="font-size: 11px;font-weight:700;color:var(--navy-900);text-transform:uppercase;letter-spacing:0.05em;">Ghi chú bảo trì</label>
                 <input asp-for="GhiChuBaoTri" placeholder="Nội dung bảo trì..." style="min-height:42px;padding:0 12px;border:1px solid #dce0e3;border-radius:2px;font-size: 13px;" />
                 <span asp-validation-for="GhiChuBaoTri" style="color:#c0392b;font-size: 12px;"></span>

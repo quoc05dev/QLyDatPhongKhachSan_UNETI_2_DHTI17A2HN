@@ -341,6 +341,25 @@ namespace QLyDatPhongKhachSan.Repositories
             return await query.OrderBy(p => p.SoPhong).ToListAsync();
         }
 
+        public async Task<List<Phong>> LayPhongNangHangKhaDungAsync(decimal donGiaToiThieu, DateTime ngayNhan, DateTime ngayTra, List<int>? phongLoaiTru)
+        {
+            var loaiTru = phongLoaiTru ?? new List<int>();
+            return await _context.Phongs
+                .AsNoTracking()
+                .Include(p => p.LoaiPhong)
+                .Where(p => p.TrangThai == "Trong"
+                    && p.DonGia >= donGiaToiThieu
+                    && !loaiTru.Contains(p.MaPhong)
+                    && !_context.ChiTietDatPhongs.Any(c => c.MaPhong == p.MaPhong
+                        && c.DatPhong!.TrangThai != "DaHuy"
+                        && c.DatPhong!.TrangThai != "HoanThanh"
+                        && c.NgayNhan.Date < ngayTra.Date
+                        && c.NgayTra.Date > ngayNhan.Date))
+                .OrderBy(p => p.DonGia)
+                .ThenBy(p => p.SoPhong)
+                .ToListAsync();
+        }
+
         public async Task ThemAsync(Phong phong)
         {
             _context.Add(phong);

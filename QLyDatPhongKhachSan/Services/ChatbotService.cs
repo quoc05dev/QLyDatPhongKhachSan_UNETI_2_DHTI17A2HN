@@ -69,6 +69,48 @@ namespace QLyDatPhongKhachSan.Services
                      + "Để bảo mật, chỉ tài khoản đặt đơn mới xem được chi tiết.";
             }
 
+            // 1b) Hai người đặt cùng lúc / đặt trùng
+            if (t.Contains("cung luc") || t.Contains("dong thoi") || t.Contains("dat trung")
+                || t.Contains("tranh chap"))
+            {
+                return "Hệ thống khoá phòng ngay khi tạo đơn nên 2 người bấm đặt cùng lúc chỉ 1 đơn được ghi nhận; người còn lại được báo chọn phòng hoặc ngày khác. "
+                     + "Nếu phát sinh trùng, khách sạn ưu tiên đơn đã cọc/thanh toán trước; đơn sau được đổi phòng tương đương hoặc hoàn cọc. Lễ tân sẽ liên hệ để xử lý.";
+            }
+
+            // 1c) Nâng hạng phòng / thanh toán chênh lệch
+            if (t.Contains("nang hang") || t.Contains("nang cap") || t.Contains("hang cao hon"))
+            {
+                return "Khách đã đặt phòng muốn nâng hạng: liên hệ lễ tân để đổi sang phòng hạng cao hơn nếu còn trống. "
+                     + "Phần chênh lệch được cộng vào đơn và thu tại quầy khi đổi, hoặc thanh toán cùng hoá đơn khi trả phòng. "
+                     + "Nếu đã trả trước, hệ thống ghi nhận thêm khoản chênh lệch chứ không hoàn lại phần đã trả.";
+            }
+
+            // 1d) Bảo trì phòng
+            if (t.Contains("bao tri") || t.Contains("sua chua") || (t.Contains("khi nao") && t.Contains("xong")))
+            {
+                return await TraLoiBaoTriAsync(laNhanVien);
+            }
+
+            // 1e) Khiếu nại dịch vụ
+            if (t.Contains("khieu nai") || t.Contains("phan nan") || t.Contains("khong hai long")
+                || (t.Contains("chat luong") && (t.Contains("kem") || t.Contains("te"))))
+            {
+                return "Khiếu nại dịch vụ:\n"
+                     + "- Đang lưu trú: gọi hotline 1900 6068 hoặc email support@uhotel.click, lễ tân tiếp nhận ngay.\n"
+                     + "- Sau khi trả phòng: gửi đánh giá trong \"Lịch sử đặt phòng\".\n"
+                     + "- Lễ tân/CSKH tiếp nhận, quản lý khách sạn xử lý và phản hồi trong 24 giờ.";
+            }
+
+            // 1f) Khuyến mãi / khách quen
+            if (t.Contains("sale") || t.Contains("giam gia") || t.Contains("khuyen mai") || t.Contains("uu dai")
+                || t.Contains("sinh nhat") || t.Contains("ngay le") || t.Contains("ki niem")
+                || t.Contains("khach quen") || t.Contains("dat nhieu lan"))
+            {
+                return "Hiện khách sạn chưa có chương trình giảm giá cho ngày lễ, kỷ niệm, sinh nhật hay khách đặt phòng nhiều lần. "
+                     + "Mình đã ghi nhận đề xuất của bạn; khi có chương trình sẽ thông báo trên website. "
+                     + "Bạn có thể để lại số điện thoại/email để lễ tân tư vấn khi có ưu đãi mới.";
+            }
+
             // 2) Giá cả các hạng phòng
             if (t.Contains("gia") || t.Contains("bao nhieu") || t.Contains("chi phi"))
             {
@@ -186,8 +228,42 @@ namespace QLyDatPhongKhachSan.Services
                     $"{d.TenDichVu} {d.Gia.ToString("N0", vn)}đ")) + ".");
             }
 
+            var laNhanVien = vaiTro is "Admin" or "NhanVien";
+            var phongBaoTri = (await _phongRepository.LayTatCaAsync())
+                .Where(p => p.TrangThai == "BaoTri")
+                .OrderBy(p => p.SoPhong)
+                .ToList();
+            if (phongBaoTri.Any())
+            {
+                sb.AppendLine("Phòng đang bảo trì: " + string.Join("; ", phongBaoTri.Select(p =>
+                    $"phòng {p.SoPhong} ({(p.NgayBaoTri.HasValue ? $"từ {p.NgayBaoTri:dd/MM/yyyy}" : "chưa rõ ngày bắt đầu")}, "
+                    + $"{(p.NgayHoanThanhBaoTri.HasValue ? $"dự kiến xong {p.NgayHoanThanhBaoTri:dd/MM/yyyy}" : "chưa có ngày sửa xong")}"
+                    + $"{(laNhanVien && !string.IsNullOrWhiteSpace(p.GhiChuBaoTri) ? $", ghi chú: {p.GhiChuBaoTri}" : "")})")) + ".");
+            }
+            else
+            {
+                sb.AppendLine("Hiện không có phòng nào đang bảo trì.");
+            }
+
+            if (maTaiKhoan is not null)
+            {
+                var khachDangHoi = await _khachHangRepository.LayTheoMaTaiKhoanAsync(maTaiKhoan.Value);
+                if (khachDangHoi != null)
+                {
+                    var thongKeKhach = await _datPhongRepository.ThongKeTrangThaiCuaKhachHangAsync(khachDangHoi.MaKhachHang);
+                    var soLanDaO = thongKeKhach.GetValueOrDefault("HoanThanh");
+                    sb.AppendLine($"Khách đang hỏi đã hoàn thành {soLanDaO} lần lưu trú.");
+                }
+            }
+
             sb.AppendLine("Địa chỉ: UNETI Grand Hotel & Spa, Hà Nội. Hotline 1900 6068, email support@uhotel.click.");
             sb.AppendLine("Check-in từ 14:00, check-out trước 12:00. Hủy miễn phí trước 24 giờ, hủy muộn phí 1 đêm đầu; đổi phòng cùng loại miễn phí nếu còn trống.");
+            sb.AppendLine("Chính sách vận hành:");
+            sb.AppendLine("- Đặt trùng giờ: hệ thống khoá phòng khi tạo đơn nên đơn thứ hai bị từ chối; nếu phát sinh trùng, ưu tiên đơn đã cọc/thanh toán trước, đơn còn lại được đổi phòng tương đương hoặc hoàn cọc.");
+            sb.AppendLine("- Nâng hạng phòng: đổi sang phòng hạng cao hơn nếu còn trống; chênh lệch cộng vào tổng tiền, thu tại quầy khi đổi hoặc thanh toán khi trả phòng.");
+            sb.AppendLine("- Bảo trì: phòng bảo trì tạm khoá đặt/đổi; ngày sửa xong lấy theo ngày dự kiến, chưa có thì lễ tân xác nhận.");
+            sb.AppendLine("- Khiếu nại dịch vụ: hotline 1900 6068 hoặc email support@uhotel.click khi đang lưu trú; sau khi trả phòng gửi đánh giá trong \"Lịch sử đặt phòng\". Lễ tân/CSKH tiếp nhận, quản lý xử lý và phản hồi trong 24 giờ.");
+            sb.AppendLine("- Khuyến mãi: hiện chưa có chương trình giảm giá cho ngày lễ, kỷ niệm, sinh nhật hay khách quen; khách đã ở nhiều lần được lễ tân ghi nhận để chăm sóc.");
 
             if (vaiTro is "Admin" or "NhanVien")
             {
@@ -207,6 +283,35 @@ namespace QLyDatPhongKhachSan.Services
                 sb.AppendLine("Khách chưa đăng nhập; không được tra cứu đơn đặt phòng.");
             }
 
+            return sb.ToString();
+        }
+
+        private async Task<string> TraLoiBaoTriAsync(bool laNhanVien)
+        {
+            var phongBaoTri = (await _phongRepository.LayTatCaAsync())
+                .Where(p => p.TrangThai == "BaoTri")
+                .OrderBy(p => p.SoPhong)
+                .ToList();
+
+            if (!phongBaoTri.Any())
+            {
+                return "Hiện không có phòng nào đang bảo trì. Nếu cần kiểm tra một phòng cụ thể, bạn cho mình số phòng nhé.";
+            }
+
+            var sb = new StringBuilder("Phòng đang bảo trì:\n");
+            foreach (var p in phongBaoTri)
+            {
+                var batDau = p.NgayBaoTri.HasValue ? $"từ {p.NgayBaoTri:dd/MM/yyyy}" : "chưa ghi ngày bắt đầu";
+                var xong = p.NgayHoanThanhBaoTri.HasValue
+                    ? $"dự kiến xong {p.NgayHoanThanhBaoTri:dd/MM/yyyy}"
+                    : "chưa có ngày xong cụ thể";
+                sb.AppendLine($"- Phòng {p.SoPhong}: {batDau}, {xong}.");
+                if (laNhanVien && !string.IsNullOrWhiteSpace(p.GhiChuBaoTri))
+                {
+                    sb.AppendLine($"  Ghi chú nội bộ: {p.GhiChuBaoTri}");
+                }
+            }
+            sb.Append("Phòng bảo trì tạm khoá đặt/đổi; khi chưa có ngày xong, lễ tân sẽ xác nhận với bộ phận kỹ thuật.");
             return sb.ToString();
         }
 

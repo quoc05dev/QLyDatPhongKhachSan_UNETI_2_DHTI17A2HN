@@ -80,6 +80,47 @@ namespace QLyDatPhongKhachSan.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> ThemDonChongTrungAsync(DatPhong datPhong, ChiTietDatPhong chiTiet)
+        {
+            await using var transaction = await _context.Database
+                .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            try
+            {
+                // Khoá hàng phòng: request thứ 2 phải chờ request đầu commit/rollback.
+                await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $"SELECT 1 FROM Phong WITH (UPDLOCK, HOLDLOCK) WHERE MaPhong = {chiTiet.MaPhong}");
+
+                var biTrung = await _context.ChiTietDatPhongs
+                    .AsNoTracking()
+                    .AnyAsync(c => c.MaPhong == chiTiet.MaPhong
+                                && c.DatPhong!.TrangThai != "DaHuy"
+                                && c.DatPhong!.TrangThai != "HoanThanh"
+                                && c.NgayNhan.Date < chiTiet.NgayTra.Date
+                                && c.NgayTra.Date > chiTiet.NgayNhan.Date);
+
+                if (biTrung)
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                _context.DatPhongs.Add(datPhong);
+                await _context.SaveChangesAsync();
+
+                chiTiet.MaDatPhong = datPhong.MaDatPhong;
+                _context.ChiTietDatPhongs.Add(chiTiet);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public Task<bool> TonTaiAsync(int maDatPhong) =>
             _context.DatPhongs.AsNoTracking().AnyAsync(d => d.MaDatPhong == maDatPhong);
 

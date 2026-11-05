@@ -23,6 +23,10 @@ namespace QLyDatPhongKhachSan.Repositories.Interfaces
         Task<int> DemPhongKhongBaoTriTheoLoaiAsync(int maLoaiPhong);
         Task<List<Phong>> LayPhongTrongCungLoaiAsync(int maLoaiPhong);
         Task<List<Phong>> LayPhongTrongCungLoaiAsync(int maLoaiPhong, List<int>? phongDaChonTrongDon, List<int>? phongBanIds);
+
+        // Phòng trống (cùng loại hoặc hạng cao hơn) còn trống đúng khoảng ngày,
+        // dùng cho nâng hạng phòng.
+        Task<List<Phong>> LayPhongNangHangKhaDungAsync(decimal donGiaToiThieu, DateTime ngayNhan, DateTime ngayTra, List<int>? phongLoaiTru);
         Task ThemAsync(Phong phong);
         Task CapNhatAsync(Phong phong);
         Task XoaAsync(Phong phong);

@@ -28,6 +28,10 @@ namespace QLyDatPhongKhachSan.Repositories.Interfaces
         // Thêm mới một đơn đặt phòng (kèm lưu thay đổi).
         Task ThemAsync(DatPhong datPhong);
 
+        // Tạo đơn + chi tiết trong 1 transaction, khoá hàng phòng để 2 khách
+        // đặt cùng lúc không thể cùng lọt. Trả false nếu phòng đã bị đặt.
+        Task<bool> ThemDonChongTrungAsync(DatPhong datPhong, ChiTietDatPhong chiTiet);
+
         // Đơn đặt phòng có tồn tại trong hệ thống hay không.
         Task<bool> TonTaiAsync(int maDatPhong);
 

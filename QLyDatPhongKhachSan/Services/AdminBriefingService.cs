@@ -108,7 +108,55 @@ namespace QLyDatPhongKhachSan.Services
                 vm.ThongDiep.Add(new($"Chỉ còn {phongTrong} phòng trống — khách hỏi đặt sẽ nhanh hết, cân nhắc báo giá sớm.", urlPhongTrong));
             }
 
+            // Phòng bảo trì quá ngày dự kiến sửa xong: nhắc lễ tân cập nhật/đẩy tiến độ.
+            var baoTriQuaHan = phongs
+                .Where(p => p.TrangThai == "BaoTri"
+                    && p.NgayHoanThanhBaoTri.HasValue
+                    && p.NgayHoanThanhBaoTri.Value.Date < homNay)
+                .Select(p => p.SoPhong)
+                .ToList();
+            if (baoTriQuaHan.Count > 0)
+            {
+                vm.ThongDiep.Add(new($"{baoTriQuaHan.Count} phòng bảo trì quá hạn sửa xong: {string.Join(", ", baoTriQuaHan)}.", "/Phong?trangThai=BaoTri"));
+            }
+
+            // Khách đến hôm nay: sinh nhật / khách quen để lễ tân chủ động chăm sóc.
+            var khachDenHomNay = tatCa
+                .Where(d => d.NgayNhan.Date == homNay && d.TrangThai is "DaXacNhan" or "DangSuDung")
+                .GroupBy(d => d.MaKhachHang)
+                .Select(g => g.First())
+                .ToList();
+
+            var sinhNhatHomNay = khachDenHomNay
+                .Where(d => d.KhachHang?.NgaySinh is { } ns && ns.Month == homNay.Month && ns.Day == homNay.Day)
+                .Select(d => d.KhachHang!.HoTen)
+                .Distinct()
+                .ToList();
+            if (sinhNhatHomNay.Count > 0)
+            {
+                vm.ViecUuTien.Add(new($"Sinh nhật khách hôm nay: {string.Join(", ", sinhNhatHomNay)} — gửi lời chúc/ưu đãi nhỏ.", "/QuanLyDatPhong"));
+            }
+
+            var khachQuen = new List<string>();
+            foreach (var d in khachDenHomNay)
+            {
+                var thongKeCuaKhach = await _datPhongRepository.ThongKeTrangThaiCuaKhachHangAsync(d.MaKhachHang);
+                var soLanODaHoanThanh = thongKeCuaKhach.GetValueOrDefault("HoanThanh");
+                if (soLanODaHoanThanh >= 3)
+                {
+                    khachQuen.Add($"{d.KhachHang?.HoTen} ({soLanODaHoanThanh} lần)");
+                }
+            }
+            if (khachQuen.Count > 0)
+            {
+                vm.ViecUuTien.Add(new($"Khách quen đến hôm nay: {string.Join(", ", khachQuen)} — chào hỏi và ưu đãi theo chính sách khách sạn.", "/QuanLyDatPhong"));
+            }
+
             // ===== AI chốt việc ưu tiên: xếp theo mức độ khẩn, việc nào gấp nằm trên =====
+            if (baoTriQuaHan.Count > 0)
+            {
+                vm.ViecUuTien.Add(new($"Kiểm tra {baoTriQuaHan.Count} phòng bảo trì quá hạn: {string.Join(", ", baoTriQuaHan)} — cập nhật ngày xong hoặc báo quản lý.", "/Phong?trangThai=BaoTri"));
+            }
             if (choQua24h > 0)
             {
                 vm.ViecUuTien.Add(new($"Chờ xử lý gấp: {choQua24h} đơn đặt quá 24h chưa xác nhận — khách dễ hủy, xử lý ngay.", urlDonCho));
