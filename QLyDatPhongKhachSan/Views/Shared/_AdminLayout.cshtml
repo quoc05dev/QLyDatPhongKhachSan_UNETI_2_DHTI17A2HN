@@ -9,6 +9,7 @@
     var vaiTro = Context.Session.GetVaiTro();
     var isAdmin = vaiTro == "Admin";
     var isKhachHang = vaiTro == "KhachHang";
+    var laKhach = string.IsNullOrEmpty(vaiTro) || isKhachHang;
 
     var action = Context.Request.RouteValues["action"]?.ToString();
     var active = (string?)ViewData["AdminActive"]
@@ -25,7 +26,7 @@
 <body>
     <div class="admin-app">
         <aside class="admin-sidebar" id="admin-sidebar">
-            <a class="admin-brand" asp-controller="ThongKe" asp-action="Dashboard">
+            <a class="admin-brand" asp-controller="@(laKhach ? "Home" : "ThongKe")" asp-action="@(laKhach ? "Index" : "Dashboard")">
                 <span>U</span>
                 <div><strong>UNETI GRAND</strong><small>HOTEL MANAGEMENT</small></div>
             </a>
