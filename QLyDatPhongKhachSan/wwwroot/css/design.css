@@ -155,10 +155,12 @@ input:focus-visible {
 }
 
 .site-header {
-  position: absolute;
+  position: sticky;
   z-index: 20;
   top: 0;
   width: 100%;
+  margin-bottom: -82px;
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   color: var(--white);
 }
@@ -1306,6 +1308,10 @@ footer {
 
   .nav-wrap {
     height: 72px;
+  }
+
+  .site-header {
+    margin-bottom: -72px;
   }
 
   .main-nav.is-open {
