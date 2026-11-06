@@ -2753,27 +2753,31 @@ a.row-action {
   font-family: "DM Sans", sans-serif !important;
 }
 
-/* Nút về đầu trang: hiện khi cuộn xuống, ẩn ở đầu trang */
+/* Nút về đầu trang: mũi tên, đồng bộ navy/gold, giữa dưới */
 .btn-to-top {
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9999;
   display: none;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  border: none;
-  background: #0d6efd;
-  color: #fff;
+  border: 1px solid rgba(201, 163, 93, .65);
+  background: var(--navy-900, #0b1b2e);
+  color: var(--gold-400, #d9ba7c);
   font-size: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 26px rgba(7, 21, 37, .35);
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background 0.2s, color 0.2s;
 }
 
 .btn-to-top:hover {
-  transform: translateY(-2px);
-  opacity: 0.9;
+  transform: translateX(-50%) translateY(-2px);
+  background: var(--gold-500, #c9a35d);
+  color: var(--navy-950, #071525);
 }
 

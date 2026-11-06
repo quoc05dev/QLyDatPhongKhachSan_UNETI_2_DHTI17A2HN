@@ -297,7 +297,7 @@
         var btn = document.getElementById('btnToTop');
         if (!btn) return;
         window.addEventListener('scroll', function () {
-            btn.style.display = window.scrollY > 100 ? 'block' : 'none';
+            btn.style.display = window.scrollY > 100 ? 'flex' : 'none';
         });
         btn.addEventListener('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
