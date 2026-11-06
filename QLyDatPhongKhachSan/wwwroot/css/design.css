@@ -2753,30 +2753,32 @@ a.row-action {
   font-family: "DM Sans", sans-serif !important;
 }
 
-/* Nút về đầu trang: mũi tên, đồng bộ navy/gold, giữa dưới */
+/* Nút về đầu trang: cạnh phải giữa chiều dọc, bán trong suốt, hiện rõ khi hover */
 .btn-to-top {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 9999;
   display: none;
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(201, 163, 93, .65);
+  border: 1px solid rgba(201, 163, 93, .45);
   background: var(--navy-900, #0b1b2e);
   color: var(--gold-400, #d9ba7c);
-  font-size: 1.25rem;
-  box-shadow: 0 10px 26px rgba(7, 21, 37, .35);
+  font-size: 1rem;
+  box-shadow: 0 6px 18px rgba(7, 21, 37, .25);
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s, background 0.2s, color 0.2s;
+  opacity: .55;
+  transition: transform 0.2s, opacity 0.2s, background 0.2s, color 0.2s;
 }
 
 .btn-to-top:hover {
-  transform: translateX(-50%) translateY(-2px);
+  transform: translateY(-50%) scale(1.08);
+  opacity: 1;
   background: var(--gold-500, #c9a35d);
   color: var(--navy-950, #071525);
 }
