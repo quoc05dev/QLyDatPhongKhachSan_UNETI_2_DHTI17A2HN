@@ -288,3 +288,19 @@
         }
     })();
 </script>
+
+<button id="btnToTop" class="btn-to-top" aria-label="Về đầu trang" title="Về đầu trang">
+    <i class="bi bi-arrow-up"></i>
+</button>
+<script>
+    (function () {
+        var btn = document.getElementById('btnToTop');
+        if (!btn) return;
+        window.addEventListener('scroll', function () {
+            btn.style.display = window.scrollY > 100 ? 'block' : 'none';
+        });
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+</script>
