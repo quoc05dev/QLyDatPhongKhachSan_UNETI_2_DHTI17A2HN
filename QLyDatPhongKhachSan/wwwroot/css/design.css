@@ -2758,7 +2758,7 @@ a.row-action {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 1000;
+  z-index: 9999;
   display: none;
   width: 44px;
   height: 44px;
