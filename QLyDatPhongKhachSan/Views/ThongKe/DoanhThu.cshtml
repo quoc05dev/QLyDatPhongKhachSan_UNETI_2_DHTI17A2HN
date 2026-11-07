@@ -112,6 +112,10 @@
                 Xuất báo cáo
             </button>
             <div class="export-menu" id="menuXuatBaoCao" role="menu">
+                <a role="menuitem" href="#" id="menuPreview">
+                    <svg class="admin-icon" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+                    <span>Xem trước báo cáo<small>Xem đúng bản PDF sẽ xuất</small></span>
+                </a>
                 <a role="menuitem" asp-controller="ThongKe" asp-action="ExportPdf" asp-route-nam="@namChon" asp-route-thang="@thangChon">
                     <svg class="admin-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
                     <span>Xuất PDF<small>Tệp .pdf</small></span>
@@ -338,6 +342,49 @@
     Doanh thu chỉ tính các chi tiết chưa bị hủy.
 </p>
 
+@* Xem trước & chỉnh sửa báo cáo trước khi xuất PDF/Excel *@
+<div class="modal-backdrop" id="preview-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pv-title" style="grid-template-columns:1fr;width:min(1040px,96vw);">
+        <button aria-label="Đóng" class="modal-close" id="pv-close" type="button" style="width:34px;height:34px;border:1px solid #e1e4e7;border-radius:50%;cursor:pointer;background:#fff;font-size:16px;line-height:1;z-index:2;">×</button>
+        <div class="modal-content" style="padding:26px 28px 22px;">
+            <div class="eyebrow" style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-500);">Xem trước bản chính thức</div>
+            <h2 id="pv-title" style="font-size:24px;margin:8px 0 4px;">Bản PDF trước khi xuất</h2>
+            <p style="color:var(--muted);font-size:13px;margin:0;">
+                Kỳ <strong>Tháng @thangChon/@namChon</strong> — bên dưới là <strong>đúng file PDF sẽ tải về</strong>
+                (mẫu văn bản chuẩn, <strong>@chiTietKy.Count</strong> đơn trong kỳ). Sửa dòng V/v/ghi chú rồi kiểm tra lại, ưng ý bấm "Xuất".
+            </p>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+                <label class="modal-field" style="margin:0;">
+                    <span>Tiêu đề dòng V/v (sửa được)</span>
+                    <input id="pv-tieude" type="text" maxlength="120" value="Tình hình doanh thu tháng @thangChon/@namChon" />
+                </label>
+                <label class="modal-field" style="margin:0;">
+                    <span>Ghi chú — dưới dòng V/v (tùy chọn)</span>
+                    <textarea id="pv-ghichu" rows="2" maxlength="500" style="width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:2px;background:var(--white);outline:none;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+                </label>
+            </div>
+
+            <div style="position:relative;margin-top:14px;">
+                <iframe id="pv-frame" title="Xem trước báo cáo PDF" style="width:100%;height:min(52vh,520px);border:1px solid var(--line);background:#fff;display:block;"></iframe>
+                <div id="pv-loading" style="position:absolute;inset:0;align-items:center;justify-content:center;background:rgba(255,255,255,.8);font-size:13px;color:var(--muted);display:none;">Đang tải bản xem trước…</div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <a href="#" id="pv-pdf" class="admin-primary" style="flex:1;justify-content:center;text-decoration:none;">
+                    <svg class="admin-icon" viewBox="0 0 24 24"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M4 21h16" /></svg>
+                    Xuất PDF (như đang xem)
+                </a>
+                <a href="#" id="pv-excel" class="admin-secondary" style="flex:1;justify-content:center;text-decoration:none;">
+                    <svg class="admin-icon" viewBox="0 0 24 24"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M4 21h16" /></svg>
+                    Xuất Excel
+                </a>
+            </div>
+            <small class="modal-note">Xem trước = đúng file PDF sẽ tải về. Excel không hiển thị trong trình duyệt — bấm "Xuất Excel" rồi mở bằng Excel.</small>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         (function () {
@@ -364,6 +411,72 @@
                     btn.setAttribute('aria-expanded', 'false');
                 }
             });
+        })();
+
+        // Xem trước đúng bản PDF sẽ xuất, rồi mới bấm Xuất
+        (function () {
+            var modal = document.getElementById('preview-modal');
+            var openBtn = document.getElementById('menuPreview');
+            if (!modal || !openBtn) { return; }
+
+            var closeBtn = document.getElementById('pv-close');
+            var inputTd = document.getElementById('pv-tieude');
+            var inputGc = document.getElementById('pv-ghichu');
+            var linkPdf = document.getElementById('pv-pdf');
+            var linkExcel = document.getElementById('pv-excel');
+            var frame = document.getElementById('pv-frame');
+            var loading = document.getElementById('pv-loading');
+            var debounce;
+            var lanTai = 0;
+            var urlPdf = '@Url.Action("ExportPdf", "ThongKe")';
+            var urlExcel = '@Url.Action("ExportExcel", "ThongKe")';
+
+            function truyVan() {
+                return '?nam=@namChon&thang=@thangChon'
+                    + '&tieuDe=' + encodeURIComponent(inputTd.value)
+                    + '&ghiChu=' + encodeURIComponent(inputGc.value);
+            }
+            function capNhatLink() {
+                linkPdf.href = urlPdf + truyVan();
+                linkExcel.href = urlExcel + truyVan();
+            }
+            // Tải đúng file PDF sẽ xuất rồi nhúng vào modal để xem thử.
+            function taiPreview() {
+                capNhatLink();
+                var so = ++lanTai;
+                loading.style.display = 'flex';
+                fetch(urlPdf + truyVan(), { credentials: 'same-origin' })
+                    .then(function (r) { if (!r.ok) { throw new Error('tai loi'); } return r.blob(); })
+                    .then(function (b) {
+                        if (so !== lanTai) { return; }
+                        if (window.pvBlobUrl) { URL.revokeObjectURL(window.pvBlobUrl); }
+                        window.pvBlobUrl = URL.createObjectURL(b);
+                        frame.src = window.pvBlobUrl;
+                        // Trình duyệt có thể không bắn event load với PDF plugin — ẩn lớp chờ sau 2,5s.
+                        setTimeout(function () {
+                            if (so === lanTai) { loading.style.display = 'none'; }
+                        }, 2500);
+                    })
+                    .catch(function () {
+                        if (so === lanTai) {
+                            loading.style.display = 'none';
+                            frame.removeAttribute('src');
+                        }
+                    });
+            }
+            function keoTiepTai() { clearTimeout(debounce); debounce = setTimeout(taiPreview, 500); }
+
+            frame.addEventListener('load', function () { loading.style.display = 'none'; });
+
+            function mo() { modal.hidden = false; taiPreview(); }
+            function dong() { modal.hidden = true; }
+
+            openBtn.addEventListener('click', function (e) { e.preventDefault(); mo(); });
+            closeBtn.addEventListener('click', dong);
+            modal.addEventListener('click', function (e) { if (e.target === modal) dong(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) dong(); });
+            inputTd.addEventListener('input', keoTiepTai);
+            inputGc.addEventListener('input', keoTiepTai);
         })();
     </script>
 }

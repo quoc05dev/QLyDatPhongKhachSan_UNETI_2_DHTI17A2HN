@@ -247,13 +247,15 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // GET: ThongKe/ExportExcel
         // Xuất báo cáo doanh thu của kỳ đang chọn ra tệp Excel (.xlsx).
-        public async Task<IActionResult> ExportExcel(int? nam, int? thang)
+        // tieuDe/ghiChu: người dùng sửa trong modal xem trước trước khi xuất.
+        public async Task<IActionResult> ExportExcel(int? nam, int? thang, string? tieuDe, string? ghiChu)
         {
             int namChon = nam ?? DateTime.Now.Year;
             int thangChon = thang ?? DateTime.Now.Month;
+            var (td, gc) = LocThongTinXuat(tieuDe, ghiChu, $"Tình hình doanh thu tháng {thangChon}/{namChon}");
 
             var baoCao = await LayBaoCaoDoanhThu(namChon, thangChon);
-            var noiDung = TaoExcelBaoCao(baoCao);
+            var noiDung = TaoExcelBaoCao(baoCao, td, gc);
 
             return File(
                 noiDung,
@@ -263,15 +265,28 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // GET: ThongKe/ExportPdf
         // Xuất báo cáo doanh thu của kỳ đang chọn ra tệp PDF.
-        public async Task<IActionResult> ExportPdf(int? nam, int? thang)
+        public async Task<IActionResult> ExportPdf(int? nam, int? thang, string? tieuDe, string? ghiChu)
         {
             int namChon = nam ?? DateTime.Now.Year;
             int thangChon = thang ?? DateTime.Now.Month;
+            var (td, gc) = LocThongTinXuat(tieuDe, ghiChu, $"Tình hình doanh thu tháng {thangChon}/{namChon}");
 
             var baoCao = await LayBaoCaoDoanhThu(namChon, thangChon);
-            var noiDung = TaoPdfBaoCao(baoCao);
+            var noiDung = TaoPdfBaoCao(baoCao, td, gc);
 
             return File(noiDung, "application/pdf", $"BaoCaoDoanhThu_{thangChon:00}_{namChon}.pdf");
+        }
+
+        // Chuẩn hóa tiêu đề/ghi chú người dùng sửa ở màn xem trước (giới hạn độ dài).
+        private static (string TieuDe, string? GhiChu) LocThongTinXuat(string? tieuDe, string? ghiChu, string macDinh)
+        {
+            var td = string.IsNullOrWhiteSpace(tieuDe) ? macDinh : tieuDe.Trim();
+            if (td.Length > 120) td = td[..120];
+
+            var gc = string.IsNullOrWhiteSpace(ghiChu) ? null : ghiChu.Trim();
+            if (gc is { Length: > 500 }) gc = gc[..500];
+
+            return (td, gc);
         }
 
         // Gom toàn bộ số liệu của một kỳ (tháng/năm) vào một chỗ để màn hình
@@ -338,39 +353,92 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // ================== XUẤT EXCEL (ClosedXML) ==================
 
-        private static byte[] TaoExcelBaoCao(DoanhThuBaoCaoViewModel baoCao)
+        private static byte[] TaoExcelBaoCao(DoanhThuBaoCaoViewModel baoCao, string tieuDe, string? ghiChu)
         {
             using var wb = new XLWorkbook();
 
-            // ---- Sheet 1: Tổng quan ----
+            // Viền ngoài + trong cho bảng dữ liệu để cột/ô tách bạch, không hụt hàng.
+            static void VienBang(IXLWorksheet ws, int dongCuoi, int cotCuoi)
+            {
+                var bang = ws.Range(1, 1, Math.Max(1, dongCuoi), cotCuoi);
+                bang.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                bang.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            }
+
+            // ---- Sheet 1: Tổng quan (mẫu văn bản hành chính chuẩn) ----
             var tq = wb.Worksheets.Add("Tổng quan");
 
-            tq.Cell("A1").Value = "BÁO CÁO DOANH THU KHÁCH SẠN";
-            tq.Range("A1:D1").Merge();
-            tq.Range("A1:D1").Style.Font.Bold = true;
-            tq.Range("A1:D1").Style.Font.FontSize = 16;
-            tq.Range("A1:D1").Style.Font.FontColor = XLColor.FromHtml("#172433");
+            // Bloc tiêu đề: tên đơn vị bên trái, quốc hiệu bên phải.
+            tq.Cell("A1").Value = "KHÁCH SẠN UNETI GRAND & SPA";
+            tq.Range("A1:C1").Merge();
+            tq.Range("A1:C1").Style.Font.Bold = true;
+            tq.Range("A1:C1").Style.Font.FontSize = 11;
 
-            tq.Cell("A2").Value = $"Kỳ báo cáo: Tháng {baoCao.Thang}/{baoCao.Nam}";
-            tq.Range("A2:D2").Merge();
-            tq.Range("A2:D2").Style.Font.FontSize = 11;
-            tq.Range("A2:D2").Style.Font.FontColor = XLColor.FromHtml("#59636d");
+            tq.Cell("E1").Value = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM";
+            tq.Range("E1:H1").Merge();
+            tq.Range("E1:H1").Style.Font.Bold = true;
+            tq.Range("E1:H1").Style.Font.FontSize = 11;
+            tq.Range("E1:H1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-            tq.Cell("A4").Value = "Chỉ tiêu";
-            tq.Cell("B4").Value = "Giá trị";
-            tq.Range("A4:B4").Style.Font.Bold = true;
-            tq.Range("A4:B4").Style.Fill.BackgroundColor = XLColor.FromHtml("#f2f4f6");
+            tq.Cell("E2").Value = "Độc lập - Tự do - Hạnh phúc";
+            tq.Range("E2:H2").Merge();
+            tq.Range("E2:H2").Style.Font.FontSize = 11;
+            tq.Range("E2:H2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-            tq.Cell("A5").Value = "Doanh thu trong kỳ";
-            tq.Cell("B5").Value = baoCao.DoanhThuKy;
-            tq.Cell("A6").Value = "Số lượt đặt có hiệu lực";
-            tq.Cell("B6").Value = baoCao.SoLuotDat;
-            tq.Cell("A7").Value = "Số lượt hủy trong kỳ";
-            tq.Cell("B7").Value = baoCao.SoLuotHuy;
-            tq.Cell("A8").Value = "Doanh thu bình quân / lượt";
-            tq.Cell("B8").Value = baoCao.DoanhThuBinhQuan;
-            tq.Cell("B5").Style.NumberFormat.Format = "#,##0 \"₫\"";
-            tq.Cell("B8").Style.NumberFormat.Format = "#,##0 \"₫\"";
+            var ngayXuat = DateTime.Now;
+            tq.Cell("A4").Value = $"Hà Nội, ngày {ngayXuat.Day} tháng {ngayXuat.Month} năm {ngayXuat.Year}";
+            tq.Range("A4:H4").Merge();
+            tq.Range("A4:H4").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            tq.Cell("A5").Value = "BÁO CÁO";
+            tq.Range("A5:H5").Merge();
+            tq.Range("A5:H5").Style.Font.Bold = true;
+            tq.Range("A5:H5").Style.Font.FontSize = 16;
+            tq.Range("A5:H5").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            tq.Cell("A6").Value = $"V/v: {tieuDe}";
+            tq.Range("A6:H6").Merge();
+            tq.Range("A6:H6").Style.Font.FontSize = 11;
+
+            if (!string.IsNullOrEmpty(ghiChu))
+            {
+                tq.Cell("A7").Value = $"Ghi chú: {ghiChu}";
+                tq.Range("A7:H7").Merge();
+                tq.Range("A7:H7").Style.Font.FontSize = 10;
+            }
+
+            tq.Cell("A9").Value = "Chỉ tiêu";
+            tq.Cell("B9").Value = "Giá trị";
+            tq.Range("A9:B9").Style.Font.Bold = true;
+
+            tq.Cell("A10").Value = "Doanh thu trong kỳ";
+            tq.Cell("B10").Value = baoCao.DoanhThuKy;
+            tq.Cell("A11").Value = "Số lượt đặt có hiệu lực";
+            tq.Cell("B11").Value = baoCao.SoLuotDat;
+            tq.Cell("A12").Value = "Số lượt hủy trong kỳ";
+            tq.Cell("B12").Value = baoCao.SoLuotHuy;
+            tq.Cell("A13").Value = "Doanh thu bình quân / lượt";
+            tq.Cell("B13").Value = baoCao.DoanhThuBinhQuan;
+            tq.Cell("B10").Style.NumberFormat.Format = "#,##0 \"₫\"";
+            tq.Cell("B13").Style.NumberFormat.Format = "#,##0 \"₫\"";
+
+            // Viền mỏng cho bảng chỉ tiêu, nền trắng (đen trắng tối giản).
+            var bangChiTieu = tq.Range("A9:B13");
+            bangChiTieu.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            bangChiTieu.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Chữ ký cuối báo cáo.
+            tq.Cell("A15").Value = "Người lập báo cáo";
+            tq.Range("A15:B15").Merge();
+            tq.Cell("E15").Value = "KT. GIÁM ĐỐC";
+            tq.Range("E15:F15").Merge();
+            tq.Range("E15:F15").Style.Font.Bold = true;
+            tq.Cell("A17").Value = "(Họ tên, chữ ký)";
+            tq.Range("A17:B17").Merge();
+            tq.Cell("E17").Value = "(Họ tên, chữ ký)";
+            tq.Range("E17:F17").Merge();
+            tq.Range("A15:F17").Style.Font.FontSize = 10;
+
             tq.Columns().AdjustToContents();
 
             // ---- Sheet 2: Doanh thu theo tháng ----
@@ -398,6 +466,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 th.Cell(dong, 3).Value = baoCao.DoanhThuTheoThang.Sum(x => x.SoLuotDat);
                 th.Cell(dong, 3).Style.Font.Bold = true;
             }
+            VienBang(th, baoCao.DoanhThuTheoThang.Count > 0 ? dong : 1, 3);
             th.Columns().AdjustToContents();
 
             // ---- Sheet 3: Doanh thu theo hạng phòng ----
@@ -413,6 +482,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 lp.Cell(dong, 2).Style.NumberFormat.Format = "#,##0 \"₫\"";
                 dong++;
             }
+            VienBang(lp, dong - 1, 2);
             lp.Columns().AdjustToContents();
 
             // ---- Sheet 4: Top phòng ----
@@ -434,16 +504,17 @@ namespace QLyDatPhongKhachSan.Controllers
                 top.Cell(dong, 5).Style.NumberFormat.Format = "#,##0 \"₫\"";
                 dong++;
             }
+            VienBang(top, dong - 1, 5);
             top.Columns().AdjustToContents();
 
             // ---- Sheet 5: Chi tiết đơn trong kỳ ----
             var ct = wb.Worksheets.Add("Chi tiết đơn trong kỳ");
-            string[] tieuDe = { "Mã đơn", "Khách hàng", "Số điện thoại", "Nhận phòng", "Trả phòng", "Số người", "Trạng thái", "Tổng tiền" };
-            for (var c = 0; c < tieuDe.Length; c++)
+            string[] cotTieuDe = { "Mã đơn", "Khách hàng", "Số điện thoại", "Nhận phòng", "Trả phòng", "Số người", "Trạng thái", "Tổng tiền" };
+            for (var c = 0; c < cotTieuDe.Length; c++)
             {
-                ct.Cell(1, c + 1).Value = tieuDe[c];
+                ct.Cell(1, c + 1).Value = cotTieuDe[c];
             }
-            ct.Range(1, 1, 1, tieuDe.Length).Style.Font.Bold = true;
+            ct.Range(1, 1, 1, cotTieuDe.Length).Style.Font.Bold = true;
             dong = 2;
             foreach (var dp in baoCao.ChiTietKy)
             {
@@ -458,6 +529,7 @@ namespace QLyDatPhongKhachSan.Controllers
                 ct.Cell(dong, 8).Style.NumberFormat.Format = "#,##0 \"₫\"";
                 dong++;
             }
+            VienBang(ct, dong - 1, cotTieuDe.Length);
             ct.Columns().AdjustToContents();
 
             using var ms = new MemoryStream();
@@ -467,51 +539,77 @@ namespace QLyDatPhongKhachSan.Controllers
 
         // ================== XUẤT PDF (QuestPDF) ==================
 
-        private static byte[] TaoPdfBaoCao(DoanhThuBaoCaoViewModel baoCao)
+        private static byte[] TaoPdfBaoCao(DoanhThuBaoCaoViewModel baoCao, string tieuDe, string? ghiChu)
         {
+            var ngayXuat = DateTime.Now;
+
             var taiLieu = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4);
-                    page.Margin(28);
-                    page.DefaultTextStyle(t => t.FontFamily("Arial").FontSize(9.5f).FontColor("#243340"));
+                    page.Margin(35);
+                    page.DefaultTextStyle(t => t.FontFamily("Arial").FontSize(11));
 
-                    page.Header().Column(col =>
+                    page.Content().Column(col =>
                     {
-                        col.Item().Text("BÁO CÁO DOANH THU KHÁCH SẠN").FontSize(17).Bold().FontColor("#172433");
-                        col.Item().PaddingTop(2).Text($"Kỳ báo cáo: Tháng {baoCao.Thang}/{baoCao.Nam}")
-                            .FontSize(10).FontColor("#59636d");
-                        col.Item().PaddingTop(6).LineHorizontal(1).LineColor("#e6eaed");
-                    });
+                        col.Spacing(10);
 
-                    page.Content().PaddingTop(10).Column(col =>
-                    {
-                        col.Spacing(14);
+                        // Bloc tiêu đề văn bản chuẩn: tên đơn vị bên trái, quốc hiệu bên phải.
+                        col.Item().Row(row =>
+                        {
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("KHÁCH SẠN").Bold().FontSize(11);
+                                c.Item().Text("UNETI GRAND & SPA").Bold().FontSize(11);
+                            });
+                            row.RelativeItem(1.1f).AlignCenter().Column(c =>
+                            {
+                                c.Item().Text("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM").Bold().FontSize(11);
+                                c.Item().Text("Độc lập - Tự do - Hạnh phúc").FontSize(11);
+                            });
+                        });
 
-                        // Bảng tóm tắt đầu trang.
+                        // Ngày tháng xuất báo cáo.
+                        col.Item().PaddingTop(8).AlignCenter()
+                            .Text($"Hà Nội, ngày {ngayXuat.Day} tháng {ngayXuat.Month} năm {ngayXuat.Year}");
+
+                        // Tiêu đề báo cáo.
+                        col.Item().PaddingTop(8).AlignCenter()
+                            .Text("BÁO CÁO").Bold().FontSize(18);
+
+                        // Dòng V/v + ghi chú.
+                        col.Item().PaddingTop(6).Text($"V/v: {tieuDe}").Bold();
+                        if (!string.IsNullOrEmpty(ghiChu))
+                        {
+                            col.Item().Text($"Ghi chú: {ghiChu}").FontSize(10);
+                        }
+
+                        col.Item().LineHorizontal(1).LineColor("#000000");
+
+                        // Bảng tóm tắt đầu trang (đen trắng tối giản).
                         col.Item().Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem().Element(SummaryBox).Column(c =>
+                            row.RelativeItem().Element(BoxCell).Column(c =>
                             {
-                                c.Item().Text("Doanh thu trong kỳ").FontSize(8.5f).FontColor("#737d87");
-                                c.Item().Text($"{baoCao.DoanhThuKy:N0} ₫").Bold().FontSize(13).FontColor("#b28c49");
+                                c.Item().Text("Doanh thu trong kỳ").FontSize(9);
+                                c.Item().Text($"{baoCao.DoanhThuKy:N0} ₫").Bold().FontSize(12);
                             });
-                            row.RelativeItem().Element(SummaryBox).Column(c =>
+                            row.RelativeItem().Element(BoxCell).Column(c =>
                             {
-                                c.Item().Text("Số lượt đặt (hiệu lực)").FontSize(8.5f).FontColor("#737d87");
-                                c.Item().Text(baoCao.SoLuotDat.ToString()).Bold().FontSize(13).FontColor("#1f3a5f");
+                                c.Item().Text("Số lượt đặt (hiệu lực)").FontSize(9);
+                                c.Item().Text(baoCao.SoLuotDat.ToString()).Bold().FontSize(12);
                             });
-                            row.RelativeItem().Element(SummaryBox).Column(c =>
+                            row.RelativeItem().Element(BoxCell).Column(c =>
                             {
-                                c.Item().Text("Số lượt hủy").FontSize(8.5f).FontColor("#737d87");
-                                c.Item().Text(baoCao.SoLuotHuy.ToString()).Bold().FontSize(13).FontColor("#c0392b");
+                                c.Item().Text("Số lượt hủy").FontSize(9);
+                                c.Item().Text(baoCao.SoLuotHuy.ToString()).Bold().FontSize(12);
                             });
                         });
 
                         // Doanh thu theo tháng.
-                        col.Item().Text("Doanh thu theo tháng").Bold().FontSize(11).FontColor("#172433");
+                        col.Item().Text("Doanh thu theo tháng").Bold().FontSize(11);
                         if (baoCao.DoanhThuTheoThang.Count > 0)
                         {
                             col.Item().Table(table =>
@@ -538,11 +636,11 @@ namespace QLyDatPhongKhachSan.Controllers
                         }
                         else
                         {
-                            col.Item().Text("Chưa có dữ liệu trong kỳ.").Italic().FontColor("#9aa2aa");
+                            col.Item().Text("Chưa có dữ liệu trong kỳ.").Italic();
                         }
 
                         // Doanh thu theo hạng phòng.
-                        col.Item().Text("Doanh thu theo hạng phòng").Bold().FontSize(11).FontColor("#172433");
+                        col.Item().Text("Doanh thu theo hạng phòng").Bold().FontSize(11);
                         if (baoCao.DoanhThuTheoLoai.Count > 0)
                         {
                             col.Item().Table(table =>
@@ -566,11 +664,11 @@ namespace QLyDatPhongKhachSan.Controllers
                         }
                         else
                         {
-                            col.Item().Text("Chưa có dữ liệu trong kỳ.").Italic().FontColor("#9aa2aa");
+                            col.Item().Text("Chưa có dữ liệu trong kỳ.").Italic();
                         }
 
                         // Top phòng.
-                        col.Item().Text("Phòng được đặt nhiều nhất trong kỳ").Bold().FontSize(11).FontColor("#172433");
+                        col.Item().Text("Phòng được đặt nhiều nhất trong kỳ").Bold().FontSize(11);
                         if (baoCao.PhongDatNhieuNhat.Count > 0)
                         {
                             col.Item().Table(table =>
@@ -605,11 +703,11 @@ namespace QLyDatPhongKhachSan.Controllers
                         }
                         else
                         {
-                            col.Item().Text("Chưa có lượt đặt nào trong kỳ.").Italic().FontColor("#9aa2aa");
+                            col.Item().Text("Chưa có lượt đặt nào trong kỳ.").Italic();
                         }
 
                         // Chi tiết đơn trong kỳ.
-                        col.Item().Text("Chi tiết các đơn đặt phòng trong kỳ").Bold().FontSize(11).FontColor("#172433");
+                        col.Item().Text("Chi tiết các đơn đặt phòng trong kỳ").Bold().FontSize(11);
                         if (baoCao.ChiTietKy.Count > 0)
                         {
                             col.Item().Table(table =>
@@ -648,11 +746,26 @@ namespace QLyDatPhongKhachSan.Controllers
                         }
                         else
                         {
-                            col.Item().Text("Chưa có đơn đặt phòng nào trong kỳ.").Italic().FontColor("#9aa2aa");
+                            col.Item().Text("Chưa có đơn đặt phòng nào trong kỳ.").Italic();
                         }
+
+                        // Khối ký tên cuối báo cáo.
+                        col.Item().PaddingTop(24).Row(row =>
+                        {
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().AlignCenter().Text("Người lập báo cáo").Bold();
+                                c.Item().PaddingTop(40).AlignCenter().Text("(Họ tên, chữ ký)");
+                            });
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().AlignCenter().Text("KT. GIÁM ĐỐC").Bold();
+                                c.Item().PaddingTop(40).AlignCenter().Text("(Họ tên, chữ ký)");
+                            });
+                        });
                     });
 
-                    page.Footer().AlignCenter().DefaultTextStyle(t => t.FontSize(8).FontColor("#9aa2aa")).Text(text =>
+                    page.Footer().AlignCenter().DefaultTextStyle(t => t.FontSize(8)).Text(text =>
                     {
                         text.Span("Trang ");
                         text.CurrentPageNumber();
@@ -665,25 +778,27 @@ namespace QLyDatPhongKhachSan.Controllers
             return taiLieu.GeneratePdf();
         }
 
-        private static IContainer SummaryBox(IContainer container)
+        private static IContainer BoxCell(IContainer container)
         {
-            return container.Border(1).BorderColor("#e6eaed").Background("#f7f9fa").Padding(8);
+            return container.Border(1).BorderColor("#000000").Padding(8);
         }
 
         private static IContainer HeaderCell(IContainer container)
         {
             return container
-                .Background("#1f3a5f")
+                .Border(1)
+                .BorderColor("#000000")
+                .Background("#ffffff")
                 .PaddingVertical(4)
                 .PaddingHorizontal(6)
-                .DefaultTextStyle(t => t.FontColor("#ffffff").Bold());
+                .DefaultTextStyle(t => t.Bold());
         }
 
         private static IContainer BodyCell(IContainer container)
         {
             return container
-                .BorderBottom(1)
-                .BorderColor("#e6eaed")
+                .Border(1)
+                .BorderColor("#999999")
                 .PaddingVertical(4)
                 .PaddingHorizontal(6);
         }

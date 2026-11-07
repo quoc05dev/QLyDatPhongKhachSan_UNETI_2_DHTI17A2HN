@@ -290,14 +290,15 @@
 </script>
 
 <button id="btnToTop" class="btn-to-top" aria-label="Về đầu trang" title="Về đầu trang">
-    <i class="bi bi-arrow-up"></i>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>
 </button>
 <script>
     (function () {
         var btn = document.getElementById('btnToTop');
         if (!btn) return;
         window.addEventListener('scroll', function () {
-            btn.style.display = window.scrollY > 100 ? 'flex' : 'none';
+            var nearBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 120;
+            btn.style.display = nearBottom ? 'flex' : 'none';
         });
         btn.addEventListener('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
