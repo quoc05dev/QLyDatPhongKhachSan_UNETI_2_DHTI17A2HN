@@ -59,11 +59,6 @@
                 <button class="admin-menu" id="admin-menu-btn" aria-label="Mở menu" type="button">
                     <svg class="admin-icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                 </button>
-                <form class="global-search" method="get" asp-controller="@(isKhachHang ? "DatPhong" : "Phong")" asp-action="Index">
-                    <svg class="admin-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
-                    <input name="keyword" placeholder="@(isKhachHang ? "Tìm phòng theo số phòng, tiện nghi..." : "Tìm nhanh phòng (số phòng, loại, trạng thái)...")" />
-                    <kbd>tìm</kbd>
-                </form>
                 <div class="admin-header-actions">
                     @if (isKhachHang)
                     {

@@ -54,6 +54,8 @@ BEGIN TRANSACTION;
 
 -- Chi tiết trỏ tới DatPhong và Phong, phải xóa trước
 DELETE FROM ChiTietDatPhong;
+-- DanhGia trỏ tới DatPhong, phải xóa trước DatPhong
+DELETE FROM DanhGia;
 -- DatPhong trỏ tới KhachHang
 DELETE FROM DatPhong;
 -- KhachHang trỏ tới TaiKhoan, phải xóa trước TaiKhoan
@@ -75,9 +77,9 @@ SET IDENTITY_INSERT TaiKhoan ON;
 
 INSERT INTO TaiKhoan (MaTaiKhoan, TenDangNhap, MatKhau, HoTen, Email, SoDienThoai, VaiTro, TrangThai, NgayTao)
 VALUES
-    (1, 'admin',     N'PBKDF2$100000$JRpD+oqrwHrc3OJtX+8Kmg==$w38/HX1xcoX1pVqA55fKs2oIS1EG5OfoUk+roL9RWVU=', N'Quản Trị Viên',      'admin@hotel.com',     '0901234567', 'Admin',     1, '2026-01-05'),
+    (1, 'admin',     N'PBKDF2$100000$JRpD+oqrwHrc3OJtX+8Kmg==$AX/2dxvOnS6sssXK3UC9v4NmvObISdJ45ER8dJqRpn8=', N'Quản Trị Viên',      'admin@hotel.com',     '0901234567', 'Admin',     1, '2026-01-05'),
     (2, 'nhanvien',  N'PBKDF2$100000$euCPBmIaNpz3zfvodEJ/pA==$29OSx3lRkX1nwf4ebGOrR55nwB4lth1mBef59QAhlIQ=', N'Nguyễn Thị Lan',     'nhanvien@hotel.com',  '0902345678', 'NhanVien',  1, '2026-01-05'),
-    (3, 'khachhang', N'PBKDF2$100000$67SomZLoLr+B9EIkzVp61Q==$Q5eyW3pY+/4Iq+fSXUj97HLAQT4AiCQDyD0lzr59Q38=', N'Lê Minh Anh',        'khachhang@gmail.com', '0903456789', 'KhachHang', 1, '2026-01-05'),
+    (3, 'khachhang', N'PBKDF2$100000$67SomZLoLr+B9EIkzVp61Q==$PkiNF3sdwDnGF+ojAvPSgWQWcfMr83iyscjK5TAwGwo=', N'Lê Minh Anh',        'khachhang@gmail.com', '0903456789', 'KhachHang', 1, '2026-01-05'),
     (4, 'khoa',      N'PBKDF2$100000$mC71K1N4WROlHumZPoUsjg==$+ER4s9mByhYSFloJtIuEcmDPJhk5OXOIQchontD+UuQ=', N'Tài Khoản Bị Khóa',  'khoa@gmail.com',      '0904567890', 'KhachHang', 0, '2026-01-05'),
     (5, 'khachhang2',N'PBKDF2$100000$NXu0Bx5T+rQcLZv7e70gPg==$8TyUkVeOWHi1ClrK1g3lb+MFnwEr47OIH0Dx+8I83Z4=', N'Nguyễn Thị Bích',    'bich@gmail.com',      '0912000002', 'KhachHang', 1, '2026-01-05');
 
@@ -137,8 +139,9 @@ SET IDENTITY_INSERT Phong OFF;
 GO
 
 /* ---------------------------------------------------------------------------
-   5. KHÁCH HÀNG (mục 7.1) - 20 hồ sơ, 2 hồ sơ liên kết tài khoản online
-   --------------------------------------------------------------------------- */
+   5. KHÁCH HÀNG (mục 7.1) - 20 hồ sơ + 2 hồ sơ ngừng hoạt động (test bộ lọc)
+       2 hồ sơ đầu liên kết tài khoản online, 2 hồ sơ cuối TrangThai = 0
+    --------------------------------------------------------------------------- */
 
 SET IDENTITY_INSERT KhachHang ON;
 
@@ -163,110 +166,134 @@ VALUES
     (17, NULL, N'Cao Văn Long',        '1987-11-30', N'Nam', '001087017890', '0912000017', NULL,                   N'19 Phạm Ngũ Lão, Q.5, TP.HCM',    N'Việt Nam', 1, NULL),
     (18, NULL, N'Chu Thị Hạnh',        '1995-04-06', N'Nữ',  '001095018901', '0912000018', NULL,                   N'43 Trần Quốc Thảo, Q.3, TP.HCM',  N'Việt Nam', 1, NULL),
     (19, NULL, N'Đinh Văn Kiên',       '1992-12-01', N'Nam', '001092019012', '0912000019', NULL,                   N'66 Cách Mạng Tháng 8, Q.10, TP.HCM', N'Việt Nam', 1, NULL),
-    (20, NULL, N'Lương Thị Hạnh Nhung', '1998-06-17', N'Nữ',  '001098020123', '0912000020', NULL,                   N'7 Nguyễn Đình Chiểu, Q.3, TP.HCM', N'Việt Nam', 1, NULL);
+    (20, NULL, N'Lương Thị Hạnh Nhung', '1998-06-17', N'Nữ',  '001098020123', '0912000020', NULL,                   N'7 Nguyễn Đình Chiểu, Q.3, TP.HCM', N'Việt Nam', 1, NULL),
+    (21, NULL, N'Nguyễn Văn Đoán',      '1984-08-19', N'Nam', '001084021234', '0912000021', NULL,                   N'12 Trường Chinh, Q. Tân Bình, TP.HCM', N'Việt Nam', 0, N'Ngừng hoạt động - test bộ lọc trạng thái'),
+    (22, NULL, N'Trịnh Thị Thơ',        '1999-02-27', N'Nữ',  '001099022345', '0912000022', NULL,                   N'88 Âu Cơ, Q. Tân Bình, TP.HCM',    N'Việt Nam', 0, N'Ngừng hoạt động - test bộ lọc trạng thái');
 
 SET IDENTITY_INSERT KhachHang OFF;
 GO
 
 /* ---------------------------------------------------------------------------
-   6. ĐƠN ĐẶT PHÒNG (mục 8.1) - 40 đơn trải trên 6 tháng (05/2026 - 10/2026)
-      Tháng 05-09 đã xử lý xong (phần lớn HoanThanh, có DaHuy)
-      Tháng 10 còn đang mở: DangSuDung / ChoXuLy / DangXuLy / DaHuy
-   --------------------------------------------------------------------------- */
+   6. ĐƠN ĐẶT PHÒNG (mục 8.1) - đơn trải từ 2025 đến tháng hiện tại + 1
+      Quá khứ           -> HoanThanh (vài đơn DaHuy)        để lọc năm/tháng
+      Tháng hiện tại    -> đủ 6 trạng thái                 để lọc trạng thái
+      Tháng kế tiếp     -> ChoXuLy / DaXacNhan / DaHuy     để test lọc tương lai
+    --------------------------------------------------------------------------- */
 
 SET IDENTITY_INSERT DatPhong ON;
 
--- @MaDon tăng liên tục qua các tháng, nhờ vậy MaDatPhong luôn là 1..40 và phòng
--- được gán xoay vòng ở bước 7 luôn hợp lệ.
+-- @MaDon tăng liên tục, nhờ vậy phòng gán xoay vòng ở bước 7 luôn hợp lệ
+-- (mỗi tháng tối đa 8 đơn < 18 phòng nên không bao giờ trùng phòng trong tháng).
 DECLARE @MaDon INT = 1;
+DECLARE @NamHT INT = YEAR(GETDATE());
+DECLARE @ThangHT INT = MONTH(GETDATE());
+DECLARE @Nam INT = 2025;
+DECLARE @Thang INT;
+DECLARE @NgayDau DATE;
+DECLARE @SoDon INT;
+DECLARE @i INT;
+DECLARE @TrangThai NVARCHAR(50);
+DECLARE @Lech INT;
+DECLARE @NgayNhan DATE;
+DECLARE @NgayTra DATE;
+DECLARE @SucChua INT;
 
-DECLARE @Thang INT = 5;
-
-WHILE @Thang <= 10
+WHILE @Nam <= @NamHT
 BEGIN
-    DECLARE @NgayDau DATE = DATEFROMPARTS(2026, @Thang, 1);
+    SET @Thang = 1;
 
-    -- Số đơn trong từng tháng
-    DECLARE @SoDon INT = CASE @Thang
-        WHEN 5 THEN 7
-        WHEN 6 THEN 8
-        WHEN 7 THEN 6
-        WHEN 8 THEN 7
-        WHEN 9 THEN 6
-        ELSE 6
-    END;
-
-    DECLARE @i INT = 1;
-
-    WHILE @i <= @SoDon
+    WHILE @Thang <= 12
     BEGIN
-        -- Phân bố trạng thái:
-        --   Tháng đã qua: cứ 7 đơn thì 1 đơn bị hủy, còn lại hoàn thành
-        --   Tháng hiện tại: đơn đầu đã nhận phòng, các đơn sau trải đều 4 trạng
-        --   thái còn lại của vòng đời đặt phòng
-        DECLARE @TrangThai NVARCHAR(50);
+        -- Chỉ seed tới tháng hiện tại + 1
+        IF (@Nam < @NamHT) OR (@Nam = @NamHT AND @Thang <= @ThangHT + 1)
+        BEGIN
+            SET @NgayDau = DATEFROMPARTS(@Nam, @Thang, 1);
 
-        IF @Thang < 10
-        BEGIN
-            SET @TrangThai = CASE WHEN @i % 7 = 0 THEN N'DaHuy' ELSE N'HoanThanh' END;
-        END
-        ELSE
-        BEGIN
-            SET @TrangThai = CASE @i
-                WHEN 1 THEN N'DangSuDung'
-                WHEN 2 THEN N'DangSuDung'
-                WHEN 3 THEN N'DangSuDung'
-                WHEN 4 THEN N'ChoXuLy'
-                WHEN 5 THEN N'DangXuLy'
-                WHEN 6 THEN N'DaXacNhan'
-                ELSE N'DaHuy'
+            -- Số đơn mỗi tháng biến thiên 5-8 để test phân trang/keyword
+            SET @SoDon = CASE (@Nam * 12 + @Thang) % 4
+                WHEN 0 THEN 8
+                WHEN 1 THEN 6
+                WHEN 2 THEN 7
+                ELSE 5
             END;
+
+            SET @i = 1;
+
+            WHILE @i <= @SoDon
+            BEGIN
+                -- Phân bố trạng thái theo mốc thời gian thật (xem chú thích đầu mục)
+                IF (@Nam < @NamHT) OR (@Thang < @ThangHT)
+                BEGIN
+                    SET @TrangThai = CASE WHEN @i % 7 = 0 THEN N'DaHuy' ELSE N'HoanThanh' END;
+                END
+                ELSE IF (@Nam = @NamHT AND @Thang = @ThangHT)
+                BEGIN
+                    SET @TrangThai = CASE @i
+                        WHEN 1 THEN N'DangSuDung'
+                        WHEN 2 THEN N'DangSuDung'
+                        WHEN 3 THEN N'DangSuDung'
+                        WHEN 4 THEN N'ChoXuLy'
+                        WHEN 5 THEN N'DangXuLy'
+                        WHEN 6 THEN N'DaXacNhan'
+                        ELSE N'DaHuy'
+                    END;
+                END
+                ELSE
+                BEGIN
+                    SET @TrangThai = CASE @i % 3
+                        WHEN 0 THEN N'DaHuy'
+                        WHEN 1 THEN N'ChoXuLy'
+                        ELSE N'DaXacNhan'
+                    END;
+                END
+
+                -- Ngày đặt trước ngày nhận 1-3 ngày; ngày nhận rơi trong tháng
+                SET @Lech = (@i % 3) + 1;
+                SET @NgayNhan = DATEADD(DAY, @i - 1, @NgayDau);
+                SET @NgayTra = DATEADD(DAY, 2, @NgayNhan);
+
+                -- Sức chứa của phòng sẽ được gán cho đơn này (công thức xoay vòng
+                -- ở bước 7) để số người không bao giờ vượt quá sức chứa.
+                SET @SucChua = (
+                    SELECT TOP 1 l.SoNguoiToiDa
+                    FROM Phong p
+                    INNER JOIN LoaiPhong l ON l.MaLoaiPhong = p.MaLoaiPhong
+                    WHERE p.MaPhong = ((@MaDon - 1) % 18) + 1
+                );
+
+                INSERT INTO DatPhong (MaDatPhong, MaKhachHang, NgayDat, NgayNhan, NgayTraDuKien, SoNguoi, TienCoc, TongTien, TrangThai, GhiChu)
+                VALUES
+                (
+                    @MaDon,
+                    ((@Nam * 3 + @Thang * 7 + @i) % 20) + 1,
+                    DATEADD(DAY, -@Lech, @NgayNhan),
+                    @NgayNhan,
+                    @NgayTra,
+                    CASE
+                        WHEN 3 <= @SucChua THEN CASE WHEN @i % 4 = 0 THEN 3 WHEN @i % 3 = 0 THEN 2 ELSE 1 END
+                        WHEN 2 <= @SucChua THEN 2
+                        ELSE 1
+                    END,
+                    500000.00,
+                    0,
+                    @TrangThai,
+                    CASE @TrangThai
+                        WHEN N'DaHuy'      THEN N'Khách hủy do thay đổi kế hoạch'
+                        WHEN N'HoanThanh'  THEN NULL
+                        WHEN N'DangSuDung' THEN N'Khách đang lưu trú'
+                        ELSE N'Yêu cầu check-in sau 14h'
+                    END
+                );
+
+                SET @i = @i + 1;
+                SET @MaDon = @MaDon + 1;
+            END
         END
 
-        -- Ngày đặt trước ngày nhận 1-3 ngày; ngày nhận rơi trong tháng
-        DECLARE @Lech INT = (@i % 3) + 1;
-        DECLARE @NgayNhan DATE = DATEADD(DAY, @i - 1, @NgayDau);
-        DECLARE @NgayTra DATE = DATEADD(DAY, 2, @NgayNhan);
-
-        -- Sức chứa của phòng sẽ được gán cho đơn này. Mục 7 gán phòng xoay vòng
-        -- theo MaDatPhong, nên lấy đúng công thức đó để số người không bao giờ
-        -- vượt quá sức chứa (vượt thì Module 4 sẽ chặn xác nhận đơn).
-        DECLARE @SucChua INT = (
-            SELECT TOP 1 l.SoNguoiToiDa
-            FROM Phong p
-            INNER JOIN LoaiPhong l ON l.MaLoaiPhong = p.MaLoaiPhong
-            WHERE p.MaPhong = ((@MaDon - 1) % 18) + 1
-        );
-
-        INSERT INTO DatPhong (MaDatPhong, MaKhachHang, NgayDat, NgayNhan, NgayTraDuKien, SoNguoi, TienCoc, TongTien, TrangThai, GhiChu)
-        VALUES
-        (
-            @MaDon,
-            ((@Thang * 7 + @i) % 20) + 1,
-            DATEADD(DAY, -@Lech, @NgayNhan),
-            @NgayNhan,
-            @NgayTra,
-            CASE
-                WHEN 3 <= @SucChua THEN CASE WHEN @i % 4 = 0 THEN 3 WHEN @i % 3 = 0 THEN 2 ELSE 1 END
-                WHEN 2 <= @SucChua THEN 2
-                ELSE 1
-            END,
-            500000.00,
-            0,
-            @TrangThai,
-            CASE @TrangThai
-                WHEN N'DaHuy'      THEN N'Khách hủy do thay đổi kế hoạch'
-                WHEN N'HoanThanh'  THEN NULL
-                WHEN N'DangSuDung' THEN N'Khách đang lưu trú'
-                ELSE N'Yêu cầu check-in sau 14h'
-            END
-        );
-
-        SET @i = @i + 1;
-        SET @MaDon = @MaDon + 1;
+        SET @Thang = @Thang + 1;
     END
 
-    SET @Thang = @Thang + 1;
+    SET @Nam = @Nam + 1;
 END
 
 SET IDENTITY_INSERT DatPhong OFF;
@@ -356,12 +383,25 @@ GO
       - Phòng đã có đơn chờ xử lý   -> DangXuLy
       - 2 phòng đưa vào bảo trì      -> BaoTri
       - Còn lại                      -> Trong
+      2 phòng bảo trì lấy từ số phòng CHƯA có đơn đang mở (ưu tiên 105, 203),
+      để bảo trì không mâu thuẫn với đơn đặt phòng.
     --------------------------------------------------------------------------- */
 
+DECLARE @BaoTri TABLE (SoPhong NVARCHAR(20));
+
+INSERT INTO @BaoTri (SoPhong)
+SELECT TOP 2 p.SoPhong
+FROM Phong p
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ChiTietDatPhong ct
+    INNER JOIN DatPhong dp ON dp.MaDatPhong = ct.MaDatPhong
+    WHERE ct.MaPhong = p.MaPhong
+      AND dp.TrangThai IN (N'DangSuDung', N'ChoXuLy', N'DangXuLy', N'DaXacNhan')
+)
+ORDER BY CASE p.SoPhong WHEN '105' THEN 0 WHEN '203' THEN 1 ELSE 2 END, p.MaPhong;
+
 -- Thứ tự ưu tiên: khách đang ở > đơn đang xử lý > bảo trì > trống.
--- Nhờ vậy trạng thái phòng luôn khớp với giao dịch thực tế.
--- Hai phòng đưa vào bảo trì (105, 203) được chọn trong số phòng chưa có
--- khách ở và chưa có đơn chờ xử lý, để không mâu thuẫn với đơn đặt phòng.
 UPDATE p
 SET p.TrangThai = CASE
         WHEN EXISTS (
@@ -374,13 +414,17 @@ SET p.TrangThai = CASE
             INNER JOIN DatPhong dp ON dp.MaDatPhong = ct.MaDatPhong
             WHERE ct.MaPhong = p.MaPhong AND dp.TrangThai IN (N'ChoXuLy', N'DangXuLy', N'DaXacNhan')
         ) THEN N'DangXuLy'
-        WHEN p.SoPhong IN ('105', '203') THEN N'BaoTri'
+        WHEN EXISTS (SELECT 1 FROM @BaoTri b WHERE b.SoPhong = p.SoPhong) THEN N'BaoTri'
         ELSE N'Trong'
     END,
-    p.NgayBaoTri = CASE WHEN p.SoPhong IN ('105', '203') THEN '2026-10-01' ELSE NULL END,
+    p.NgayBaoTri = CASE
+        WHEN EXISTS (SELECT 1 FROM @BaoTri b WHERE b.SoPhong = p.SoPhong) THEN DATEADD(DAY, -7, GETDATE())
+        ELSE NULL
+    END,
     p.GhiChuBaoTri = CASE
         WHEN p.SoPhong = '105' THEN N'Bảo dưỡng điều hòa do chảy nước nhẹ'
         WHEN p.SoPhong = '203' THEN N'Thay bóng đèn ngọc và sơn lại tường phòng ngủ'
+        WHEN EXISTS (SELECT 1 FROM @BaoTri b WHERE b.SoPhong = p.SoPhong) THEN N'Bảo trì tổng thể - test bộ lọc trạng thái'
         ELSE NULL
     END
 FROM Phong p;
@@ -405,7 +449,52 @@ SET IDENTITY_INSERT DichVu OFF;
 GO
 
 /* ---------------------------------------------------------------------------
-   11. KẾT QUẢ KIỂM TRA
+   11. ĐÁNH GIÁ MẪU (mục 17)
+       3 đánh giá mới chưa phản hồi (hiển thị sáng) + 5 đánh giá đã phản hồi
+       (hiển thị mờ như lịch sử) để trang "Đánh giá & khiếu nại" không trống.
+       Gắn với các đơn Hoàn thành gần nhất (rn 1..8 theo ngày trả phòng).
+   --------------------------------------------------------------------------- */
+
+SET IDENTITY_INSERT DanhGia ON;
+
+;WITH DonMau AS (
+    SELECT dp.MaDatPhong, dp.NgayTraDuKien, kh.HoTen,
+           ROW_NUMBER() OVER (ORDER BY dp.NgayTraDuKien DESC, dp.MaDatPhong DESC) AS rn
+    FROM DatPhong dp
+    INNER JOIN KhachHang kh ON kh.MaKhachHang = dp.MaKhachHang
+    WHERE dp.TrangThai = N'HoanThanh'
+)
+INSERT INTO DanhGia (MaDanhGia, MaDatPhong, TenKhachHang, SoSao, BinhLuan,
+                     NgayDanhGia, TinhCam, DiemCamXuc, GoiYPhanHoi, PhanHoi, DaPhanHoi)
+SELECT d.rn, d.MaDatPhong, d.HoTen, m.SoSao, m.BinhLuan,
+       DATEADD(DAY, 1, d.NgayTraDuKien), m.TinhCam, m.DiemCamXuc, m.GoiY, m.PhanHoi,
+       CASE WHEN d.rn <= 3 THEN 0 ELSE 1 END
+FROM DonMau d
+INNER JOIN (VALUES
+    (1, 5, N'Phòng sạch sẽ, view đẹp, nhân viên thân thiện. Sẽ quay lại lần sau!',
+        'TichCuc', 0.88, N'Cảm ơn quý khách đã dành thời gian đánh giá cao dịch vụ của chúng tôi. Rất mong được đón quý khách quay lại!', NULL),
+    (2, 2, N'Điều hòa kêu to, phòng cách âm kém nên khó ngủ.',
+        'TieuCuc', -0.76, N'Thành thật xin lỗi quý khách vì trải nghiệm chưa trọn vẹn. Chúng tôi đã chuyển bộ phận kỹ thuật kiểm tra điều hòa và cách âm phòng.', NULL),
+    (3, 4, N'Bữa sáng phong phú, lễ tân hỗ trợ nhanh.',
+        'TichCuc', 0.72, N'Cảm ơn quý khách đã ghi nhận đội ngũ lễ tân và nhà hàng. Hẹn gặp lại quý khách!', NULL),
+    (4, 5, N'Vị trí thuận tiện, gần trung tâm, giá hợp lý.',
+        'TichCuc', 0.81, NULL, N'Cảm ơn quý khách đã tin chọn và chia sẻ cảm nhận tích cực. Hẹn gặp lại quý khách!'),
+    (5, 4, N'Dịch vụ ổn, tuy nhiên thang máy chờ hơi lâu.',
+        'TrungLap', 0.12, NULL, N'Cảm ơn góp ý của quý khách. Khách sạn đã bố trí thêm nhân viên điều phối thang máy vào giờ cao điểm.'),
+    (6, 1, N'Phòng có mùi ẩm, gọi buồng phòng hai lần mới tới.',
+        'TieuCuc', -0.85, N'Thành thật xin lỗi quý khách. Chúng tôi đã kiểm tra hệ thống hút ẩm và chấn chỉnh quy trình phản hồi buồng phòng trong 5 phút.', N'Thành thật xin lỗi quý khách vì sự bất tiện. Khách sạn đã xử lý độ ẩm phòng và nhắc nhở bộ phận buồng phòng. Mong quý khách thông cảm.'),
+    (7, 5, N'Không gian yên tĩnh, giường êm, rất hài lòng.',
+        'TichCuc', 0.90, NULL, N'Cảm ơn quý khách đã hài lòng với kỳ nghỉ. Rất mong được phục vụ quý khách lần tới!'),
+    (8, 3, N'Chất lượng tạm ổn so với giá tiền.',
+        'TrungLap', 0.05, NULL, N'Cảm ơn quý khách đã chia sẻ. Khách sạn đang nâng cấp trang thiết bị để phục vụ tốt hơn.')
+) AS m(rn, SoSao, BinhLuan, TinhCam, DiemCamXuc, GoiY, PhanHoi)
+    ON m.rn = d.rn;
+
+SET IDENTITY_INSERT DanhGia OFF;
+GO
+
+/* ---------------------------------------------------------------------------
+   12. KẾT QUẢ KIỂM TRA
    --------------------------------------------------------------------------- */
 
 PRINT '=== SO LUONG DU LIEU MAU ===';
@@ -416,6 +505,7 @@ UNION ALL SELECT 'Phong',          COUNT(*) FROM Phong
 UNION ALL SELECT 'KhachHang',      COUNT(*) FROM KhachHang
 UNION ALL SELECT 'DatPhong',       COUNT(*) FROM DatPhong
 UNION ALL SELECT 'ChiTietDatPhong',COUNT(*) FROM ChiTietDatPhong
+UNION ALL SELECT 'DanhGia',        COUNT(*) FROM DanhGia
 UNION ALL SELECT 'DichVu',         COUNT(*) FROM DichVu;
 
 PRINT '';

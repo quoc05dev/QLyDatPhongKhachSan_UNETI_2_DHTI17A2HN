@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace QLyDatPhongKhachSan.Models
 {
     [Table("Phong")]
-    public class Phong
+    public class Phong : IValidatableObject
     {
         [Key]
         public int MaPhong { get; set; }
@@ -67,5 +67,16 @@ namespace QLyDatPhongKhachSan.Models
         public virtual LoaiPhong? LoaiPhong { get; set; }
 
         public virtual ICollection<ChiTietDatPhong> ChiTietDatPhongs { get; set; } = new List<ChiTietDatPhong>();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (NgayBaoTri.HasValue && NgayHoanThanhBaoTri.HasValue
+                && NgayHoanThanhBaoTri.Value.Date < NgayBaoTri.Value.Date)
+            {
+                yield return new ValidationResult(
+                    "Ngày dự kiến hoàn tất không được sớm hơn ngày bắt đầu bảo trì.",
+                    new[] { nameof(NgayHoanThanhBaoTri) });
+            }
+        }
     }
 }
