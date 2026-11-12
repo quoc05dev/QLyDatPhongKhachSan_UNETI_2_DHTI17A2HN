@@ -74,7 +74,7 @@ spec:
           # dòng này mỗi lần deploy ([skip ci]) => git LUON khớp cluster, nên mọi
           # lần ArgoCD sync đều no-op trên image (ignoreDifferences chỉ là lưới an
           # toàn thứ 2 — selfHeal KHÔNG bị chặn bởi ignoreDifferences, đã bị revert 1 lần).
-          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main@sha256:a5177823e0b66e669bdb566dd98013b3d9add8379d9efb8050ca443ecaeff3d8
+          image: ghcr.io/quoc05dev/qlydatphongkhachsan_uneti_2_dhti17a2hn-web:main@sha256:5952cc30652a4ce3449734a556894001a95ae72ff8c7b5ee272bcf9361c2c520
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
